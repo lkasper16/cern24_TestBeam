@@ -260,7 +260,7 @@ public :
    TBranch        *b_gem_peak_area;   //!
    TBranch        *b_gem_peak_real_pos;   //!
 
-   trdclass_cern24(int RunNum, int MaxEvt, int FirstEvt);
+   trdclass_cern24(int RunNum, int MaxEvt, int FirstEvt, int FileNum);
    virtual ~trdclass_cern24();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -269,7 +269,7 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   double   TrkFit(TH2F *h2, TF1 &fx, const char *cfx, int rob);
+   std::pair<Double_t, Double_t>   TrkFit(TH2F *h2, TF1 &fx, const char *cfx, int rob);
    void Count(const char *tit);
    void Count(const char *tit, double cut1);
    void Count(const char *tit, double cut1, double cut2);
@@ -277,29 +277,29 @@ public :
    //==================  histograms ========================
 
    int RunNum;
+   int FileNum;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
    TH1F *h250_size;
    TH1D *hcount;
+   TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
    TH1F *hCal_occ;
-   TH1F *hCal_sum;
-   TH1F *hCal_sum_el;
-   TH1F *hCal_sum_pi;
+   TH1F *hCal_pulse, *hPresh_pulse, *hMult_pulse, *hCher_pulse;
+   TH1F *hCal_sum,    *hPresh_sum,    *hMult_sum,    *hCher_sum;
+   TH1F *hCal_sum_el, *hPresh_sum_el, *hMult_sum_el, *hCher_sum_el;
+   TH1F *hCal_sum_pi, *hPresh_sum_pi, *hMult_sum_pi, *hCher_sum_pi;
    #define  NCAL 7
    TH1F *hCal_adc[7];  //---  FADC250 channles 0 - 8
    TH2F *hCal_cor[7];      //---  FADC250 channles 0 - 8
    TH2F *hCal_trk[7];      //---  FADC250 channles 0 - 8
    TH2F *hCal_cal[7];      //---  FADC250 channles 0 - 8
    TH1F *hCal_time[7];  //---  FADC250 channles 0 - 8
-   TH2F *cal_el_evt, *cal_pi_evt;
+   TH2F *cal_el_evt, *cal_pi_evt, *hCal_Presh, *hCal_Cher;
    const int NCHER=3;
    //TH1F *hCher_adc[3]; //-- FADC250 channels 13,14,15
-   TH1F *hCher_u_adc;
-   TH1F *hCher_din_adc;
-   TH1F *hCher_dout_adc;
-   TH1F *hCher_u_time;
-   TH1F *hCher_din_time;
-   TH1F *hCher_dout_time;
+
+   TH1F *gem_trk_fit_integral;
+
 
    TH2F *hCCor_ud;
    TH2F *hCCCor_u;
@@ -314,11 +314,13 @@ public :
    
    TH1F *f125_el, *f125_el_max, *f125_el_chi2, *f125_el_fita;
    TH1F *f125_pi, *f125_pi_max, *f125_pi_chi2, *f125_pi_fita;
-   TH2F *f125_el_amp2d, *f125_el_amp2ds, *f125_el_evt, *f125_el_raw, *f125_el_fit;
-   TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt, *f125_pi_raw, *f125_pi_fit;
+   TH2F *f125_el_amp2d, *f125_amp2ds, *f125_el_evt_display, *f125_el_raw, *f125_el_fit, *f125_fit;
+   TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt_display, *f125_pi_raw, *f125_pi_fit;
    TH2F *f125_el_clu2d;
    TH2F *f125_pi_clu2d;
-
+   TH2F *aver2d_e;
+   TH2F *aver2d_p;
+   
    TH1F *mmg1_f125_el;
    TH1F *mmg1_f125_el_max;
    TH1F *mmg1_f125_pi;
@@ -335,24 +337,42 @@ public :
    TH2F *mmg2_f125_el_clu2d, *mmg2_f125_el_clu2d_x, *mmg2_f125_el_clu2d_y;
    TH2F *mmg2_f125_pi_clu2d, *mmg2_f125_pi_clu2d_x, *mmg2_f125_pi_clu2d_y;
    TH2F *mmg2_f125_2d, *mmg2_f125_2d_clu, *mmg2_f125_2d_time, *mmg2_f125_2d_charge, *mmg2_time_max;
-
    
-   TH2F *hevt, *hevtc, *hevti, *hevtf;
+   TH2F *hevt, *hevtc, *hevti, *hevtf,  *hevtk, *hevtck, *hevtL;
+   
+   
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
    TTree *EVENT_VECT_MMG1;
    TTree *EVENT_VECT_MMG2;
    //---------------------------
    int event_num;
+   //   int gem_parID;
+   std::vector <bool>  gem_parID;
+   float Ecal_Energy;
+   float Presh_Energy;
+   float Mult_Energy;
    int gem_nhit;
    std::vector <int> gem_xpos;
-   std::vector <int> gem_ypos;
+   //std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
    std::vector <float> gem_dedx;
    std::vector <int> gem_trackID;
-   std::vector <bool> gem_parID;
+   //std::vector <bool> gem_parID;
    std::vector <float> gem_zHist_vect;
+   int clu_nhit;
+   std::vector <float> clu_xpos;
+   //std::vector <float> clu_ypos;
+   std::vector <float> clu_zpos;
+   std::vector <float> clu_dedx;
+   std::vector <float> clu_width;
    TH1F *gem_zHist;
+   std::vector <float> gem_amp_max;
+   std::vector <float> chi2cc_gem;
+   std::vector <float> gem_integral;
+   std::vector <float> a0;
+   std::vector <float> a1;
+   std::vector <float> gem_xch_max;
    
    int mmg1_nhit;
    std::vector <int> mmg1_xpos;
@@ -382,20 +402,40 @@ public :
 #endif
 
 #ifdef trdclass_cern24_cxx
-trdclass_cern24::trdclass_cern24(int RunNum_in, int MaxEvt_in=0,  int FirstEvt_in=0) : fChain(0)
+trdclass_cern24::trdclass_cern24(int RunNum_in, int MaxEvt_in=0,  int FirstEvt_in=0, int FileNum_in=0) : fChain(0)
 {
   RunNum=RunNum_in;
+  FileNum=FileNum_in;
   MaxEvt=MaxEvt_in;
   FirstEvt=FirstEvt_in;
+
+  printf("====== trdclass constructor Run=%d File=%d  ============\n",RunNum,FileNum);
+
+  TChain* chain;
   TTree *tree=NULL;
+  char chainFiles[128];
+  
+  if (FileNum<0) {
+    sprintf(chainFiles,"ROOT/Run_%06d_*.root",RunNum);
+    chain = new TChain("events");
+    chain->Add(chainFiles);
+    //chain->Print();
+    tree=chain;
+  } 
+  
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
      char FileName[128];
-     sprintf(FileName,"ROOT/Run_%06d_000.root",RunNum);
+     sprintf(FileName,"ROOT/Run_%06d_%03d.root",RunNum,FileNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
+       printf("---> Open file = %s \n",FileName);
+     } else {
+       sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
+       f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
+       printf("---> Open file = %s \n",FileName);
       }
       f->GetObject("events",tree);
 
@@ -666,7 +706,7 @@ Int_t trdclass_cern24::Cut(Long64_t entry)
    return 1;
 }
 
-double trdclass_cern24::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
+std::pair<Double_t, Double_t> trdclass_cern24::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
 {
   //----------  SF fit ---------------------------
   /*
@@ -682,43 +722,27 @@ double trdclass_cern24::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
 
   // TF1 fx("fx","pol1",100,190);
  
+  gErrorIgnoreLevel = kBreak; // Suppress warning messages from empty chi^2 fit data
+  
   TCutG *cutgx = new TCutG("cutgx",5);
-  cutgx->SetPoint(0,  100,20);      cutgx->SetPoint(1, 190,20);      cutgx->SetPoint(2, 190, 220);      cutgx->SetPoint(3,  100, 220);      cutgx->SetPoint(4,  100,20);
+  cutgx->SetPoint(0,40,0);
+  cutgx->SetPoint(1,150,0);
+  cutgx->SetPoint(2,150,528);
+  cutgx->SetPoint(3,40,528);
+  cutgx->SetPoint(4,40,0);
 
-  TProfile *profx = h2_evt->ProfileX("profx", 5, 500,"[cutgx]");
-  //profx->Fit("fx","QNR");
+  TProfile *profx = h2_evt->ProfileX("profx", 0, 528, "[cutgx]");
   if (rob>0) {
     profx->Fit(cfx,"QNR+rob=0.75"); //  "+rob=0.75"
   } else {
-    profx->Fit(cfx,"QNR"); //
+    profx->Fit(cfx,"QNR");
   }
   Double_t chi2x = fx.GetChisquare();
   Double_t Ndfx = fx.GetNDF();
-  Double_t p0x = fx.GetParameter(0);
-  Double_t p1x = fx.GetParameter(1);
-
-  //profx->Draw();
-  //fx.DrawClone("same");
-
-  //printf("+++>   Chi2/Ndf = %f \n",chi2x/Ndfx);
-
-  //chi2xy->Fill(chi2x/Ndfx,chi2y/Ndfy);
-     
-  int kfit = 0;
-  //if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) {
-  if (chi2x/Ndfx<100  && Ndfx>10) {
-    kfit=1;
-    //    hp0x->Fill(p0x);
-    //    hp1x->Fill(p1x);
-    //    sct_plot->Add(ct_plot);
-    //    scty_plot->Add(cty_plot);
-  }
-
-  //printf("Ndfx = %f \n",Ndfx);
-  double chi2=chi2x/Ndfx;  if (Ndfx<3) chi2=-chi2;
-
-  return chi2;
-
+  Double_t integral = profx->Integral(profx->GetXaxis()->FindBin(40.), profx->GetXaxis()->FindBin(150.));
+  double chi2=chi2x/Ndfx; if (Ndfx<3) chi2=-chi2;
+  //return chi2;
+  return std::make_pair(chi2, integral);
 }
 
 
