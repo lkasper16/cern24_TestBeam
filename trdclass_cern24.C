@@ -11,6 +11,8 @@
 #include "GNN/gnn_model.h"
 #include "GNN/gnn_model.cpp"
 #include "GNN/toGraph.cpp"
+#include <iostream>
+#include <fstream>
 
 #define NPRT 1000
 #define USE_TRK
@@ -30,8 +32,13 @@
 #define SAVE_TRACK_HITS
 #define SAVE_PDF
 #define SHOW_EVTbyEVT
+#define WRITE_CSV
 //#define DEBUG 5
 #define DEBUG 0
+
+void WriteToCSV(std::ofstream &csvFile, float v1, float v2, float v3, float v4, float v5, float v6, float v7, float v8, float v9, float v10) {
+  csvFile<<v1<<","<<v2<<","<<v3<<","<<v4<<","<<v5<<","<<v6<<","<<v7<<","<<v8<<","<<v9<<","<<v10<<std::endl;
+}
 
 //===================================
 //      TRD DAQ Channel Mapping
@@ -99,6 +106,9 @@ void trdclass_cern24::Loop() {
   
   gErrorIgnoreLevel = kBreak; // Suppress warning messages from empty chi^2 fit data
   TList *HistList = new TList();
+  #ifdef WRITE_CSV
+    std::ofstream csvFile("EventByEvent.csv");
+  #endif
   //-----------------  (canvas 0) Event Display ----------
   #ifdef SHOW_EVT_DISPLAY
     char c0Title[256]; sprintf(c0Title,"Event_Display_Run=%d",RunNum);
@@ -236,7 +246,7 @@ void trdclass_cern24::Loop() {
   hgem_peak_y_height = new TH1F("hgem_peak_y_height"," GEM-TRD Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgem_peak_y_height);
   
   //---- GEM-TRD --
-  float GEM_THRESH=125.; //175
+  float GEM_THRESH=135.; //175
   float MM1_THRESH=125.; //150
   float MM2_THRESH=25.;
 
@@ -1228,7 +1238,7 @@ void trdclass_cern24::Loop() {
               	gErrorIgnoreLevel = kBreak; // Suppress warning messages from empty chi^2 fit data
               	TGraph *g = new TGraph(TRACKS_N[i2], &x[0], &y[0]);  g->SetMarkerStyle(21); g->SetMarkerColor(i2);
               	TF1 *f = new TF1("f", "[1] * x + [0]");
-              	g->Fit(f);
+              	g->Fit(f,"Q");
                 //  --- get fit parameters ---
                 TF1 *ffunc=g->GetFunction("f");
                 p0=ffunc->GetParameter(0);
@@ -1259,8 +1269,11 @@ void trdclass_cern24::Loop() {
         
         //******************************************************************************
         #ifdef SHOW_EVTbyEVT
-          if (jentry<NPRT || ShowEvent>0 ) {
-            cout<<"Event#="<<event_num<<" Electron="<<electron_tag<<"  Pion="<<pion_tag<<"  AtlasTrig="<<atlas_trigger<<" CherenkovEn="<<cher_energy<<" CalorimeterEn="<<cal_energy<<" PreshowerEn"<<presh_energy<<" CounterEn"<<mult_counter_energy<<" #ofTracks="<<NTRACKS<<endl;
+          //if (jentry<NPRT || ShowEvent>0 ) {
+            cout<<"Event#="<<event_num<<" Electron="<<electron_tag<<"  Pion="<<pion_tag<<"  AtlasTrig="<<atlas_trigger<<" CherenkovEn="<<cher_energy<<" CalorimeterEn="<<cal_energy<<" PreshowerEn="<<presh_energy<<" CounterEn="<<mult_counter_energy<<" #ofTracks="<<NTRACKS<<endl;
+            #ifdef WRITE_CSV
+              WriteToCSV(csvFile,event_num,electron_tag,pion_tag,atlas_trigger,cher_energy,cal_energy,presh_energy,mult_counter_energy,NTRACKS,chi2cc_gem);
+            #endif
             c2->cd(4);  f125_fit->Draw("box");  fx1.Draw("same");       gPad->Modified(); gPad->Update();
             c2->cd(5);  hevt->Draw("colz");       gPad->Modified(); gPad->Update();
             c2->cd(6);  hCal_sum->Draw();         gPad->Modified(); gPad->Update();
@@ -1269,9 +1282,8 @@ void trdclass_cern24::Loop() {
             c2->cd(9);  hPresh_pulse->Draw("hist"); gPad->Modified(); gPad->Update();
             c2->cd(10);  hMult_pulse->Draw("hist"); gPad->Modified(); gPad->Update();
             printf(" all done, click middle pad ... a0=%f a1=%f (%f deg)  fx1(150)=%f chi2cc_gem=%f  \n",a0,a1,a1/3.1415*180.,fx1.Eval(150.),chi2cc_gem);
-            // if (electron_tag || pion_tag)
-            c2->cd(2); gPad->WaitPrimitive();
-          }
+            if (electron_tag || pion_tag) c2->cd(2); //////gPad->WaitPrimitive();
+          //}
           ShowEvent=0;
         #endif
       #endif   // (USE_CLUST)
@@ -1305,6 +1317,9 @@ void trdclass_cern24::Loop() {
     #endif
   } // ------------------------ END of event loop  ------------------------------
   
+  #ifdef WRITE_CSV
+    csvFile.close();
+  #endif
   cout<<" Total events = "<<jentry<<endl;
   cout<<" # of electrons="<<el_count<<" # of pions="<<pi_count<<" # of atlas triggers="<<atlas_trigger_count<<endl;
   
