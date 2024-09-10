@@ -35,7 +35,7 @@ float MAX_SEGM_LEN2 = maxSegmLen* maxSegmLen;   // mm^2 == 10mm;
  */
 void vector2fixedarray(int offset, int nTracks, std::vector<std::vector<std::vector<float>>>& points, std::vector<std::vector<float>>& nodes, std::vector<std::vector<int>>& truth){
   // Check if maximum is larger than inputted points
-  if(points.size() < offset+nTracks)
+  if((int)points.size() < offset+nTracks)
     offset = 0;
 
   // initialize nodes and truth
@@ -213,7 +213,7 @@ void fromGraphToTracks(int nTracks, std::vector<std::vector<int>>& tracks, std::
   std::vector<LinkedList*> all_ll;
   bool debug = false;
 
-  for(int eID = 0; eID < edges_t.size(); eID++){
+  for(int eID = 0; eID < (int)edges_t.size(); eID++){
     if(debug) printf("eID: %d\n",eID);
     if(edges_t[eID][0] > 0.5f){
       if(debug) printf(" true\n");
@@ -229,7 +229,7 @@ void fromGraphToTracks(int nTracks, std::vector<std::vector<int>>& tracks, std::
       for(ULong64_t i = 0; i < all_ll.size(); i++){
         for(ULong64_t j = 0; j < all_ll.size(); j++){
           if(i == j) continue;
-          if(debug) printf("  checking : %d & %d\n",i,j);
+          if(debug) printf("  checking : %d & %d\n",(int)i,(int)j);
           LinkedList* i_ll = all_ll[i];
           LinkedList* j_ll = all_ll[j];
           if(i_ll->getTail().id == j_ll->getHead().id){
@@ -249,7 +249,7 @@ void fromGraphToTracks(int nTracks, std::vector<std::vector<int>>& tracks, std::
     }
   }
 
-  for(int i = 0; i < all_ll.size(); i++){
+  for(int i = 0; i < (int)all_ll.size(); i++){
     all_ll[i]->resetHead();
     std::vector<int> a;
     for(int j = 0; j < all_ll[i]->size(); j++){

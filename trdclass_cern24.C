@@ -28,10 +28,10 @@
 #define MAX_CLUST 500
 #define MAX_NODES 100
 //
-#define SHOW_EVT_DISPLAY
+//#define SHOW_EVT_DISPLAY
 #define SAVE_TRACK_HITS
 #define SAVE_PDF
-#define SHOW_EVTbyEVT
+//#define SHOW_EVTbyEVT
 #define WRITE_CSV
 //#define DEBUG 5
 #define DEBUG 0
@@ -118,9 +118,9 @@ void trdclass_cern24::Loop() {
     char c2Title[256]; sprintf(c2Title,"GEM_Event_Display_Run=%d",RunNum);
     TCanvas *c2 = new TCanvas("FPGA",c2Title,1000,100,1500,1300);
     c2->Divide(5,2); c2->cd(1);
-    char c3Title[256]; sprintf(c3Title,"MMG_Event_Display_Run=%d",RunNum);
-    TCanvas *c3 = new TCanvas("FPGA_c3",c3Title,1000,100,1500,1300);
-    c3->Divide(5,2); //c3->cd(1);
+    //char c3Title[256]; sprintf(c3Title,"MMG_Event_Display_Run=%d",RunNum);
+    //TCanvas *c3 = new TCanvas("FPGA_c3",c3Title,1000,100,1500,1300);
+    //c3->Divide(5,2); //c3->cd(1);
   #endif
   
   // Track fit in time
@@ -156,7 +156,8 @@ void trdclass_cern24::Loop() {
   int nx0=100;      int ny0=256; //528;
   double Ymin=0.;    double Ymax=ny0*0.4; // +528.;
   double Xmin=0.;    double Xmax=30.;
-  hevt  = new TH2F("hevt"," Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); hevt->SetStats( 0 ); hevt->SetMaximum(10.);
+  mhevt  = new TH2F("mhevt","MMG1-TRD Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); //mhevt->SetStats( 0 ); mhevt->SetMaximum(10.);
+  hevt  = new TH2F("hevt","GEM-TRD Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); hevt->SetStats( 0 ); hevt->SetMaximum(10.);
   hevtc = new TH2F("hevtc"," Clustering ; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);
   hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
   hevti = new TH2F("hevti"," ML-FPGA response; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax);  hevti->SetStats( 0 ); hevti->SetMaximum(10.);
@@ -283,15 +284,6 @@ void trdclass_cern24::Loop() {
   mmg2_f125_2d_charge = new TH2F("mmg2_f125_2d_charge","MMG2-TRD 2D Response (Time Coinc.) ; X ADC Amplitude ; Y ADC Amplitude ",200,0.5,2096.5,100,0.5,2096.5);    HistList->Add(mmg2_f125_2d_charge);
   mmg2_time_max = new TH2F("mmg2_time_max","MMG2-TRD 2D Response (Time Coinc.) ; X ADC Max Amplitude ; Y ADC Max Amplitude ",200,0.5,2096.5,100,0.5,2096.5);    HistList->Add(mmg2_time_max);
   
-  //---  clustering histograms  ---
-/*
-  int nx0=100;    int ny0=250;
-  hevt  = new TH2F("hevt"," Event display; z pos,mm; y pos,mm ",nx0,0.,+30.,ny0,-50.,+50.); hevt->SetStats( 0 ); hevt->SetMaximum(10.);         HistList->Add(hevt);
-  hevtc = new TH2F("hevtc"," Clustering ; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);                                 HistList->Add(hevtc);
-  hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
-  hevti = new TH2F("hevti"," ML-FPGA response; z pos,mm; y pos,mm ",nx0,0.,+30.,ny0,-50.,+50.);  hevti->SetStats( 0 ); hevti->SetMaximum(10.);  HistList->Add(hevti);
-  hevtf = new TH2F("hevtf"," Clusters for FPGA ; z pos,mm; y pos,mm ",nx0,0.,+30.,ny0,-50.,+50.);  hevtf->SetStats( 0 ); hevtf->SetMaximum(10.);  HistList->Add(hevtf);
-*/
   //=========================================
   gem_zHist = new  TH1F("gem_zHist", "gem_zHist", 20, 80., 200.);
   mmg1_zHist = new  TH1F("mmg1_zHist", "mmg1_zHist", 20, 80., 200.);
@@ -372,7 +364,7 @@ void trdclass_cern24::Loop() {
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);
     nbytes += nb;
-    if (jentry<MAX_PRINT || !(jentry%NPRT))
+    if (!(jentry%NPRT))
       printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_peak_count=%llu \n",jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count, gem_peak_count);
     event_num = jentry;
     
@@ -903,7 +895,10 @@ void trdclass_cern24::Loop() {
     //==================================================================================================
     
     #ifdef USE_125_RAW
-      if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
+      #ifdef VERBOSE
+        if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
+      #endif
+      mhevt->Reset();
       hevt->Reset();
       hevtc->Reset();
       hevti->Reset();
@@ -916,13 +911,15 @@ void trdclass_cern24::Loop() {
         int fADCSlot = f125_wraw_slot->at(i);
         int fADCChan = f125_wraw_channel->at(i);
         int gemChan = GetGEMChan(fADCChan, fADCSlot);
+        int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
         int amax=0;
         int tmax=0;
         if (gemChan<0) continue;
-        double DEDX_THR = 120; //////250?????
+        //double DEDX_THR = 125; //////250?????
+        double DEDX_THR = GEM_THRESH;
         int TimeWindowStart = 45; /////95????
         int TimeMin = 0;
-        int TimeMax = 130; ///////100????
+        int TimeMax = 150; ///////100????
         
         for (int si=0; si<fadc_window; si++) {
           int time=si;
@@ -933,7 +930,7 @@ void trdclass_cern24::Loop() {
             tmax=si;
           }
           if (adc>DEDX_THR) {
-            double adc_fill=adc;
+            //double adc_fill=adc;
             if (electron_tag)  {
               f125_el_raw->Fill(time,gemChan,adc);
             } else if (pion_tag) {
@@ -943,28 +940,27 @@ void trdclass_cern24::Loop() {
             if ( TimeMin > time || time > TimeMax ) continue; // --- drop early and late hits ---
             
             hevtc->SetBinContent(time,gemChan,adc/100.);
-            //double xp = gemChan/250.*100-50.;
-            //double zp = (time)/(100.)*30;
-      	    //double ap = adc/100.;
             hevt->SetBinContent(time,gemChan,adc/100.);
+            mhevt->SetBinContent(time,mmg1Chan,adc/100.);
             hentries++;
           }
         } // --  end of samples loop
       } // -- end of fadc125 raw channels loop
-      
-      if (jentry<NPRT || ShowEvent>0 ) {
-        #if (USE_PULSE>0)
-          c2->cd(1);   hevtk->Draw("box");
-          //Add c3 fill
-        #else
-          c2->cd(1); hevt->Draw("colz");
-          //Add c3 fill
-        #endif
-        c2->cd(2);   hevtf->Draw("text"); // hevtf
-        //Add c3 fills
-        c2->Modified(); c2->Update();
-        //printf("===============>    Draw raw hist hevt entries=%d\n",hentries);
-      }
+      #ifdef SHOW_EVT_DISPLAY
+        if (jentry<NPRT || ShowEvent>0 ) {
+          #if (USE_PULSE>0)
+            c2->cd(1);   hevtk->Draw("box");
+            //Add c3 fill
+          #else
+            c2->cd(1); hevt->Draw("colz");
+            //Add c3 fill
+          #endif
+          c2->cd(2);   hevtf->Draw("text"); // hevtf
+          //Add c3 fills
+          c2->Modified(); c2->Update();
+          //printf("===============>    Draw raw hist hevt entries=%d\n",hentries);
+        }
+      #endif
       //==================================================================================================
       //            Begin NN Clustering & Track Fitting
       //==================================================================================================
@@ -1099,19 +1095,15 @@ void trdclass_cern24::Loop() {
         
         //=================================== Draw HITS and CLUST  ============================================
         #ifdef SHOW_EVTbyEVT
-          char hevtTitle[80]; sprintf(hevtTitle," Display Event: %lld   Run: %d e=%d #pi=%d; z pos,mm; y pos,mm ",jentry,RunNum,electron_tag,pion_tag);
+          char hevtTitle[80]; sprintf(hevtTitle,"GEM Display Event: %lld   Run: %d e=%d #pi=%d; z pos,mm; y pos,mm ",jentry,RunNum,electron_tag,pion_tag);
           hevt->SetTitle(hevtTitle);
           hevtk->SetTitle(hevtTitle);
+          char mhevtTitle[80]; sprintf(mhevtTitle,"MMG1 Display Event: %lld   Run: %d e=%d #pi=%d; z pos,mm; y pos,mm ",jentry,RunNum,electron_tag,pion_tag);
+          mhevt->SetTitle(mhevtTitle);
           #ifdef VERBOSE
             printf("hits_SIZE=%d  Clust size = %d \n",nhits,nclust);
           #endif
           if (jentry<NPRT || ShowEvent>0 ) {
-           /*
-          	c2->cd(1);   hevt->Draw("colz");
-          	c2->cd(2);   hevtf->Draw("text");
-          	c2->cd(3);   hevti->Draw("colz");
-          	c2->Modified(); c2->Update();
-           */
           	c2->cd(1); gPad->Modified(); gPad->Update();
             //Add c3 fill
           	int COLMAP[]={1,2,3,4,6,5};
@@ -1126,7 +1118,6 @@ void trdclass_cern24::Loop() {
           	  m.DrawClone();  //gPad->Modified(); gPad->Update();
           	}
             gPad->Modified(); gPad->Update();
-            //c2->Modified(); c2->Update();
           }
         #endif
         
@@ -1226,7 +1217,7 @@ void trdclass_cern24::Loop() {
               #endif
             	std::vector<Double_t> x;
             	std::vector<Double_t> y;
-            	for (int i3 = 0; i3 < TRACKS[i2].size(); i3+=2) {
+            	for (int i3 = 0; i3 < (int)TRACKS[i2].size(); i3+=2) {
             	  #ifdef VERBOSE
                   printf(" trkID=%d  hit=%d x=%f z=%f \n",i2,i3/2,TRACKS[i2].at(i3),TRACKS[i2].at(i3+1));
             	  #endif
@@ -1280,14 +1271,19 @@ void trdclass_cern24::Loop() {
             c2->cd(7);  hCal_pulse->Draw("hist"); gPad->Modified(); gPad->Update();
             c2->cd(8);  hCher_pulse->Draw("hist"); gPad->Modified(); gPad->Update();
             c2->cd(9);  hPresh_pulse->Draw("hist"); gPad->Modified(); gPad->Update();
-            c2->cd(10);  hMult_pulse->Draw("hist"); gPad->Modified(); gPad->Update();
+            //c2->cd(10);  hMult_pulse->Draw("hist"); gPad->Modified(); gPad->Update();
+            c2->cd(10);  mhevt->Draw("colz");       gPad->Modified(); gPad->Update();
             printf(" all done, click middle pad ... a0=%f a1=%f (%f deg)  fx1(150)=%f chi2cc_gem=%f  \n",a0,a1,a1/3.1415*180.,fx1.Eval(150.),chi2cc_gem);
-            if (electron_tag || pion_tag) c2->cd(2); //////gPad->WaitPrimitive();
+            if (electron_tag || pion_tag) c2->cd(2); gPad->WaitPrimitive();
           //}
           ShowEvent=0;
         #endif
       #endif   // (USE_CLUST)
     #endif   //=======================  End Fa125 RAW process Loop  =====================================
+    
+    if (NTRACKS==1) Count("singleTRK");
+    if (NTRACKS==1 && electron_tag) Count("snTRKel");
+    if (NTRACKS==1 && pion_tag) Count("snTRKpi");
     
     //=====================================================================================
     //===                Fill Root TTree Hits                                            ===
@@ -1345,7 +1341,7 @@ void trdclass_cern24::Loop() {
   l->AddEntry(mmg2_f125_drift_x_c, "MMG2 X", "l");
   l->AddEntry(mmg2_f125_drift_y_c, "MMG2 Y", "l");
   
-  TCanvas *c4 = new TCanvas("c3","Drift Time Distribution", 1200, 800);
+  TCanvas *c4 = new TCanvas("c4","Drift Time Distribution", 1200, 800);
   c4->cd();
   f125_drift_c->Draw();
   mmg1_f125_drift_c->Draw("same");
