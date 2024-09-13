@@ -28,10 +28,10 @@
 #define MAX_CLUST 500
 #define MAX_NODES 100
 //
-//#define SHOW_EVT_DISPLAY
+#define SHOW_EVT_DISPLAY
 #define SAVE_TRACK_HITS
 #define SAVE_PDF
-//#define SHOW_EVTbyEVT
+#define SHOW_EVTbyEVT
 #define WRITE_CSV
 //#define DEBUG 5
 #define DEBUG 0
@@ -156,7 +156,7 @@ void trdclass_cern24::Loop() {
   int nx0=100;      int ny0=256; //528;
   double Ymin=0.;    double Ymax=ny0*0.4; // +528.;
   double Xmin=0.;    double Xmax=30.;
-  mhevt  = new TH2F("mhevt","MMG1-TRD Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); //mhevt->SetStats( 0 ); mhevt->SetMaximum(10.);
+  mhevt  = new TH2F("mhevt","MMG1-TRD Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); mhevt->SetStats( 0 ); mhevt->SetMaximum(10.);
   hevt  = new TH2F("hevt","GEM-TRD Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); hevt->SetStats( 0 ); hevt->SetMaximum(10.);
   hevtc = new TH2F("hevtc"," Clustering ; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);
   hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
@@ -247,7 +247,7 @@ void trdclass_cern24::Loop() {
   hgem_peak_y_height = new TH1F("hgem_peak_y_height"," GEM-TRD Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgem_peak_y_height);
   
   //---- GEM-TRD --
-  float GEM_THRESH=135.; //175
+  float GEM_THRESH=140.; //175
   float MM1_THRESH=125.; //150
   float MM2_THRESH=25.;
 
@@ -914,12 +914,12 @@ void trdclass_cern24::Loop() {
         int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
         int amax=0;
         int tmax=0;
-        if (gemChan<0) continue;
+        //if (gemChan<0) continue;
         //double DEDX_THR = 125; //////250?????
         double DEDX_THR = GEM_THRESH;
         int TimeWindowStart = 45; /////95????
         int TimeMin = 0;
-        int TimeMax = 150; ///////100????
+        int TimeMax = 130; ///////100????
         
         for (int si=0; si<fadc_window; si++) {
           int time=si;
@@ -930,19 +930,22 @@ void trdclass_cern24::Loop() {
             tmax=si;
           }
           if (adc>DEDX_THR) {
-            //double adc_fill=adc;
-            if (electron_tag)  {
-              f125_el_raw->Fill(time,gemChan,adc);
-            } else if (pion_tag) {
-              f125_pi_raw->Fill(time,gemChan,adc);
+            if (gemChan>-1) {
+              if (electron_tag)  {
+                f125_el_raw->Fill(time,gemChan,adc);
+              } else if (pion_tag) {
+                f125_pi_raw->Fill(time,gemChan,adc);
+              }
+              time-=TimeWindowStart;
+              if ( TimeMin > time || time > TimeMax ) continue; // --- drop early and late hits ---
+              
+              hevtc->SetBinContent(time,gemChan,adc/100.);
+              hevt->SetBinContent(time,gemChan,adc/100.);
+              hentries++;
             }
-            time-=TimeWindowStart;
-            if ( TimeMin > time || time > TimeMax ) continue; // --- drop early and late hits ---
-            
-            hevtc->SetBinContent(time,gemChan,adc/100.);
-            hevt->SetBinContent(time,gemChan,adc/100.);
-            mhevt->SetBinContent(time,mmg1Chan,adc/100.);
-            hentries++;
+            if (mmg1Chan>-1) {
+              mhevt->SetBinContent(time-35,mmg1Chan,adc/100.);
+            }
           }
         } // --  end of samples loop
       } // -- end of fadc125 raw channels loop
@@ -1073,7 +1076,7 @@ void trdclass_cern24::Loop() {
             if (k<30) printf("%2d Clust(%2d): %6.1f %6.1f %6.1f %8.1f %6.2f %6.2f %8.1f  ",k,k+1,clust_Xpos[k],clust_Ypos[k],clust_Zpos[k],clust_dEdx[k],clust_Width[k][2],clust_Length[k][2],clust_Size[k]);
           #endif
           //-------------  Cluster Filter -----------------
-          if (clust_Size[k] >= MinClustSize && zStart < clust_Zpos[k] && clust_Zpos[k] < zEnd && clust_Width[k][2]>MinClustWidth || clust_Length[k][2]<MaxClustLength ) {
+          if ((clust_Size[k] >= MinClustSize && zStart < clust_Zpos[k] && clust_Zpos[k] < zEnd && clust_Width[k][2]>MinClustWidth) || clust_Length[k][2]<MaxClustLength ) {
         	  hits_Xpos[ii]=clust_Xpos[k];
         	  hits_Ypos[ii]=clust_Ypos[k];
         	  hits_Zpos[ii]=clust_Zpos[k];
