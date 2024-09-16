@@ -19,8 +19,9 @@ After cloning repo, make directory links
 And use executable files for run analysis   
 ```
 ./trdclass_cern24.sh [$RUNNUMBER] [$MAXNUMBEROFEVENTS] [$FIRSTEVENT]  
+./trd_mlp_cern.sh [$RUNNUMBER]
 ```
-With this workflow, raw .evio data files have already been processed into .root files that now live in the `ROOT/` directory. These .root data files are analyzed with the `trdclass_cern24.C` analysis macro. Output from there is saved in the `RootOutput/cern24` directory.  
+With this workflow, raw .evio data files have already been processed into .root files that now live in the `ROOT/` directory. These .root data files are analyzed with the `trdclass_cern24.C` analysis macro. Output from there is saved in the `RootOutput/cern24` directory. The output from this in the form of a .root TTree file is passed on to `trd_mlp_cern.C` where a rejection factor calculation is done for different particle efficiencies. Output from this NN macro is saved in the `mlpOutput/cern24` directory.  
 
 See JLab's [2FA documentation](https://jlab.servicenowservices.com/sp?id=kb_article_view&sysparm_article=KB0012313&sys_kb_id=a8caee091b990910a552ed3ce54bcbe3&spa=1.)  
 See JLab analysis code repository: [trd_root](https://github.com/JeffersonLab/trd_root/tree/main)  
