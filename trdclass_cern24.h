@@ -329,38 +329,26 @@ public :
    TH2F *mmg1_f125_el_clu2d;
    TH2F *mmg1_f125_pi_clu2d;
 
-   TH1F *mmg2_f125_el, *mmg2_f125_el_x, *mmg2_f125_el_y;
-   TH1F *mmg2_f125_pi, *mmg2_f125_pi_x, *mmg2_f125_pi_y;
-   TH1F *mmg2_f125_el_max, *mmg2_f125_x_max, *mmg2_f125_y_max;
-   TH2F *mmg2_f125_el_amp2d, *mmg2_f125_el_amp2d_x, *mmg2_f125_el_amp2d_y;
-   TH2F *mmg2_f125_pi_amp2d, *mmg2_f125_pi_amp2d_x, *mmg2_f125_pi_amp2d_y;
-   TH2F *mmg2_f125_el_clu2d, *mmg2_f125_el_clu2d_x, *mmg2_f125_el_clu2d_y;
-   TH2F *mmg2_f125_pi_clu2d, *mmg2_f125_pi_clu2d_x, *mmg2_f125_pi_clu2d_y;
-   TH2F *mmg2_f125_2d, *mmg2_f125_2d_clu, *mmg2_f125_2d_time, *mmg2_f125_2d_charge, *mmg2_time_max;
-   
-   TH2F *hevt, *hevtc, *hevti, *hevtf,  *hevtk, *hevtck, *hevtL;
-   
+   TH2F *mhevt, *hevt, *hevtc, *hevti, *hevtf, *hevtk, *hevtck, *hevtL;
    
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
    TTree *EVENT_VECT_MMG1;
-   TTree *EVENT_VECT_MMG2;
    //---------------------------
    int event_num;
-   //   int gem_parID;
-   std::vector <bool>  gem_parID;
    float Ecal_Energy;
    float Presh_Energy;
    float Mult_Energy;
    int gem_nhit;
+   int clu_nhit;
+   
    std::vector <int> gem_xpos;
    //std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
    std::vector <float> gem_dedx;
    std::vector <int> gem_trackID;
-   //std::vector <bool> gem_parID;
+   std::vector <bool> gem_parID;
    std::vector <float> gem_zHist_vect;
-   int clu_nhit;
    std::vector <float> clu_xpos;
    //std::vector <float> clu_ypos;
    std::vector <float> clu_zpos;
@@ -383,17 +371,16 @@ public :
    std::vector <bool> mmg1_parID;
    std::vector <float> mmg1_zHist_vect;
    TH1F *mmg1_zHist;
-   
-   int mmg2_nhit;
-   std::vector <int> mmg2_xpos;
-   std::vector <int> mmg2_ypos;
-   std::vector <float> mmg2_zpos;
-   std::vector <float> mmg2_dedx;
-   std::vector <int> mmg2_trackID;
-   std::vector <bool> mmg2_parID;
-   std::vector <float> mmg2_zHist_vect;
-   TH1F *mmg2_zHist;
-
+   std::vector <float> mmg1_clu_xpos;
+   std::vector <float> mmg1_clu_zpos;
+   std::vector <float> mmg1_clu_dedx;
+   std::vector <float> mmg1_clu_width;
+   std::vector <float> mmg1_amp_max;
+   std::vector <float> chi2cc_mmg1;
+   std::vector <float> mmg1_integral;
+   std::vector <float> mmg1_a0;
+   std::vector <float> mmg1_a1;
+   std::vector <float> mmg1_xch_max;
    //---------------------------
 
    //=============================================

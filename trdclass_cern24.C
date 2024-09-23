@@ -28,13 +28,14 @@
 #define MAX_CLUST 500
 #define MAX_NODES 100
 //
-#define SHOW_EVT_DISPLAY
 #define SAVE_TRACK_HITS
 #define SAVE_PDF
-#define SHOW_EVTbyEVT
 #define WRITE_CSV
-//#define DEBUG 5
 #define DEBUG 0
+//
+//-- For single evt clustering display, uncomment BOTH:
+#define SHOW_EVTbyEVT
+#define SHOW_EVT_DISPLAY
 
 void WriteToCSV(std::ofstream &csvFile, float v1, float v2, float v3, float v4, float v5, float v6, float v7, float v8, float v9, float v10) {
   csvFile<<v1<<","<<v2<<","<<v3<<","<<v4<<","<<v5<<","<<v6<<","<<v7<<","<<v8<<","<<v9<<","<<v10<<std::endl;
@@ -66,30 +67,6 @@ int GetMMG1Chan(int ch, int slot, int runNum) {
     }
     if (slot==13&&ch<48) {
       if ((dchan-528.)==224.) { return -1; } else {return dchan - 528.;}
-    }
-  }
-  return -1;
-}
-
-// -- MMG-2 mapping --
-int GetMMG2XChan(int ch, int slot, int runNum) {
-  int cardNumber = ch/24;
-  int cardChannel = ch-cardNumber*24;
-  float dchan = cardChannel+cardNumber*24+(slot-3)*72.;
-  if (runNum>4450) {
-    if (slot==3) {
-      if (dchan==1. || dchan==34.) { return -1; } else {return dchan;}
-    }
-  }
-  return -1;
-}
-int GetMMG2YChan(int ch, int slot, int runNum) {
-  int cardNumber = ch/24;
-  int cardChannel = ch-cardNumber*24;
-  float dchan = cardChannel+cardNumber*24+(slot-3)*72.;
-  if (runNum>4450) {
-    if (slot==4) {
-      if ((dchan-72.)==42.) { return -1; } else {return dchan-72.;}
     }
   }
   return -1;
@@ -153,10 +130,10 @@ void trdclass_cern24::Loop() {
   #endif
   
   h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5);                                        HistList->Add(h250_size);
-  int nx0=100;      int ny0=256; //528;
+  int nx0=120;      int ny0=256; //528;
   double Ymin=0.;    double Ymax=ny0*0.4; // +528.;
   double Xmin=0.;    double Xmax=30.;
-  mhevt  = new TH2F("mhevt","MMG1-TRD Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); mhevt->SetStats( 0 ); mhevt->SetMaximum(10.);
+  mhevt  = new TH2F("mhevt","MMG1-TRD Event display; z pos,mm; y pos,mm ",nx0+100.,Xmin,Xmax,ny0,Ymin,Ymax); mhevt->SetStats( 0 ); mhevt->SetMaximum(10.);
   hevt  = new TH2F("hevt","GEM-TRD Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); hevt->SetStats( 0 ); hevt->SetMaximum(10.);
   hevtc = new TH2F("hevtc"," Clustering ; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);
   hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
@@ -203,14 +180,6 @@ void trdclass_cern24::Loop() {
   mmg1_f125_el = new TH1F("mmg1_f125_el","MMG1-TRD f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg1_f125_el);
   mmg1_f125_pi = new TH1F("mmg1_f125_pi","MMG1-TRD f125 Peak Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg1_f125_pi);
   mmg1_f125_el_max = new TH1F("mmg1_f125_el_max","MMG1-TRD f125 Max Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg1_f125_el_max);
-  //mmg2_f125_el = new TH1F("mmg2_f125_el","MMG2-TRD f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg2_f125_el);
-  //mmg2_f125_el_max = new TH1F("mmg2_f125_el_max","MMG2-TRD f125 Max Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg2_f125_el_max);
-  mmg2_f125_el_x = new TH1F("mmg2_f125_el_x","MMG2-TRD X f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg2_f125_el_x);
-  mmg2_f125_pi_x = new TH1F("mmg2_f125_pi_x","MMG2-TRD X f125 Peak Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg2_f125_pi_x);
-  mmg2_f125_x_max = new TH1F("mmg2_f125_x_max","MMG2-TRD X f125 Max Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg2_f125_x_max);
-  mmg2_f125_el_y = new TH1F("mmg2_f125_el_y","MMG2-TRD Y f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg2_f125_el_y);
-  mmg2_f125_pi_y = new TH1F("mmg2_f125_pi_y","MMG2-TRD Y f125 Peak Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg2_f125_pi_y);
-  mmg2_f125_y_max = new TH1F("mmg2_f125_y_max","MMG2-TRD Y f125 Max Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg2_f125_y_max);
   
   // --- SRS ---
   srs_ncl = new TH1F("srs_ncl"," Number SRS clusters per event",10,-0.5,9.5);                     HistList->Add(srs_ncl);
@@ -249,7 +218,6 @@ void trdclass_cern24::Loop() {
   //---- GEM-TRD --
   float GEM_THRESH=140.; //175
   float MM1_THRESH=125.; //150
-  float MM2_THRESH=25.;
 
   f125_el_evt_display = new TH2F("f125_el_evt_display","GEM-TRD track for Electrons ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);  HistList->Add(f125_el_evt_display);
   f125_el_evt_display->SetStats(0);  f125_el_evt_display->SetMinimum(GEM_THRESH);  f125_el_evt_display->SetMaximum(1000.);
@@ -264,36 +232,21 @@ void trdclass_cern24::Loop() {
   f125_pi_amp2d = new TH2F("f125_pi_amp2d","GEM-TRD ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);           HistList->Add(f125_pi_amp2d);
   mmg1_f125_el_amp2d = new TH2F("mmg1_f125_el_amp2d","MMG1-TRD ADC Amp in Time for Electrons ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);   HistList->Add(mmg1_f125_el_amp2d);
   mmg1_f125_pi_amp2d = new TH2F("mmg1_f125_pi_amp2d","MMG1-TRD ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);   HistList->Add(mmg1_f125_pi_amp2d);
-  mmg2_f125_el_amp2d_x = new TH2F("mmg2_f125_el_amp2d_x","MMG2-TRD X ADC Amp in Time for Electrons ; Time Response (8ns) ; X Channel ",200,0.5,200.5,72,0.5,72.5);   HistList->Add(mmg2_f125_el_amp2d_x);
-  mmg2_f125_pi_amp2d_x = new TH2F("mmg2_f125_pi_amp2d_x","MMG2-TRD X ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,72,0.5,72.5);   HistList->Add(mmg2_f125_pi_amp2d_x);
-  mmg2_f125_el_amp2d_y = new TH2F("mmg2_f125_el_amp2d_y","MMG2-TRD Y ADC Amp in Time for Electrons ; Time Response (8ns) ; Y Channel ",200,0.5,200.5,72,0.5,72.5);   HistList->Add(mmg2_f125_el_amp2d_y);
-  mmg2_f125_pi_amp2d_y = new TH2F("mmg2_f125_pi_amp2d_y","MMG2-TRD Y ADC Amp in Time for Pions ; Time Response (8ns) ; Y Channel ",200,0.5,200.5,72,0.5,72.5);   HistList->Add(mmg2_f125_pi_amp2d_y);
   
   f125_el_clu2d = new TH2F("f125_el_clu2d","GEM-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);               HistList->Add(f125_el_clu2d);
   f125_pi_clu2d = new TH2F("f125_pi_clu2d","GEM-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);               HistList->Add(f125_pi_clu2d);
   mmg1_f125_el_clu2d = new TH2F("mmg1_f125_el_clu2d","MMG1-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);    HistList->Add(mmg1_f125_el_clu2d);
   mmg1_f125_pi_clu2d = new TH2F("mmg1_f125_pi_clu2d","MMG1-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);    HistList->Add(mmg1_f125_pi_clu2d);
-  mmg2_f125_el_clu2d_x = new TH2F("mmg2_f125_el_clu2d_x","MMG2-TRD X Amp for Electrons (Clusters)",200,0.5,200.5,72,0.5,72.5);    HistList->Add(mmg2_f125_el_clu2d_x);
-  mmg2_f125_el_clu2d_y = new TH2F("mmg2_f125_el_clu2d_y","MMG2-TRD Y Amp for Electrons (Clusters)",200,0.5,200.5,72,0.5,72.5);    HistList->Add(mmg2_f125_el_clu2d_y);
-  mmg2_f125_pi_clu2d_x = new TH2F("mmg2_f125_pi_clu2d_x","MMG2-TRD X Amp for Pions (Clusters)",200,0.5,200.5,72,0.5,72.5);    HistList->Add(mmg2_f125_pi_clu2d_x);
-  mmg2_f125_pi_clu2d_y = new TH2F("mmg2_f125_pi_clu2d_y","MMG2-TRD Y Amp for Pions (Clusters)",200,0.5,200.5,72,0.5,72.5);    HistList->Add(mmg2_f125_pi_clu2d_y);
-  
-  mmg2_f125_2d = new TH2F("mmg2_f125_2d","MMG2-TRD 2D Response ; X Channel ; Y Channel ",72,0.5,72.5,72,0.5,72.5);    HistList->Add(mmg2_f125_2d);
-  mmg2_f125_2d_clu = new TH2F("mmg2_f125_2d_clu","MMG2-TRD 2D Response (Clusters) ; X Channel ; Y Channel ",72,0.5,72.5,72,0.5,72.5);    HistList->Add(mmg2_f125_2d_clu);
-  mmg2_f125_2d_time = new TH2F("mmg2_f125_2d_time","MMG2-TRD 2D Response (Time Coinc.) ; X Channel ; Y Channel ",72,0.5,72.5,72,0.5,72.5);    HistList->Add(mmg2_f125_2d_time);
-  mmg2_f125_2d_charge = new TH2F("mmg2_f125_2d_charge","MMG2-TRD 2D Response (Time Coinc.) ; X ADC Amplitude ; Y ADC Amplitude ",200,0.5,2096.5,100,0.5,2096.5);    HistList->Add(mmg2_f125_2d_charge);
-  mmg2_time_max = new TH2F("mmg2_time_max","MMG2-TRD 2D Response (Time Coinc.) ; X ADC Max Amplitude ; Y ADC Max Amplitude ",200,0.5,2096.5,100,0.5,2096.5);    HistList->Add(mmg2_time_max);
   
   //=========================================
   gem_zHist = new  TH1F("gem_zHist", "gem_zHist", 20, 80., 200.);
   mmg1_zHist = new  TH1F("mmg1_zHist", "mmg1_zHist", 20, 80., 200.);
-  mmg2_zHist = new  TH1F("mmg2_zHist", "mmg2_zHist", 20, 80., 200.);
   
   TFile* fHits;
   #ifdef SAVE_TRACK_HITS
     char hitsFileName[256]; sprintf(hitsFileName, "RootOutput/cern24/trd_singleTrackHits_Run_%06d.root", RunNum);
     fHits = new TFile(hitsFileName, "RECREATE");
-    
+    //-- GEM-TRD
     EVENT_VECT_GEM = new TTree("gem_hits","GEM TTree with single track hit info");
     EVENT_VECT_GEM->Branch("event_num",&event_num,"event_num/I");
     EVENT_VECT_GEM->Branch("nhit",&gem_nhit,"gem_nhit/I");
@@ -301,49 +254,44 @@ void trdclass_cern24::Loop() {
     EVENT_VECT_GEM->Branch("presh_energy",&Presh_Energy,"Presh_Energy/float");
     EVENT_VECT_GEM->Branch("mult_energy",&Mult_Energy,"Mult_Energy/float");
     EVENT_VECT_GEM->Branch("xpos",&gem_xpos);
-    //EVENT_VECT_GEM->Branch("ypos",&gem_ypos);
     EVENT_VECT_GEM->Branch("zpos",&gem_zpos);
     EVENT_VECT_GEM->Branch("dedx",&gem_dedx);
     EVENT_VECT_GEM->Branch("parID",&gem_parID);
     EVENT_VECT_GEM->Branch("zHist",&gem_zHist_vect);
     EVENT_VECT_GEM->Branch("xposc",&clu_xpos);
-    //EVENT_VECT_GEM->Branch("yposc",&clu_ypos);
     EVENT_VECT_GEM->Branch("zposc",&clu_zpos);
     EVENT_VECT_GEM->Branch("dedxc",&clu_dedx);
     EVENT_VECT_GEM->Branch("widthc",&clu_width);
     EVENT_VECT_GEM->Branch("xch",&gem_xch_max);
-    //EVENT_VECT_GEM->Branch("ych",&gem_ych_max);
     //EVENT_VECT_GEM->Branch("xchtrkr",&gemtrkr_xch_max);
     //EVENT_VECT_GEM->Branch("ychtrkr",&gemtrkr_ych_max);
     EVENT_VECT_GEM->Branch("xamp",&gem_amp_max);
-    //EVENT_VECT_GEM->Branch("yamp",&gem_yamp_max);
     //EVENT_VECT_GEM->Branch("xamptrkr",&gemtrkr_xamp_max);
     //EVENT_VECT_GEM->Branch("yamptrkr",&gemtrkr_yamp_max);
     EVENT_VECT_GEM->Branch("chi2",&chi2cc_gem);
     EVENT_VECT_GEM->Branch("Fint",&gem_integral);
     EVENT_VECT_GEM->Branch("a0",&a0);
     EVENT_VECT_GEM->Branch("a1",&a1);
-    
+    //-- MMG1-TRD
     EVENT_VECT_MMG1 = new TTree("mmg1_hits","MMG1 TTree with single track hit info");
     EVENT_VECT_MMG1->Branch("event_num",&event_num,"event_num/I");
     EVENT_VECT_MMG1->Branch("nhit",&mmg1_nhit,"mmg1_nhit/I");
     EVENT_VECT_MMG1->Branch("xpos",&mmg1_xpos);
-    //EVENT_VECT_MMG1->Branch("ypos",&mmg1_ypos);
     EVENT_VECT_MMG1->Branch("zpos",&mmg1_zpos);
     EVENT_VECT_MMG1->Branch("dedx",&mmg1_dedx);
     EVENT_VECT_MMG1->Branch("parID",&mmg1_parID);
     EVENT_VECT_MMG1->Branch("zHist",&mmg1_zHist_vect);
-    /*
-    EVENT_VECT_MMG2 = new TTree("mmg2_hits","MMG2 TTree with single track hit info");
-    EVENT_VECT_MMG2->Branch("event_num",&event_num,"event_num/I");
-    EVENT_VECT_MMG2->Branch("nhit",&mmg2_nhit,"mmg2_nhit/I");
-    EVENT_VECT_MMG2->Branch("xpos",&mmg2_xpos);
-    EVENT_VECT_MMG2->Branch("ypos",&mmg2_ypos);
-    EVENT_VECT_MMG2->Branch("zpos",&mmg2_zpos);
-    EVENT_VECT_MMG2->Branch("dedx",&mmg2_dedx);
-    EVENT_VECT_MMG2->Branch("parID",&mmg2_parID);
-    EVENT_VECT_MMG2->Branch("zHist",&mmg2_zHist_vect);
-    */
+    EVENT_VECT_MMG1->Branch("xposc",&mmg1_clu_xpos);
+    EVENT_VECT_MMG1->Branch("zposc",&mmg1_clu_zpos);
+    EVENT_VECT_MMG1->Branch("dedxc",&mmg1_clu_dedx);
+    EVENT_VECT_MMG1->Branch("widthc",&mmg1_clu_width);
+    EVENT_VECT_MMG1->Branch("xch",&mmg1_xch_max);
+    EVENT_VECT_MMG1->Branch("xamp",&mmg1_amp_max);
+    EVENT_VECT_MMG1->Branch("chi2",&chi2cc_mmg1);
+    EVENT_VECT_MMG1->Branch("Fint",&mmg1_integral);
+    EVENT_VECT_MMG1->Branch("a0",&mmg1_a0);
+    EVENT_VECT_MMG1->Branch("a1",&mmg1_a1);
+    
   #endif
   
   Long64_t nentries = fChain->GetEntriesFast();
@@ -368,39 +316,32 @@ void trdclass_cern24::Loop() {
       printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_peak_count=%llu \n",jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count, gem_peak_count);
     event_num = jentry;
     
-    //--GEM-TRD
+    //-- GEM-TRD
     gem_nhit=0;
+    clu_nhit=0;
+    mmg1_nhit=0;
     gem_xpos.clear();
-    //gem_ypos.clear();
     gem_zpos.clear();
     gem_dedx.clear();
     gem_parID.clear();
     gem_zHist->Reset();
     gem_zHist_vect.clear();
-    clu_nhit=0;
     clu_xpos.clear();
-    //clu_ypos.clear();
     clu_zpos.clear();
     clu_dedx.clear();
     clu_width.clear();
-    //--MMG1-TRD
-    mmg1_nhit=0;
+    
+    //-- MMG1-TRD
     mmg1_xpos.clear();
-    //mmg1_ypos.clear();
     mmg1_zpos.clear();
     mmg1_dedx.clear();
     mmg1_parID.clear();
     mmg1_zHist->Reset();
     mmg1_zHist_vect.clear();
-    //--MMG2-TRD
-    mmg2_nhit=0;
-    mmg2_xpos.clear();
-    mmg2_ypos.clear();
-    mmg2_zpos.clear();
-    mmg2_dedx.clear();
-    mmg2_parID.clear();
-    mmg2_zHist->Reset();
-    mmg2_zHist_vect.clear();
+    mmg1_clu_xpos.clear();
+    mmg1_clu_zpos.clear();
+    mmg1_clu_dedx.clear();
+    mmg1_clu_width.clear();
     
     //==================================================================================================
     //                    Process Fa250  Pulse data
@@ -438,10 +379,6 @@ void trdclass_cern24::Loop() {
     //if (jentry<MAX_PRINT) printf("------------------ Fadc250  wraw_count = %llu ---------\n", f250_wraw_count);
     h250_size->Fill(f250_wraw_count);
     double CalSum=0;
-    double Ch_u=0;
-    double Ch_in=0;
-    double Ch_out=0;
-    bool electron_ch=false;
     bool electron=false;
     bool pion=false;
     int ch_cal     = 0;
@@ -659,11 +596,11 @@ void trdclass_cern24::Loop() {
     
     //f125_el_fit->Reset();
     //f125_el_amp2d->Reset();
-    double gem_amp_max = -1.;
-    int gem_xch_max=-1;
+    double gem_amp_max = -1., mmg1_amp_max = -1.;
+    int gem_xch_max=-1, mmg1_xch_max=-1;
     f125_fit->Reset();
-    double chi2cc_gem=-999.;
-    double gem_integral=0.;
+    double chi2cc_gem=-999., chi2cc_mmg1=-999.;
+    double gem_integral=0., mmg1_integral=0.;
     hevtL->Reset();
     hevtk->Reset();
     hevtck->Reset();
@@ -680,6 +617,7 @@ void trdclass_cern24::Loop() {
       int fADCSlot = f125_pulse_slot->at(i);
       int fADCChan = f125_pulse_channel->at(i);
       int gemChan = GetGEMChan(fADCChan, fADCSlot);
+      int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
       
       if (gemChan>-1 && amp>GEM_THRESH) {
         f125_fit->Fill(time,gemChan,amp);
@@ -716,13 +654,11 @@ void trdclass_cern24::Loop() {
       
       //--------- Event Histogram Filling ---------
       
-      double mmg1_amp_max=0, mmg2_x_amp_max=0, mmg2_y_amp_max=0;
       double gem_time_max=0, mmg1_time_max=0, gem_chan_max=-1, mmg1_chan_max=-1;
-      double mmg2_x_time_max=0, mmg2_y_time_max=0,  mmg2_x_chan_max=-1,  mmg2_y_chan_max=-1;
       double xaver=0, xaver2=0;
       int naver=0;
       float ped_max=0;
-      gem_amp_max=0;
+      gem_amp_max=-1, mmg1_amp_max=-1;
       
       for (ULong64_t i=0;i<f125_pulse_count; i++) {
         
@@ -736,8 +672,6 @@ void trdclass_cern24::Loop() {
       	
       	int gemChan = GetGEMChan(fADCChan, fADCSlot);
       	int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
-      	int mmg2XChan = GetMMG2XChan(fADCChan, fADCSlot, RunNum);
-      	int mmg2YChan = GetMMG2YChan(fADCChan, fADCSlot, RunNum);
         
       	if (amp<0) amp=0;
       	
@@ -750,7 +684,7 @@ void trdclass_cern24::Loop() {
       	    gem_xpos.push_back(gemChan);
       	    gem_dedx.push_back(amp);
       	    gem_zpos.push_back(time);
-      	    gem_parID.push_back(electron_tag);
+      	    gem_parID.push_back(1);
       	    gem_nhit++;
       	    gem_zHist->Fill(time, amp);
           } else if (pion_tag) {
@@ -760,7 +694,7 @@ void trdclass_cern24::Loop() {
             gem_xpos.push_back(gemChan);
             gem_dedx.push_back(amp);
             gem_zpos.push_back(time);
-            gem_parID.push_back(pion_tag);
+            gem_parID.push_back(0);
             gem_nhit++;
             //gem_zHist->Fill(time, amp);
           }
@@ -774,7 +708,7 @@ void trdclass_cern24::Loop() {
       	    mmg1_xpos.push_back(mmg1Chan);
       	    mmg1_dedx.push_back(amp);
       	    mmg1_zpos.push_back(time);
-      	    mmg1_parID.push_back(electron_tag);
+      	    mmg1_parID.push_back(1);
       	    mmg1_nhit++;
       	    mmg1_zHist->Fill(time, amp);
           } else if (pion_tag) {
@@ -784,59 +718,9 @@ void trdclass_cern24::Loop() {
             mmg1_xpos.push_back(mmg1Chan);
             mmg1_dedx.push_back(amp);
             mmg1_zpos.push_back(time);
-            mmg1_parID.push_back(pion_tag);
+            mmg1_parID.push_back(0);
             mmg1_nhit++;
             //mmg1_zHist->Fill(time, amp);
-          }
-    	  }
-        if (amp>MM2_THRESH && mmg2XChan>-1) {
-    	    if (mmg2_x_amp_max<amp) {mmg2_x_amp_max=amp;  mmg2_x_time_max=time; mmg2_x_chan_max=mmg2XChan;}
-          if (electron_tag) {
-      	    mmg2_f125_el_x->Fill(amp);
-      	    mmg2_f125_el_amp2d_x->Fill(time,mmg2XChan,amp);
-      	    mmg2_f125_el_clu2d_x->Fill(time,mmg2XChan,1.);
-      	    mmg2_xpos.push_back(mmg2XChan);
-      	    mmg2_dedx.push_back(amp);
-      	    mmg2_zpos.push_back(time);
-      	    mmg2_parID.push_back(electron_tag);
-      	    mmg2_nhit++;
-      	    mmg2_zHist->Fill(time, amp);
-          }
-          if (pion_tag) {
-            mmg2_f125_pi_x->Fill(amp);
-            mmg2_f125_pi_amp2d_x->Fill(time,mmg2XChan,amp);
-            mmg2_f125_pi_clu2d_x->Fill(time,mmg2XChan,1.);
-            mmg2_xpos.push_back(mmg2XChan);
-            mmg2_dedx.push_back(amp);
-            mmg2_zpos.push_back(time);
-            mmg2_parID.push_back(pion_tag);
-            mmg2_nhit++;
-            //mmg2_zHist->Fill(time, amp);
-          }
-    	  }
-    	  if (amp>MM2_THRESH && mmg2YChan>-1) {
-    	    if (mmg2_y_amp_max<amp) {mmg2_y_amp_max=amp;  mmg2_y_time_max=time; mmg2_y_chan_max=mmg2YChan;}
-          if (electron_tag) {
-      	    mmg2_f125_el_y->Fill(amp);
-      	    mmg2_f125_el_amp2d_y->Fill(time,mmg2YChan,amp);
-      	    mmg2_f125_el_clu2d_y->Fill(time,mmg2YChan,1.);
-      	    mmg2_xpos.push_back(mmg2YChan);
-      	    mmg2_dedx.push_back(amp);
-      	    mmg2_zpos.push_back(time);
-      	    mmg2_parID.push_back(electron_tag);
-      	    mmg2_nhit++;
-      	    mmg2_zHist->Fill(time, amp);
-          }
-          if (pion_tag) {
-            mmg2_f125_pi_y->Fill(amp);
-            mmg2_f125_pi_amp2d_y->Fill(time,mmg2YChan,amp);
-            mmg2_f125_pi_clu2d_y->Fill(time,mmg2YChan,1.);
-            mmg2_xpos.push_back(mmg2YChan);
-            mmg2_dedx.push_back(amp);
-            mmg2_zpos.push_back(time);
-            mmg2_parID.push_back(pion_tag);
-            mmg2_nhit++;
-            //mmg2_zHist->Fill(time, amp);
           }
     	  }
     	} //--- end Fa125 Pulse Loop ---
@@ -877,15 +761,10 @@ void trdclass_cern24::Loop() {
       */
       if (gem_amp_max>0) f125_el_max->Fill(gem_amp_max);
       if (mmg1_amp_max>0) mmg1_f125_el_max->Fill(mmg1_amp_max);
-      if (mmg2_x_amp_max>0) mmg2_f125_x_max->Fill(mmg2_x_amp_max);
-      if (mmg2_y_amp_max>0) mmg2_f125_y_max->Fill(mmg2_y_amp_max);
-      
-      if (mmg2_x_amp_max>0 && mmg2_y_amp_max>0 && (abs(mmg2_x_time_max-mmg2_y_time_max)<5)) mmg2_time_max->Fill(mmg2_x_amp_max,mmg2_y_amp_max,1.);
       
       for (int i=1; i<21; i++) {
         gem_zHist_vect.push_back(gem_zHist->GetBinContent(i));
         mmg1_zHist_vect.push_back(mmg1_zHist->GetBinContent(i));
-        mmg2_zHist_vect.push_back(mmg2_zHist->GetBinContent(i));
       }
     #endif
     //======================= End Process Fa125 Pulse data ================================
@@ -1296,7 +1175,6 @@ void trdclass_cern24::Loop() {
       //printf("Filling hits tree ... ev=%d  Nhits=%d \n", event_num, nhit);
       if (gem_nhit>0) EVENT_VECT_GEM->Fill();
       if (mmg1_nhit>0)EVENT_VECT_MMG1->Fill();
-      //if (mmg2_nhit>0)EVENT_VECT_MMG2->Fill();
       clu_nhit=nhits;
       for (int n=0; n<nhits; n++) {
         clu_xpos.push_back(hits_Xpos[n]);
@@ -1327,29 +1205,19 @@ void trdclass_cern24::Loop() {
   TH1D *f125_drift_c = new TH1D(*f125_drift);
   TH1D *mmg1_f125_drift = mmg1_f125_el_amp2d->ProjectionX("mmg1_f125_drift",110,140);
   TH1D *mmg1_f125_drift_c = new TH1D(*mmg1_f125_drift);
-  TH1D *mmg2_f125_drift_x = mmg2_f125_el_amp2d_x->ProjectionX("mmg2_f125_drift_x",110,140);
-  TH1D *mmg2_f125_drift_x_c = new TH1D(*mmg2_f125_drift_x);
-  TH1D *mmg2_f125_drift_y = mmg2_f125_el_amp2d_y->ProjectionX("mmg2_f125_drift_y",110,140);
-  TH1D *mmg2_f125_drift_y_c = new TH1D(*mmg2_f125_drift_y);
   f125_drift_c->SetLineColor(4);  HistList->Add(f125_drift_c);
   mmg1_f125_drift_c->SetLineColor(2); HistList->Add(mmg1_f125_drift_c);
-  mmg2_f125_drift_x_c->SetLineColor(3); HistList->Add(mmg2_f125_drift_x_c);
-  mmg2_f125_drift_y_c->SetLineColor(6); HistList->Add(mmg2_f125_drift_y_c);
   f125_drift_c->GetXaxis()->SetTitle("Time Response (8ns)");
   f125_drift_c->SetTitle("Drift Time Distribution");
   TLegend *l = new TLegend(0.75,0.65,0.9,0.9);
   l->SetNColumns(2);
   l->AddEntry(f125_drift_c, "GEM", "l");
   l->AddEntry(mmg1_f125_drift_c, "MMG1", "l");
-  l->AddEntry(mmg2_f125_drift_x_c, "MMG2 X", "l");
-  l->AddEntry(mmg2_f125_drift_y_c, "MMG2 Y", "l");
   
   TCanvas *c4 = new TCanvas("c4","Drift Time Distribution", 1200, 800);
   c4->cd();
   f125_drift_c->Draw();
   mmg1_f125_drift_c->Draw("same");
-  mmg2_f125_drift_x_c->Draw("same");
-  mmg2_f125_drift_y_c->Draw("same");
   l->Draw();
   
   //=====================================================================================
@@ -1372,7 +1240,6 @@ void trdclass_cern24::Loop() {
     fHits->cd();
     EVENT_VECT_GEM->Write();
     EVENT_VECT_MMG1->Write();
-    //EVENT_VECT_MMG2->Write();
     printf("OK, TTree File Write() ...  \n");
     fHits->Close();
     printf("OK, TTree File Close() ...  \n");
@@ -1438,16 +1305,11 @@ void trdclass_cern24::Loop() {
     nxd=2; nyd=4;
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();   f125_el->Draw();
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();   mmg1_f125_el->Draw();
-    cc=NextPlot(nxd,nyd);   gPad->SetLogy();   mmg2_f125_el_x->Draw();
-    cc=NextPlot(nxd,nyd);   gPad->SetLogy();   mmg2_f125_el_y->Draw();
   
     htitle("  GEMTRD (fa125) Max");    if (!COMPACT) cc=NextPlot(0,0);
     nxd=2; nyd=4;
     cc=NextPlot(nxd,nyd);    gPad->SetLogy(); f125_el_max->Draw();
     cc=NextPlot(nxd,nyd);    gPad->SetLogy(); mmg1_f125_el_max->Draw();
-    cc=NextPlot(nxd,nyd);    gPad->SetLogy(); mmg2_f125_x_max->Draw();
-    cc=NextPlot(nxd,nyd);    gPad->SetLogy(); mmg2_f125_y_max->Draw();
-    cc=NextPlot(nxd,nyd);    mmg2_time_max->Draw("colz");
   
    //---------------------  page 3a --------------------
     htitle("  GEM-TRD (fa125) Amp 2D");    if (!COMPACT) cc=NextPlot(0,0);
