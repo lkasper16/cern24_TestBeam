@@ -16,21 +16,19 @@
 
 // Declaration of leaf types
 Int_t           event_num;
+Int_t           gem_nhit;
+Int_t           mmg1_nhit;
 float           ecal_energy;
 float           presh_energy;
 float           mult_energy;
-//Int_t           parID;
 vector<bool>     *parID;
-Int_t           gem_nhit;
 vector<int>     *xpos;
-vector<int>     *ypos;
+//vector<int>     *ypos;
 vector<float>   *zpos;
 vector<float>   *dedx;
 vector<float>   *zHist;
-
-//Int_t           clu_nhit;
 vector<float>   *xposc;
-vector<float>   *yposc;
+//vector<float>   *yposc;
 vector<float>   *zposc;
 vector<float>   *dedxc;
 vector<float>   *widthc;
@@ -42,15 +40,13 @@ TBranch        *b_presh_energy;   //!
 TBranch        *b_mult_energy;   //!
 TBranch        *b_gem_nhit;   //!
 TBranch        *b_xpos;   //!
-TBranch        *b_ypos;   //!
+//TBranch        *b_ypos;   //!
 TBranch        *b_zpos;   //!
 TBranch        *b_dedx;   //!
 TBranch        *b_parID;   //!
 TBranch        *b_zHist;   //!
-//
-//TBranch        *b_clu_nhit;   //!
 TBranch        *b_xposc;   //!
-TBranch        *b_yposc;   //!
+//TBranch        *b_yposc;   //!
 TBranch        *b_zposc;   //!
 TBranch        *b_dedxc;   //!
 TBranch        *b_widthc;   //!

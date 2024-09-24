@@ -60,8 +60,7 @@ ne rabotaet !!!!
 Float_t Par[MAXpar];
 Int_t type, ievent, channel;
 TCanvas *c2=NULL;
-TH2F  *disp,*dispe,*disppi;
-int RunNum;
+TH2F *disp, *dispe, *disppi;
 
 //----------------------------------------------------------------------
 int hgive1(TH1 *hp, int *nx, double *xmi, double *xma) {
@@ -78,13 +77,15 @@ int hscale(TH1 *he, TH1 *hpi, double scale, int NORM, int DRAW) {
   int noent_e= he->GetEntries(); 
   int noent_pi= hpi->GetEntries(); 
   double escale = 1; 
-  if      (scale>0) escale=scale;
+  
+  if (scale>0) escale=scale;
   else if (noent_e>0) escale=(double)noent_pi/(double)noent_e; 
   else    ret=1; // -- 1 = error
   string name = hpi->GetName();
   #ifdef VERBOSE
     printf("NORM :: hist=%s<<< noent e=%d pi=%d e-scale=%f \n",name.c_str(),noent_e,noent_pi,escale);
   #endif
+  
   if (NORM) he->Scale(escale);
   if (DRAW>0) {
     double maxe = he->GetMaximum(); 
@@ -96,14 +97,16 @@ int hscale(TH1 *he, TH1 *hpi, double scale, int NORM, int DRAW) {
     }
     he->SetLineColor(2);  hpi->SetLineColor(4);
   }
+  
   if (DRAW>1) {
-     gPad->Update();  
-     TH1 *h1 = he;  TH1 *h0 = hpi; 
-     TPaveStats *ps1 = (TPaveStats*)h1->GetListOfFunctions()->FindObject("stats");
-     ps1->SetY1NDC(0.57);  ps1->SetY2NDC(0.75); ps1->SetTextColor(kRed);
-     TPaveStats *ps0 = (TPaveStats*)h0->GetListOfFunctions()->FindObject("stats");
-     ps0->SetTextColor(kBlue);
-     gPad->Modified(); gPad->Update(); 
+    gPad->Update();  
+    TH1 *h1 = he;
+    TH1 *h0 = hpi; 
+    TPaveStats *ps1 = (TPaveStats*)h1->GetListOfFunctions()->FindObject("stats");
+    ps1->SetY1NDC(0.57);  ps1->SetY2NDC(0.75); ps1->SetTextColor(kRed);
+    TPaveStats *ps0 = (TPaveStats*)h0->GetListOfFunctions()->FindObject("stats");
+    ps0->SetTextColor(kBlue);
+    gPad->Modified(); gPad->Update(); 
   }
   return ret;
 }
@@ -166,20 +169,18 @@ double Reject(TH1 *hp, TH1 *he, double thr) {
 }
 //---------------------------------------------------------------------
 
-int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int WC, int runnum, int *rtw1, int *rtw3) {
+int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
   
   // Set object pointer
   ecal_energy=0;
   presh_energy=0;
   mult_energy=0;
   xpos = 0;
-  ypos = 0;
   zpos = 0;
   dedx = 0;
   parID = 0;
   zHist = 0;
   xposc = 0;
-  yposc = 0;
   zposc = 0;
   dedxc = 0;
   widthc = 0;
@@ -197,19 +198,15 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   fChain->SetBranchAddress("parID", &parID, &b_parID);
   fChain->SetBranchAddress("nhit", &gem_nhit, &b_gem_nhit);
   fChain->SetBranchAddress("xpos", &xpos, &b_xpos);
-  fChain->SetBranchAddress("ypos", &ypos, &b_ypos);
   fChain->SetBranchAddress("zpos", &zpos, &b_zpos);
   fChain->SetBranchAddress("dedx", &dedx, &b_dedx);
-  
   fChain->SetBranchAddress("zHist", &zHist, &b_zHist);
   fChain->SetBranchAddress("xposc", &xposc, &b_xposc);
-  fChain->SetBranchAddress("yposc", &yposc, &b_yposc);
   fChain->SetBranchAddress("zposc", &zposc, &b_zposc);
   fChain->SetBranchAddress("dedxc", &dedxc, &b_dedxc);
   fChain->SetBranchAddress("widthc", &widthc, &b_dedxc);
   
   //========================================
-  
   TH2F *hits2d_e = new TH2F("hits2d_e","hits2d_e",50,0.,300., 256,-0.5,255.5);
   TH2F *hits2d_p = new TH2F("hits2d_p","hits2d_p",50,0.,300., 256,-0.5,255.5);
   
@@ -217,27 +214,19 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   TH2F *aver2d_p = new TH2F("aver2d_p","aver-rms",100,0.,240., 100,0.,10.);
   
   TH1F *hbeamX  = new TH1F("hbeamX","hbeamX",256,-0.5,255.5);
-  TH1F *hNhits  = new TH1F("hNhits","hNhits",100,-0.5,99.5);
+  TH1F *hNhits  = new TH1F("hNhits","gem_nhits",100,-0.5,99.5);
   
-  TH2F *rad2d   = new TH2F("rad2d","rad2d",50,0.,500., 50,0.,256.);
-  TH2F *norad2d = new TH2F("norad2d","norad2d",50,0.,500.,50,0.,256.);
-  TH2F *gem2d   = new TH2F("gem2d","gem2d",100,0.,256.,100,0.,256.);
   TH1F *rad     = new TH1F("rad","rad",600,0.,4100.*1.);
   TH1F *norad   = new TH1F("norad","norad",600,0.,4100.*1.);
-  TH1F *rad2    = new TH1F("rad2","rad2",200,0.,4100.);
-  TH1F *norad2  = new TH1F("norad2","norad2",200,0.,4100.);
-  TH1F *rad2e   = new TH1F("rad2e","rad2e",600,0.5,300000.);
-  TH1F *norad2e = new TH1F("norad2e","norad2e",600,0.5,300000.);
+  TH1F *rad2    = new TH1F("rad2","Electron max amp",200,0.,4100.);
+  TH1F *norad2  = new TH1F("norad2","Pion max amp",200,0.,4100.);
+  TH1F *rad2e   = new TH1F("rad2e","Electron e_total",600,0.5,300000.);
+  TH1F *norad2e = new TH1F("norad2e","Pion e_total",600,0.5,300000.);
   
-  TH1F *hxdiff = new TH1F("hxdiff","hxdiff",250,-450.,450.);
   TH2F *h2xdiff = new TH2F("h2xdiff","h2xdiff; GemTRD; Ext Track",380,-124.5,255.5,380,-124.5,255.5);
-  
-  TH1F *zrad2   = new TH1F("zrad2","zrad2",100,-0.5,99.5);
-  TH1F *znorad2 = new TH1F("znorad2","znorad2",100,-0.5,99.5);
   
   TH1F *time_e  = new TH1F("time_e","",330,0.5,330.5);
   TH1F *time_pi = new TH1F("time_pi","",330,0.5,330.5);
-  TH1F *ampl    = new TH1F("ampl","",500,0.5,500.5);
   
   TH1F *par_e[MAXpar]; 
   TH1F *par_pi[MAXpar];
@@ -251,21 +240,22 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   }
   
   //========================================
-  
   TRandom3 *rndm = new TRandom3();
   
   int nx;
-  double xmi,xma;
+  double xmi, xma;
   int noent = hgive1(par_e[0], &nx, &xmi, &xma );
   #ifdef VERBOSE
     cout << " hist: nx=" << nx << " xmi=" << xmi << " xma=" << xma << " noent= " << noent << endl;
   #endif
+  
   Long64_t nentries = gem_hits->GetEntries();
   Long64_t nbytes = 0;
   int ntest=nentries*0.25;
   #ifdef VERBOSE
     cout << " ntest=" << ntest << endl;
   #endif
+  
   //==============================================================================
   const int NDE=MaxNDEslices; //NDEslices; // MAXpar;
   double dEdx[NDE];
@@ -275,62 +265,46 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   int e_chan2=0;    //-- last  TR channel
   int pi_chan1=0;   //-- first pion (no-rad) channlel
   int pi_chan2=0;   //-- last  pion (no-rad) channel
-  cout << "============== BEGIN RUN " << runnum << "===============" <<endl;
-  int ievOK=0;
+  cout << "============== BEGIN RUN " << RunNum << "===============" <<endl;
   
   //--------------------------------------------------------------------------------
   //                   E V E N T    L O O P
   //--------------------------------------------------------------------------------
-  int Nfill=0;
   for (Long64_t iev = 0; iev < nentries; iev++) {  
-    nbytes += gem_hits->GetEntry(iev); ievent=iev;
+    nbytes += gem_hits->GetEntry(iev);
+    ievent=iev;
     Count("EVT");
     if (!(iev % 1000)) cout << " ===> Event = "  << iev << " of " << nentries << endl;
-    double gemx=0, gemy=0;
-    gem2d->Fill(gemx,gemy);
     for (int ip=0; ip<MAXpar; ip++) Par[ip]=0;
     for (int i=0; i<NDE; i++) dEdx[i]=0;
     
     //------------------------------------------------------------------------------
     //                 W C 
     //------------------------------------------------------------------------------
-    int w2ch=22;
-    int wch=22;
-    int gemch=w2ch;
-    int wcch=wch;
-    int trkch=wch;
+    int trkch=22;
     float zero_bin=0;
-    
+    channel = 22;
     //------------------------------------------------------------------------------
     //                 G E M 
     //------------------------------------------------------------------------------
-       
-    channel = w2ch;
+    
     int USE_TRACK = 0;
     
     if ( USE_TRACK ) {
       if (abs(13-channel/27-trkch)<3.) { // tracking cut 
-	      hxdiff->Fill(channel-trkch);
 	      h2xdiff->Fill(channel,trkch);
 	      hbeamX->Fill(channel);
       }
     } else {
-      hxdiff->Fill(channel-trkch);
       h2xdiff->Fill(channel,trkch);
       hbeamX->Fill(channel);
     }
     
     float amax2=0.;
     float emax2=0.;
-    float tmax2=50.;
-       
-    int nw2clust=gem_nhit; // w2nhit;
     
     int khit=0;
     int NTR=0;
-    int tw1=110;
-    int tw2=160;
-    int tw3=185;
     
     float THR1=100.;
     float THR2=500.;
@@ -341,53 +315,65 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     float etot=0.;
     float etrzon=0.;
     
-    pi_chan1=40;  //-- first pion (no-rad) channlel 
-    pi_chan2=220;  //-- last  pion (no-rad) channel  
-    e_chan1=43;  //-- first TR channlel
-    e_chan2=223;  //-- last  TR channel 
+    int tw1=0;
+    int tw2=tw1+1;
+    int tw3=tw2+1;
     
     //---- run specific ---
-    if ( 5000 < runnum && runnum <= 5999 ) { //------------------  CERN   2024  ---------------------
+    if ( 5000 < RunNum && RunNum <= 5999 ) { //------------------  CERN   2024  ---------------------
       
       Escale=10.;
       Ascale=10.;       
-      THR1=111.;
-      THR2=500.;
       e_chan1=40;          //-- first TR channlel
       e_chan2=55;         //-- last  TR channel 
       pi_chan1=e_chan1+1;  //-- first pion (no-rad) channel 
       pi_chan2=e_chan2+1;  //-- last  pion (no-rad) channel  
+      tw1 = 110;
+      tw2 = 160;
+      tw3 = 185;
       
-      tw1=110;	   
-      tw2=160; 	   
-      tw3=185;
-      
-      switch (runnum) {
+      switch (RunNum) {
         
-        case 52830:   tw1=5; tw2=10; tw3=27;   e_chan1=40;    e_chan2=55;   pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break;   
-        case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=110;   e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break;   
-        case 5283:   tw1=65; tw2=80; tw3=135; e_chan1=110;   e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break;   
+        case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=110;  e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5264:   tw1=65; tw2=115; tw3=135; e_chan1=110;  e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5281:   tw1=65; tw2=80; tw3=135; e_chan1=110;   e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5282:   tw1=65; tw2=80; tw3=135; e_chan1=110;   e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5283:   tw1=65; tw2=80; tw3=135; e_chan1=110;   e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5268:   tw1=65; tw2=80; tw3=135; e_chan1=110;   e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
         
-        default:  
-	      tw1=110;	   
-	      tw2=160; 	   
-	      tw3=185;
+        //-- For Second Xe Bottle !!
+        case 5301:   tw1=115; tw2=130; tw3=165; e_chan1=110; e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5302:   tw1=115; tw2=130; tw3=165; e_chan1=110; e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5303:   tw1=115; tw2=130; tw3=165; e_chan1=110; e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5304:   tw1=115; tw2=130; tw3=165; e_chan1=110; e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        
+        default:
+	      tw1=65;
+	      tw2=115;
+	      tw3=135;
+        e_chan1=110;
+        e_chan2=130;
+        pi_chan1=e_chan1+1;
+        pi_chan2=e_chan2;
       }
-    } else {  //-- Runnum ---
-      printf(" Run %d not found in the GEM range - exiting \n",runnum);
+    } else {
+      printf(" Run %d not found in the GEM range - exiting \n",RunNum);
       exit(1);
     }
+    
+    //----------------------------------------------------------------
+    //             P I D   S E L E C T I O N
     //----------------------------------------------------------------
     
     double dt=(tw3-tw1)/NDE;
     
-    #if 0          
+    #if 1          
       type=-1;
       if (parID->size()>0) {
-        if(parID->at(0) && ecal_energy > 4000. && presh_energy > 1000. ) {
-	        type=1; ntrk_e++;
-        } else  if(!parID->at(0) && ecal_energy < 400. && presh_energy < 400. ) { 
-	        type=0; ntrk_pi++;
+        if(parID->at(0)==1 && ecal_energy > 4000. && presh_energy > 1000. ) {
+	        type=1; ntrk_e++; Count("ntrk_e");
+        } else  if(parID->at(0)==0 && ecal_energy < 400. && presh_energy < 400. ) { 
+	        type=0; ntrk_pi++; Count("ntrk_pi");
         }
       }
     #else
@@ -409,8 +395,8 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       if (widthc->at(icl)>max_widthc) max_widthc=widthc->at(icl);
       if (dedxc->at(icl)>max_dedxc) max_dedxc=dedxc->at(icl);
     }
-    
     hNhits->Fill(gem_nhit);
+    
     //=================== Loop to  calculate average and RMS  ========
     double xaver=0, xaver2=0;
     int    naver=0;
@@ -418,13 +404,14 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
       xaver+=xpos->at(i); naver++; 
     }
-    xaver=xaver/naver; 
+    xaver=xaver/naver;
+    
     //====================================================================    
     for (int i=0;i<gem_nhit;i++) { // count fixed parameters 
       
-      Count("Hits");
+      Count("Gem_Hits");
       if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-      Count("zHits");
+      Count("Gem_zHits");
       xaver2+=((xpos->at(i)-xaver)*(xpos->at(i)-xaver));
       if (dedx->at(i)>THR1)  {
   	    if (type==1) hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl 
@@ -433,7 +420,6 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       
       if(dedx->at(i)>amax2 && tw2<zpos->at(i) && zpos->at(i)<tw3 )  {  //--- tw2 !!!!
 	      amax2=dedx->at(i);
-	      tmax2=zpos->at(i);
       }
       
       if(dedx->at(i)>emax2)  {  // currently same as amp
@@ -443,7 +429,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       if (type>=0 ) {  //-- rad.pos. window OK
 	      if (tw1<zpos->at(i) && zpos->at(i)<tw3 && dedx->at(i)>THR1)  { 
 	        khit++; etot+=dedx->at(i); atot+=dedx->at(i); 
-	        int ibin=(zpos->at(i)-tw1)/dt;  ibin=min(max(0,ibin),(NDE-1)); dEdx[ibin]+=dedx->at(i)/10; // w2ahit[i]/10.; w2mhit[i];
+	        int ibin=(zpos->at(i)-tw1)/dt;  ibin=min(max(0,ibin),(NDE-1)); dEdx[ibin]+=dedx->at(i)/10; // w2ahit[i]/10.; w2mhit[i]; //??????
 	      }
 	      if (tw2 < zpos->at(i) && zpos->at(i) < tw3)  {  etrzon+=dedx->at(i); }
 	      if (dedx->at(i)>THR2) NTR++;
@@ -453,7 +439,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
 	      if (type==1) time_e->Fill(zpos->at(i),dedx->at(i));
 	      if (type==0) time_pi->Fill(zpos->at(i),dedx->at(i));
       }
-    } //--- Loop over gem hits
+    } //--- End Loop over gem hits
     
     //=================================================================
     
@@ -467,17 +453,17 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     }
     if ( e_chan1 > xaver || xaver > e_chan2 ) continue; //--- radiator  area  ; for Y - need a track
     Count("eChan");
-    Count("nHits");
+    Count("radArea_nHits");
     
     //--------------------------------------------------------------------------------
-    //                    radiator case
+    //                    electron case
     //--------------------------------------------------------------------------------
     if(type==1) {
       rad2->Fill(amax2);
       rad2e->Fill(etot);
     }
     //--------------------------------------------------------------------------------
-    //                   no radiator case
+    //                    pion case
     //--------------------------------------------------------------------------------
     if(type==0) {
       norad2->Fill(amax2);
@@ -485,8 +471,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     }
     //-----------------------------------------------
     if ( type<0 ) continue;
-    Count("type");
-    ievOK++;
+    Count("type_ok");
     
     if (NN_MODE==1) {  //-- Params only
       if (MAXpar<NFixed) { printf("ERROR :: MAXpar array too small =%d \n",MAXpar); exit(1); }
@@ -555,36 +540,24 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     *rtw1=tw1;
     *rtw3=tw3;
     
-    if (type==1) {    // rad
-      zrad2->Fill(zero_bin);      Nfill++;
+    if (type==1) {    // electron
       if (rndm->Rndm()<0.1)   sig_tst->Fill();
       else                    signal->Fill();
       for (int ip=0; ip<NPF; ip++) {
         par_e[ip]->Fill(Par[ip]);
-        #ifdef VERBOSE
-          if (iev==6812 || iev==10724)  printf("t=1 i=%d dEdx = %f \n",ip,Par[ip]);
-        #endif
       }
     }
-    if (type==0) {    // no rad
-      znorad2->Fill((double)zero_bin);
+    if (type==0) {    // pion
       if (rndm->Rndm()<0.1)   bg_tst->Fill();
       else                    background->Fill();
       for (int ip=0; ip<NPF; ip++) {
         par_pi[ip]->Fill(Par[ip]);
-        #ifdef VERBOSE
-          if (iev==6812 || iev==10724)  printf("t=0 i=%d dEdx = %f \n",ip,Par[ip]);
-        #endif
       }
     }
     
-  }//-- event loop 
+  }//-------------------- End event loop --------------------
   
-  #ifdef VERBOSE
-    printf("----------------------------------------------------e_chan1=%d  e_chan2=%d\n",e_chan1,e_chan2);
-  #endif
-  
-  //------------ Plotter -------------------------------------
+  //------------------ Plot Histograms -----------------------------
   
   double escale_trk = 1 ;   if (ntrk_e>0)  escale_trk = (double)ntrk_pi/(double)ntrk_e;
   #ifdef VERBOSE
@@ -597,7 +570,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   int COMPACT=0;
   TCanvas *c1,*c0; 
   char ctit[120];
-  sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",runnum);    
+  sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",RunNum);    
   sprintf(ctit,"File=%s",G_DIR);
   htitle(ctit); //  if (!COMPACT) c1=NextPlot(0,0);
   
@@ -617,21 +590,18 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   
   c1=NextPlot(nxd,nyd);  aver2d_e->Draw("colz");
   c1=NextPlot(nxd,nyd);  aver2d_p->Draw("colz");
-  c1=NextPlot(nxd,nyd); hNhits->Draw("colz");
+  c1=NextPlot(nxd,nyd);  hNhits->Draw("colz");
   
-  if  (!WC) { 
-    //---------------------------------------------------------------------
-    cout << " +++++++  Amplitude Rejection +++++++" << endl;
-    double rej70 = Reject(norad2, rad2, 0.7);
-    cout << " Ampl: e = 70% , Eff pi = " << rej70*100. << "% , Rejection = " << 1./rej70 << endl;
-    double rej90 = Reject(norad2, rad2, 0.9);
-    cout << " Ampl: e = 90% , Eff pi = " << rej90*100. << "% , Rejection = " << 1./rej90 << endl;
-    cout << "+++++++++++++++++++++++++++++++++++\n" << endl;
-  }
-
+  //---------------------------------------------------------------------
+  cout << " +++++++  Rejection From Amplitude Distributions  +++++++" << endl;
+  double rej70 = Reject(norad2, rad2, 0.7);
+  cout << " Ampl: e = 70% , Eff pi = " << rej70*100. << "% , Rejection = " << 1./rej70 << endl;
+  double rej90 = Reject(norad2, rad2, 0.9);
+  cout << " Ampl: e = 90% , Eff pi = " << rej90*100. << "% , Rejection = " << 1./rej90 << endl;
+  cout << "+++++++++++++++++++++++++++++++++++\n" << endl;
+  
   c1=NextPlot(nxd,nyd);   h2xdiff->Draw("colz"); gPad->SetLogz();
-  if  (WC) { c1=NextPlot(nxd,nyd);   hscale(rad,norad,0.,NORM,1);   }
-  else     { c1=NextPlot(nxd,nyd);   hscale(rad2,norad2,0.,NORM,2);  c1=NextPlot(nxd,nyd);  hscale(rad2e,norad2e,0.,NORM,2); }
+  c1=NextPlot(nxd,nyd);   hscale(rad2,norad2,0.,NORM,2);  c1=NextPlot(nxd,nyd);  hscale(rad2e,norad2e,0.,NORM,2);
   c1=NextPlot(nxd,nyd);   hscale(time_e,time_pi,escale_trk,NORM,2); //--- scale time hist here ---
   c1=NextPlot(nxd,nyd);   hbeamX->Draw();
   
@@ -640,10 +610,11 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     hscale(par_e[ip],par_pi[ip],escale_trk,1,2);  //-- scale no_trk 
   }
   c1=NextPlot(-1,-1);
+  
   //------------------------------------------------------------
-  char pngname[120];
-  sprintf(pngname,"%s_dqm_m%d.png",G_DIR,NN_MODE);
-  c1->Print(pngname);
+  //char pngname[120];
+  //sprintf(pngname,"%s_dqm_m%d.png",G_DIR,NN_MODE);
+  //c1->Print(pngname);
   char pdfname[120];
   sprintf(pdfname,"%s_dqm_m%d.pdf",G_DIR,NN_MODE);
   c1->Print(pdfname);
@@ -662,22 +633,20 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   #ifdef VERBOSE
     printf("Draw Lines on c0: e1=%d e2=%d \n",e_chan1,e_chan2);
   #endif
-  c0->cd();  //hits2d->Draw("colz");
+  c0->cd();
   c0->Modified(); c0->Update();
-  char pngname0[120];
-  sprintf(pngname0,"%s_dqm_m%d_time.png",G_DIR,NN_MODE);
-  c0->Print(pngname0);
+  char pdfname0[120];
+  sprintf(pdfname0,"%s_dqm_m%d_time.pdf",G_DIR,NN_MODE);
+  c0->Print(pdfname0);
   
   //------------------------------------------------------------
   return NN_MODE;
-} //--- fill _trees() ---
+} //--- End fill _trees() ---
 
 //==================================================================
 
-void trd_mlp_cern(int runnum) {
+void trd_mlp_cern(int RunNum) {
   
-  int WC = 0;
-   
   hcount= new TH1D("hcount","Count",3,0,3); 
   hcount->SetStats(0);   hcount->SetFillColor(38);   hcount->SetMinimum(1.);
   #if ROOT_VERSION_CODE > ROOT_VERSION(6,0,0)
@@ -691,7 +660,7 @@ void trd_mlp_cern(int runnum) {
   gStyle->SetTitleSize(0.05,"XY");
   
   char rootfile[256];
-  sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_Run_%06d.root",runnum);
+  sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_Run_%06d.root",RunNum);
   char basename[120];
   char *hd = strstr(rootfile,"/"); 
   strncpy(basename,&hd[1],120-1);   char *dot= strstr(basename,"."); *dot=0;
@@ -705,31 +674,32 @@ void trd_mlp_cern(int runnum) {
   // equal to 1 for the signal and 0 for the background is added.
   TFile *input = 0;
   input = new TFile(rootfile);
-  
-  if (!input) return;
+  if (!input) {
+    cout<<"Input file "<<rootfile<<" does not exist - exiting..."<<endl;
+    return;
+  }
   
   TTree *gem_hits = (TTree *) input->Get("gem_hits");
-  char mlpname[128];   sprintf(mlpname,"mlpOutput/cern24/mlp_run%06d.root",runnum);
+  char mlpname[128];
+  sprintf(mlpname,"mlpOutput/cern24/mlp_run%06d.root",RunNum);
   TFile* f = new TFile(mlpname,"RECREATE");
   
   TTree *sig_tst = new TTree("sig_tst", "Filtered Events"); 
   TTree *bg_tst = new TTree("bg_tst", "Filtered Events"); 
-  
   TTree *signal = new TTree("signal", "Filtered Events"); 
   TTree *background = new TTree("background", "Filtered Events"); 
-  
   TTree *simu = new TTree("simu", "Filtered Events");
   
-  char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",runnum);    
-  dispe =  new TH2F("dispe","disp e ",300,-0.5,299.5,200,40.5,240.5);
-  disppi = new TH2F("disppi","disp #pi; time ; X strip ",100,0.5,100.5,350,-0.5,349.5);
+  char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",RunNum); 
+  dispe =  new TH2F("dispe","disp e; time ; X strip",300,-0.5,299.5,200,40.5,240.5);
+  disppi = new TH2F("disppi","disp pi; time ; X strip",100,0.5,100.5,350,-0.5,349.5);
   dispe->SetStats(0);
   disppi->SetStats(0);
   double fsiz=0.02;
   dispe->GetYaxis()->SetTitleSize(fsiz);   dispe->GetXaxis()->SetTitleSize(fsiz);  dispe->GetZaxis()->SetTitleSize(fsiz);
   dispe->GetYaxis()->SetLabelSize(fsiz);   dispe->GetXaxis()->SetLabelSize(fsiz);  dispe->GetZaxis()->SetLabelSize(fsiz);
-  disppi->GetYaxis()->SetTitleSize(fsiz);   disppi->GetXaxis()->SetTitleSize(fsiz);  disppi->GetZaxis()->SetTitleSize(fsiz);
-  disppi->GetYaxis()->SetLabelSize(fsiz);   disppi->GetXaxis()->SetLabelSize(fsiz);  disppi->GetZaxis()->SetLabelSize(fsiz);
+  disppi->GetYaxis()->SetTitleSize(fsiz);  disppi->GetXaxis()->SetTitleSize(fsiz); disppi->GetZaxis()->SetTitleSize(fsiz);
+  disppi->GetYaxis()->SetLabelSize(fsiz);  disppi->GetXaxis()->SetLabelSize(fsiz); disppi->GetZaxis()->SetLabelSize(fsiz);
   
   for (int ip=0; ip<MAXpar; ip++) {
     char bname[80], tname[80];
@@ -744,8 +714,8 @@ void trd_mlp_cern(int runnum) {
   simu->Branch("ievent", &ievent, "ievent/I");
   sig_tst->Branch("ievent", &ievent, "ievent/I");
   bg_tst->Branch("ievent", &ievent, "ievent/I");
-  sig_tst->Branch("ievent", &channel, "channel/I");
-  bg_tst->Branch("ievent", &channel, "channel/I");
+  sig_tst->Branch("channel", &channel, "channel/I");
+  bg_tst->Branch("channel", &channel, "channel/I");
   signal->Branch("ievent", &ievent, "ievent/I");
   background->Branch("ievent", &ievent, "ievent/I");
   
@@ -753,7 +723,7 @@ void trd_mlp_cern(int runnum) {
     cout << " Get trees signal=" << signal << endl;
   #endif
   int rtw1,rtw3;
-  int nn_mode = fill_trees( gem_hits, signal, background, sig_tst, bg_tst , WC, runnum, &rtw1, &rtw3);
+  int nn_mode = fill_trees(gem_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3);
   
   #ifdef VERBOSE
     signal->Print();
@@ -785,7 +755,7 @@ void trd_mlp_cern(int runnum) {
   //                             "par1",simu,"Entry$%2","(Entry$+1)%2");
   //----------------------------
   const int NPAR=MAXpar; // 5 , MAXpar=10
-  string INL,NNcfg;
+  string INL, NNcfg;
   for (int il=0; il<NPAR; il++) {
     stringstream ss;  ss << il;  string si = ss.str();
     INL=INL+"@par"+si;   if (il<(NPAR-1)) INL=INL+",";
@@ -824,8 +794,7 @@ void trd_mlp_cern(int runnum) {
   latex.SetTextSize(0.05);
   latex.SetTextAlign(13);  //align at top
   double ystep=0.07, ypos=0.95;
-  if   (WC>0) sprintf(text,"WireChamber TRD  Mode=%d",nn_mode);
-  else        sprintf(text,"GEM TRD  Mode=%d",nn_mode);
+  sprintf(text,"GEM TRD  Mode=%d",nn_mode);
   latex.DrawLatex(0.05,ypos-=ystep,text);
   latex.DrawLatex(0.05,ypos-=ystep,rootfile);
   latex.DrawLatex(0.05,ypos-=ystep,NNcfg.data());
@@ -862,8 +831,8 @@ void trd_mlp_cern(int runnum) {
   // This will give approx. the same result as DrawNetwork.
   // All entries are used, while DrawNetwork focuses on 
   // the test sample. Also the xaxis range is manually set.
-  TH1F *bg = new TH1F("bgh", "NN output, single mod", 100, -0.05, 1.1);
-  TH1F *sig = new TH1F("sigh", "NN output,single mod",100, -0.05, 1.1);
+  TH1F *bg = new TH1F("bgh", "NN bg output, single mod", 100, -0.05, 1.1);
+  TH1F *sig = new TH1F("sigh", "NN sig output, single mod",100, -0.05, 1.1);
   
   char htit[120]; sprintf(htit,"NN output, Nmod=%d",Nmod);
   TH1F *bgm = new TH1F("bgm",htit, 100, -.05, 1.1);
@@ -876,7 +845,7 @@ void trd_mlp_cern(int runnum) {
   
   double tout1=0.44, tout2=0.46;
   int GAUSS=0; double g_mean1=0.2, g_sigma1=0.3, g_mean2=0.8, g_sigma2=0.3;
-  int DISP=0, DISP_THR=0;
+  int DISP=0;
   if (DISP>0) {
     c2 = new TCanvas("Event Dipsplay","Event Display",1200,10,2000,1000); c2->SetRightMargin(0.15);
     c2->Divide(2,1);
@@ -884,8 +853,8 @@ void trd_mlp_cern(int runnum) {
   
   TH1F *trka = new TH1F("trka", " track angle ", 100, -0.5, 0.5);
   TH2F *trka2 = new TH2F("trka2", " track angle vs x ", 100, -0.5, 0.5, 100, 100., 200.);
-  if (runnum==494) trka->GetXaxis()->SetTitle("angle, rad");
-  else             trka->GetXaxis()->SetTitle("angle, popugay");
+  //if (RunNum==494) trka->GetXaxis()->SetTitle("angle, rad");
+  trka->GetXaxis()->SetTitle("angle, popugay");
   
   TRandom3 *rndm = new TRandom3();
   Double_t params[NPAR];
@@ -916,16 +885,16 @@ void trd_mlp_cern(int runnum) {
       c2->cd(); disppi->Reset();
       char htit[128]; sprintf(htit,"#pi event %d; time 8 ns/bin ; x-strip ",ievent);   disppi->SetTitle(htit);
       for (int i=0;i<gem_nhit;i++) {
-	      if (dedx->at(i)>DISP_THR) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
+	      if (dedx->at(i)>0) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
       }
       disppi->Draw("colz");
       TLine lin1(0.,rtw1,350.,rtw1);   TLine lin2(0.,rtw3,350.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();  
       c2->Modified(); c2->Update();
     }
-  }
+  } //-- End bg_tst entry loop
   
   sum=0;
-  for (i = 0; i < sig_tst->GetEntries(); i++) {
+  for (i=0; i<sig_tst->GetEntries(); i++) {
     sig_tst->GetEntry(i);
     for (int ip=0; ip<NPAR; ip++ ) params[ip] = Par[ip];
     double out = mlp->Evaluate(0, params);
@@ -943,6 +912,8 @@ void trd_mlp_cern(int runnum) {
         for (int ip=0; ip<NPAR; ip++) printf(" %f ",params[ip]); printf(" type = %d out=%f iev=%d \n",type,out,ievent);
       #endif
     }
+    
+    //-------------------------------------------------------------
     if (out<0.1 && DISP>1 ) {
       #ifdef VERBOSE
         printf(" e low : out=%f type=%d iev=%d par=%5.1f %5.0f  %5.1f %5.1f %5.1f  \n",out,type,ievent,Par[0],Par[1],Par[2],Par[3],Par[4]);
@@ -953,7 +924,7 @@ void trd_mlp_cern(int runnum) {
       int ii=0; double x[1000], y[1000],ey[1000];
       double yaver=0;
       for (int i=0;i<gem_nhit;i++) {
-	      if (dedx->at(i)>DISP_THR) {
+	      if (dedx->at(i)>0) {
 	        dispe->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
 	        if ( 110 < zpos->at(i) && zpos->at(i) < 185 ) {
 	          x[ii]=zpos->at(i);  y[ii]=xpos->at(i); if (dedx->at(i)==0) ey[ii]=100; else ey[ii]=1000./dedx->at(i); ii++; yaver+=y[ii];
@@ -976,7 +947,8 @@ void trd_mlp_cern(int runnum) {
           printf("p0=%f yaver=%f \n",p0,yaver);
         #endif
       }
-      if (runnum==494) trka->Fill(p1*2.); else trka->Fill(p1);
+      //if (RunNum==494) trka->Fill(p1*2.); else 
+      trka->Fill(p1);
       c2->cd(2);
       dispe->Draw("colz");
       TLine lin1(rtw1,40.,rtw1,240.);   TLine lin2(rtw3,40.,rtw3,240.);  lin1.SetLineColor(kRed); lin2.SetLineColor(kRed); lin1.Draw(); lin2.Draw();
@@ -984,10 +956,11 @@ void trd_mlp_cern(int runnum) {
       ffit2.Draw("same");
       c2->Modified(); c2->Update();
       c2->WaitPrimitive();
-    }
-  }
+    } //-- End DISP>1
+  } //-- End sig_tst Entry Loop
+  
   //---------------------------------------------------------------------
-  //---------               plot NN out                      ------------
+  //---------               plot NN output                   ------------
   //---------------------------------------------------------------------
   mlpa_canvas->cd(ipad++);
   bg->SetLineColor(kBlue);
@@ -997,10 +970,15 @@ void trd_mlp_cern(int runnum) {
   bg->SetStats(0);
   sig->SetStats(0);
   bg->Draw();
+  TLine *line90 = new TLine(Reject(bg,sig,0.9),0,Reject(bg,sig,0.9),bg->GetMaximum()+1);
+  TLine *line70 = new TLine(Reject(bg, sig, 0.7),0,Reject(bg, sig, 0.7),bg->GetMaximum()+1);
+  line90->SetLineStyle(kDashed);   line70->SetLineStyle(kDashed);
+  line90->Draw();  line70->Draw();
   sig->Draw("same");
+  gPad->Modified(); gPad->Update();
   TLegend *legend = new TLegend(.75, .80, .95, .95);
-  legend->AddEntry(bg, "Background (pions)");
-  legend->AddEntry(sig, "Signal (electrons)");
+  legend->AddEntry(bg, "Background (Pions)");
+  legend->AddEntry(sig, "Signal (Electrons)");
   legend->Draw();
   
   //---------  plot NN mod sum  ------------
@@ -1014,8 +992,8 @@ void trd_mlp_cern(int runnum) {
   bgm->Draw();
   sigm->Draw("same");
   TLegend *legend2 = new TLegend(.75, .80, .95, .95);
-  legend2->AddEntry(bgm, "Background (no rad)");
-  legend2->AddEntry(sigm, "Signal (rad)");
+  legend2->AddEntry(bgm, "Background (Pions)");
+  legend2->AddEntry(sigm, "Signal (Electrons)");
   legend2->Draw();
   //---------------------------------------------------------------------
   
@@ -1045,7 +1023,7 @@ void trd_mlp_cern(int runnum) {
   mlpa_canvas->cd(ipad++);   trka->Draw();
   mlpa_canvas->cd(ipad++);   trka2->Draw("colz");
   mlpa_canvas->cd(ipad++);   err->Draw("colz");
-  mlpa_canvas->cd(ipad++);    gPad->SetLogy(); hcount->Draw();
+  mlpa_canvas->cd(ipad++);   gPad->SetLogy(); hcount->Draw();
   //---------------------------------------------------------------------
   double rej70 = Reject(bg, sig, 0.7);
   cout << "---------------------------------------- \n" << endl;
@@ -1060,11 +1038,11 @@ void trd_mlp_cern(int runnum) {
     cout << " 1-Mod pi=90%, Eff pi = " << rej90*100. << "% ,  Rejection =" << 1./rej90 << endl;
   #endif
   //---------------------------------------------
+  #ifdef VERBOSE
   double rej70m = Reject(bgm, sigm, 0.7);
   cout << "---------------------------------------- \n" << endl;
   double rej90m = Reject(bgm, sigm, 0.9);
   cout << "---------------------------------------- \n" << endl;
-  #ifdef VERBOSE
     cout << "Nmod=" << Nmod << " Nmod=" << Nmod << " e=70% , Eff pi = " << rej70m*100. << "% ,  Rejection =" << 1./rej70m << endl;
     cout << " Nmod=" << Nmod << " pi=90%, Eff pi = " << rej90m*100. << "% ,  Rejection =" << 1./rej90m << endl;
   #endif
@@ -1086,6 +1064,7 @@ void trd_mlp_cern(int runnum) {
   latex.DrawLatex(0.05,ypos-=ystep,str2.data());
   latex.DrawLatex(0.05,ypos-=ystep,"--------------");
   //--
+  #ifdef VERBOSE
   ss.str("");  ss.clear(); 
   ss << " Nmod=" << Nmod << " e=70% , Eff #pi = " << rej70m*100. << "% ,  Rej =" << 1./rej70m ;  str2 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str2.data());
@@ -1093,17 +1072,15 @@ void trd_mlp_cern(int runnum) {
   ss.str("");  ss.clear(); 
   ss << " Nmod=" << Nmod << " e=90% , Eff #pi = " << rej90m*100. << "% ,  Rej =" << 1./rej90m ;  str2 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str2.data());
-  
+  #endif
   //---------------------------------------------
   sprintf(text,"mlpOutput/%s_m%d.png",basename,nn_mode);
   mlpa_canvas->Print(text);
   mlpa_canvas->cd(0);
   
   f->Write();
-  
   delete input;
-  
-  cout << "============== END RUN " << runnum << "===============" <<endl;
+  cout << "============== END RUN " << RunNum << "===============" <<endl;
 }
 
 
