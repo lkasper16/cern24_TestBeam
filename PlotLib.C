@@ -83,7 +83,7 @@ TCanvas *NextPlot(int nx, int ny) {
         sprintf(PSname,"%s-v%d.ps",G_DIR,G_VERS);
         ps = new TPostScript(PSname,-100111);
 #endif
-	      printf("Opening new file PSname=%s for histograms...\n",PSname);
+	      printf("Opening new file PSname=%s to draw histograms...\n",PSname);
       }
     } 
 #ifndef USE_PDF

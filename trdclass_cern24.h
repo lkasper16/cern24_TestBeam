@@ -311,9 +311,10 @@ public :
    TH1F *hgemtrkr_1_peak_x_height, *hgemtrkr_1_peak_y_height, *hgemtrkr_2_peak_x_height, *hgemtrkr_2_peak_y_height, *hgemtrkr_3_peak_x_height, *hgemtrkr_3_peak_y_height, *hmmg1_peak_y_height, *hgem_peak_y_height;
    TH2F *hgemtrkr_1_peak_xy, *hgemtrkr_2_peak_xy, *hgemtrkr_3_peak_xy;
    TH2F *hgemtrkr_1_atlas_xy, *hgemtrkr_2_atlas_xy, *hgemtrkr_3_atlas_xy;
+   TH2F *hgemtrkr_1_gem, *hgemtrkr_1_mmg1;
    
-   TH1F *f125_el, *f125_el_max, *f125_el_chi2, *f125_el_fita;
-   TH1F *f125_pi, *f125_pi_max, *f125_pi_chi2, *f125_pi_fita;
+   TH1F *f125_el, *f125_el_max, *f125_el_max_late, *f125_el_max_early, *f125_el_chi2, *f125_el_fita;
+   TH1F *f125_pi, *f125_pi_max, *f125_pi_max_late, *f125_pi_max_early, *f125_pi_chi2, *f125_pi_fita;
    TH2F *f125_el_amp2d, *f125_amp2ds, *f125_el_evt_display, *f125_el_raw, *f125_el_fit, *f125_fit;
    TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt_display, *f125_pi_raw, *f125_pi_fit;
    TH2F *f125_el_clu2d;
@@ -322,14 +323,18 @@ public :
    TH2F *aver2d_p;
    
    TH1F *mmg1_f125_el;
-   TH1F *mmg1_f125_el_max;
+   TH1F *mmg1_f125_el_max, *mmg1_f125_el_max_late, *mmg1_f125_el_max_early;
    TH1F *mmg1_f125_pi;
-   TH2F *mmg1_f125_el_amp2d;
+   TH1F *mmg1_f125_pi_max, *mmg1_f125_pi_max_late, *mmg1_f125_pi_max_early;
+   TH2F *mmg1_f125_el_amp2d, *mmg1_f125_amp2ds;
    TH2F *mmg1_f125_pi_amp2d;
    TH2F *mmg1_f125_el_clu2d;
    TH2F *mmg1_f125_pi_clu2d;
-
-   TH2F *mhevt, *hevt, *hevtc, *hevti, *hevtf, *hevtk, *hevtck, *hevtL;
+   TH2F *mmg1_f125_fit;
+   
+   TH2F *gem_el_eff, *gem_pi_eff, *mmg1_el_eff, *mmg1_pi_eff;
+   TH2F *gem_mmg1_doubleX, *gem_mmg1_doubleY;
+   TH2F *mhevt, *mhevti, *mhevtf, *hevt, *hevtc, *hevti, *hevtf, *hevtk, *hevtck, *hevtL;
    
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
@@ -346,7 +351,6 @@ public :
    //std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
    std::vector <float> gem_dedx;
-   std::vector <int> gem_trackID;
    std::vector <bool> gem_parID;
    std::vector <float> gem_zHist_vect;
    std::vector <float> clu_xpos;
@@ -356,18 +360,18 @@ public :
    std::vector <float> clu_width;
    TH1F *gem_zHist;
    std::vector <float> gem_amp_max;
-   std::vector <float> chi2cc_gem;
+   std::vector <float> gem_time_max;
+   std::vector <float> gem_chi2cc;
    std::vector <float> gem_integral;
    std::vector <float> a0;
    std::vector <float> a1;
-   std::vector <float> gem_xch_max;
+   std::vector <int> gem_xch_max;
    
    int mmg1_nhit;
    std::vector <int> mmg1_xpos;
-   std::vector <int> mmg1_ypos;
+   //std::vector <int> mmg1_ypos;
    std::vector <float> mmg1_zpos;
    std::vector <float> mmg1_dedx;
-   std::vector <int> mmg1_trackID;
    std::vector <bool> mmg1_parID;
    std::vector <float> mmg1_zHist_vect;
    TH1F *mmg1_zHist;
@@ -376,11 +380,12 @@ public :
    std::vector <float> mmg1_clu_dedx;
    std::vector <float> mmg1_clu_width;
    std::vector <float> mmg1_amp_max;
-   std::vector <float> chi2cc_mmg1;
+   std::vector <float> mmg1_time_max;
+   std::vector <float> mmg1_chi2cc;
    std::vector <float> mmg1_integral;
    std::vector <float> mmg1_a0;
    std::vector <float> mmg1_a1;
-   std::vector <float> mmg1_xch_max;
+   std::vector <int> mmg1_xch_max;
    //---------------------------
 
    //=============================================
