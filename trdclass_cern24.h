@@ -312,7 +312,8 @@ public :
    TH2F *hgemtrkr_1_peak_xy, *hgemtrkr_2_peak_xy, *hgemtrkr_3_peak_xy;
    TH2F *hgemtrkr_1_atlas_xy, *hgemtrkr_2_atlas_xy, *hgemtrkr_3_atlas_xy;
    TH2F *hgemtrkr_1_gem, *hgemtrkr_1_mmg1;
-   
+   TH1F *hgemtrkr_1_max_xch, *hgemtrkr_1_max_xamp, *hgemtrkr_2_max_xch, *hgemtrkr_2_max_xamp;
+    
    TH1F *f125_el, *f125_el_max, *f125_el_max_late, *f125_el_max_early, *f125_el_chi2, *f125_el_fita;
    TH1F *f125_pi, *f125_pi_max, *f125_pi_max_late, *f125_pi_max_early, *f125_pi_chi2, *f125_pi_fita;
    TH2F *f125_el_amp2d, *f125_amp2ds, *f125_el_evt_display, *f125_el_raw, *f125_el_fit, *f125_fit;

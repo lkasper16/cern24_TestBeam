@@ -116,15 +116,10 @@ void trdclass_cern24::Loop() {
   ftrkr.SetParameter(0,aa);
   ftrkr.SetParameter(1,bb);
   //-----------------------
-  //float x1 = 0;
   float z1 = 0;
-  //float x2 = 0;
   float z2 = 1071;
-  //float x3 = 0;
   float z3 = 1153.4;
-  //float xgem = 0;
   float zgem = 571;
-  //float xmmg1 = 0;
   float zmmg1 = 308;
   
   //----------------  GEM TRK fuducial area selection (box cut) ----------------------
@@ -213,47 +208,53 @@ void trdclass_cern24::Loop() {
   gem_mmg1_doubleY = new TH2F("gem_mmg1_doubleY","TRD Y Correlation (SRS) ; GEM-TRD Y Chan ; MMG1-TRD Y Chan ",256,-0.5,255.5,256,-0.5,255.5);    HistList->Add(gem_mmg1_doubleY);
   
   // --- SRS ---
+  hgemtrkr_1_max_xch = new TH1F("hgemtrkr_1_max_xch"," GEM-TRKR1 Max X Chan ; X Chan [mm]",100,-0.5,99.5);  HistList->Add(hgemtrkr_1_max_xch);
+  hgemtrkr_1_max_xamp = new TH1F("hgemtrkr_1_max_xamp"," GEM-TRKR1 Max X Amp ; ADC Amp ",100,0.,4096);  HistList->Add(hgemtrkr_1_max_xamp);
+  hgemtrkr_2_max_xch = new TH1F("hgemtrkr_2_max_xch"," GEM-TRKR2 Max X Chan ; X Chan [mm]",100,-0.5,99.5);  HistList->Add(hgemtrkr_2_max_xch);
+  hgemtrkr_2_max_xamp = new TH1F("hgemtrkr_2_max_xamp"," GEM-TRKR2 Max X Amp ; ADC Amp ",100,0.,4096);  HistList->Add(hgemtrkr_2_max_xamp);
   //--GEMTracker 1
-  hgemtrkr_1_peak_xy = new TH2F("hgemtrkr_1_peak_xy","GEM-TRKR1 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_1_peak_xy);
-  hgemtrkr_1_atlas_xy = new TH2F("hgemtrkr_1_atlas_xy","GEM-TRKR1 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_1_atlas_xy);
-  hgemtrkr_1_peak_x = new TH1F("hgemtrkr_1_peak_x"," GEM-TRKR1 Peak X ; X [mm] ",110,-55.,55.);  HistList->Add(hgemtrkr_1_peak_x);
-  hgemtrkr_1_peak_y = new TH1F("hgemtrkr_1_peak_y"," GEM-TRKR1 Peak Y ; Y [mm] ",110,-55.,55.);  HistList->Add(hgemtrkr_1_peak_y);
+  hgemtrkr_1_peak_xy = new TH2F("hgemtrkr_1_peak_xy","GEM-TRKR1 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_peak_xy);
+  hgemtrkr_1_atlas_xy = new TH2F("hgemtrkr_1_atlas_xy","GEM-TRKR1 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_atlas_xy);
+  hgemtrkr_1_peak_x = new TH1F("hgemtrkr_1_peak_x"," GEM-TRKR1 Peak X ; X [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_1_peak_x);
+  hgemtrkr_1_peak_y = new TH1F("hgemtrkr_1_peak_y"," GEM-TRKR1 Peak Y ; Y [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_1_peak_y);
   hgemtrkr_1_peak_x_height = new TH1F("hgemtrkr_1_peak_x_height"," GEM-TRKR1 Peak Amplitudes in X; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_1_peak_x_height);
   hgemtrkr_1_peak_y_height = new TH1F("hgemtrkr_1_peak_y_height"," GEM-TRKR1 Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_1_peak_y_height);
   //--GEMTracker 2
-  hgemtrkr_2_peak_xy = new TH2F("hgemtrkr_2_peak_xy","GEM-TRKR2 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_2_peak_xy);
-  hgemtrkr_2_atlas_xy = new TH2F("hgemtrkr_2_atlas_xy","GEM-TRKR2 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_2_atlas_xy);
-  hgemtrkr_2_peak_x = new TH1F("hgemtrkr_2_peak_x"," GEM-TRKR2 Peak X ; X [mm] ",110,-55.,55.);  HistList->Add(hgemtrkr_2_peak_x);
-  hgemtrkr_2_peak_y = new TH1F("hgemtrkr_2_peak_y"," GEM-TRKR2 Peak Y Pos ; Y [mm] ",110,-55.,55.);  HistList->Add(hgemtrkr_2_peak_y);
+  hgemtrkr_2_peak_xy = new TH2F("hgemtrkr_2_peak_xy","GEM-TRKR2 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_2_peak_xy);
+  hgemtrkr_2_atlas_xy = new TH2F("hgemtrkr_2_atlas_xy","GEM-TRKR2 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_2_atlas_xy);
+  hgemtrkr_2_peak_x = new TH1F("hgemtrkr_2_peak_x"," GEM-TRKR2 Peak X ; X [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_2_peak_x);
+  hgemtrkr_2_peak_y = new TH1F("hgemtrkr_2_peak_y"," GEM-TRKR2 Peak Y Pos ; Y [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_2_peak_y);
   hgemtrkr_2_peak_x_height = new TH1F("hgemtrkr_2_peak_x_height"," GEM-TRKR2 Peak Amplitudes in X; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_2_peak_x_height);
   hgemtrkr_2_peak_y_height = new TH1F("hgemtrkr_2_peak_y_height"," GEM-TRKR2 Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_2_peak_y_height);
   //--GEMTracker 3
-  hgemtrkr_3_peak_xy = new TH2F("hgemtrkr_3_peak_xy","GEM-TRKR3 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_3_peak_xy);
-  hgemtrkr_3_atlas_xy = new TH2F("hgemtrkr_3_atlas_xy","GEM-TRKR3 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_3_atlas_xy);
-  hgemtrkr_3_peak_x = new TH1F("hgemtrkr_3_peak_x"," GEM-TRKR3 Peak X Pos ; X [mm] ",110,-55.,55.);  HistList->Add(hgemtrkr_3_peak_x);
-  hgemtrkr_3_peak_y = new TH1F("hgemtrkr_3_peak_y"," GEM-TRKR3 Peak Y Pos ; Y [mm] ",110,-55.,55.);  HistList->Add(hgemtrkr_3_peak_y);
+  hgemtrkr_3_peak_xy = new TH2F("hgemtrkr_3_peak_xy","GEM-TRKR3 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_3_peak_xy);
+  hgemtrkr_3_atlas_xy = new TH2F("hgemtrkr_3_atlas_xy","GEM-TRKR3 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_3_atlas_xy);
+  hgemtrkr_3_peak_x = new TH1F("hgemtrkr_3_peak_x"," GEM-TRKR3 Peak X Pos ; X [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_3_peak_x);
+  hgemtrkr_3_peak_y = new TH1F("hgemtrkr_3_peak_y"," GEM-TRKR3 Peak Y Pos ; Y [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_3_peak_y);
   hgemtrkr_3_peak_x_height = new TH1F("hgemtrkr_3_peak_x_height"," GEM-TRKR3 Peak Amplitudes in X; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_3_peak_x_height);
   hgemtrkr_3_peak_y_height = new TH1F("hgemtrkr_3_peak_y_height"," GEM-TRKR3 Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_3_peak_y_height);
   
-  mmg1_peak_y = new TH1F("mmg1_peak_y"," MMG1-TRD Peak Y Pos (SRS) ; Y [mm] ",110,-55.,55.);  HistList->Add(mmg1_peak_y);
+  mmg1_peak_y = new TH1F("mmg1_peak_y"," MMG1-TRD Peak Y Pos (SRS) ; Y [mm] ",100,-0.5,99.5);  HistList->Add(mmg1_peak_y);
   hmmg1_peak_y_height = new TH1F("hmmg1_peak_y_height"," MMG1-TRD Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hmmg1_peak_y_height);
-  gem_peak_y = new TH1F("gem_peak_y"," GEM-TRD Peak Y Pos (SRS) ; Y [mm] ",110,-55.,55.);  HistList->Add(gem_peak_y);
+  gem_peak_y = new TH1F("gem_peak_y"," GEM-TRD Peak Y Pos (SRS) ; Y [mm] ",100,-0.5,99.5);  HistList->Add(gem_peak_y);
   hgem_peak_y_height = new TH1F("hgem_peak_y_height"," GEM-TRD Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgem_peak_y_height);
   
-  hgemtrkr_1_gem = new TH2F("hgemtrkr_1_gem","GEM-TRKR1 * GEM Y Correlation; GEM-TRD Y [mm]; GEM-TRKR1 Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_1_gem);
-  hgemtrkr_1_mmg1 = new TH2F("hgemtrkr_1_mmg1","GEM-TRKR1 & MMG1 Y Correlation; MMG1-TRD Y [mm]; GEM-TRKR1 Y [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(hgemtrkr_1_mmg1);
+  hgemtrkr_1_gem = new TH2F("hgemtrkr_1_gem","GEM-TRKR1 * GEM Y Correlation; GEM-TRD Y [mm]; GEM-TRKR1 Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_gem);
+  hgemtrkr_1_mmg1 = new TH2F("hgemtrkr_1_mmg1","GEM-TRKR1 & MMG1 Y Correlation; MMG1-TRD Y [mm]; GEM-TRKR1 Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_mmg1);
   
   //--External Tracking
   TH1F *f125_tracker_hits = new TH1F("f125_tracker_hits","GEM-TRD Track Extr. Hits; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(f125_tracker_hits);
   TH1F *f125_tracker_nohits = new TH1F("f125_tracker_nohits","",100.,-0.5,99.5);   HistList->Add(f125_tracker_nohits);
   TH1F *f125_tracker_eff = new TH1F("f125_tracker_eff","GEM-TRD Track Extr. Eff; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(f125_tracker_eff);
   TH1F *f125_tracker_eff2d = new TH1F("f125_tracker_eff2d","",100.,-0.5,99.5);   HistList->Add(f125_tracker_eff2d);
-  TH1F *gem_residuals = new TH1F("gem_residuals","GEM-TRD Residual Hits; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(gem_residuals);
+  TH1F *gem_residuals = new TH1F("gem_residuals","GEM-TRD Residual Hits; X Chan [mm]",150.,-25,25);   HistList->Add(gem_residuals);
+  TH2F *gem_residual_ch = new TH2F("gem_residual_ch","GEM-TRD Residual Hits vs Chan; X Chan; X Chan [mm]",240, -0.5, 239.5,110.,-55,55);   HistList->Add(gem_residual_ch);
   TH1F *mmg1_f125_tracker_hits = new TH1F("mmg1_f125_tracker_hits","MMG1-TRD Track Extr. Hits; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(mmg1_f125_tracker_hits);
   TH1F *mmg1_f125_tracker_nohits = new TH1F("mmg1_f125_tracker_nohits","",100.,-0.5,99.5);   HistList->Add(mmg1_f125_tracker_nohits);
   TH1F *mmg1_f125_tracker_eff = new TH1F("mmg1_f125_tracker_eff","MMG1-TRD Track Extr. Hits; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(mmg1_f125_tracker_eff);
   TH1F *mmg1_f125_tracker_eff2d = new TH1F("mmg1_f125_tracker_eff2d","",100.,-0.5,99.5);   HistList->Add(mmg1_f125_tracker_eff2d);
-  TH1F *mmg1_residuals = new TH1F("mmg1_residuals","MMG1-TRD Residual Hits; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(mmg1_residuals);
+  TH1F *mmg1_residuals = new TH1F("mmg1_residuals","MMG1-TRD Residual Hits; X Chan [mm]",150.,-25,25);   HistList->Add(mmg1_residuals);
+  TH2F *mmg1_residual_ch = new TH2F("mmg1_residual_ch","MMG1-TRD Residual Hits vs Chan; X Chan; X Chan [mm]",240, -0.5, 239.5,110.,-55,55);   HistList->Add(mmg1_residual_ch);
   
   //---- GEM-TRD --
   float GEM_THRESH=140.; //175
@@ -501,31 +502,25 @@ void trdclass_cern24::Loop() {
     
     ULong64_t gt_1_idx_x = 0, gt_1_idx_y=0, gt_2_idx_x = 0, gt_2_idx_y = 0, gt_3_idx_x = 0, gt_3_idx_y = 0, mmg1_idx_y=0, gem_idx_y=0;
     
-    double gemtrkr1_xamp_max=-1., gemtrkr1_xch_max=-1.;
-    double gemtrkr1_yamp_max=-1., gemtrkr1_ych_max=-1.;
-    double gemtrkr2_xamp_max=-1., gemtrkr2_xch_max=-1.;
-    double gemtrkr2_yamp_max=-1., gemtrkr2_ych_max=-1.;
-    double gemtrkr3_xamp_max=-1., gemtrkr3_xch_max=-1.;
-    double gemtrkr3_yamp_max=-1., gemtrkr3_ych_max=-1.;
+    double gemtrkr1_xamp_max=-1., gemtrkr1_xch_max=-1000.;
+    double gemtrkr1_yamp_max=-1., gemtrkr1_ych_max=-1000.;
+    double gemtrkr2_xamp_max=-1., gemtrkr2_xch_max=-1000.;
+    double gemtrkr2_yamp_max=-1., gemtrkr2_ych_max=-1000.;
+    double gemtrkr3_xamp_max=-1., gemtrkr3_xch_max=-1000.;
+    double gemtrkr3_yamp_max=-1., gemtrkr3_ych_max=-1000.;
     
     double gemtrkr_1_peak_pos_y[gem_peak_count];
     double gemtrkr_1_peak_pos_x[gem_peak_count];
     double gemtrkr_1_peak_x_height[gem_peak_count];
     double gemtrkr_1_peak_y_height[gem_peak_count];
-    double gemtrkr_1_peak_ych[gem_peak_count];
-    double gemtrkr_1_peak_xch[gem_peak_count];
     double gemtrkr_2_peak_pos_y[gem_peak_count];
     double gemtrkr_2_peak_pos_x[gem_peak_count];
     double gemtrkr_2_peak_x_height[gem_peak_count];
     double gemtrkr_2_peak_y_height[gem_peak_count];
-    double gemtrkr_2_peak_ych[gem_peak_count];
-    double gemtrkr_2_peak_xch[gem_peak_count];
     double gemtrkr_3_peak_pos_y[gem_peak_count];
     double gemtrkr_3_peak_pos_x[gem_peak_count];
     double gemtrkr_3_peak_x_height[gem_peak_count];
     double gemtrkr_3_peak_y_height[gem_peak_count];
-    double gemtrkr_3_peak_ych[gem_peak_count];
-    double gemtrkr_3_peak_xch[gem_peak_count];
     double mmg1_peak_pos_y[gem_peak_count];
     double mmg1_peak_y_height[gem_peak_count];
     double gem_peak_pos_y[gem_peak_count];
@@ -536,20 +531,14 @@ void trdclass_cern24::Loop() {
       gemtrkr_1_peak_pos_x[gem_peak_count] = -1000;
       gemtrkr_1_peak_x_height[gem_peak_count] = -1000;
       gemtrkr_1_peak_y_height[gem_peak_count] = -1000;
-      gemtrkr_1_peak_ych[gem_peak_count] = -1000;
-      gemtrkr_1_peak_xch[gem_peak_count] = -1000;
       gemtrkr_2_peak_pos_y[gem_peak_count] = -1000;
       gemtrkr_2_peak_pos_x[gem_peak_count] = -1000;
       gemtrkr_2_peak_x_height[gem_peak_count] = -1000;
       gemtrkr_2_peak_y_height[gem_peak_count] = -1000;
-      gemtrkr_2_peak_ych[gem_peak_count] = -1000;
-      gemtrkr_2_peak_xch[gem_peak_count] = -1000;
       gemtrkr_3_peak_pos_y[gem_peak_count] = -1000;
       gemtrkr_3_peak_pos_x[gem_peak_count] = -1000;
       gemtrkr_3_peak_x_height[gem_peak_count] = -1000;
       gemtrkr_3_peak_y_height[gem_peak_count] = -1000;
-      gemtrkr_3_peak_ych[gem_peak_count] = -1000;
-      gemtrkr_3_peak_xch[gem_peak_count] = -1000;
       mmg1_peak_pos_y[gem_peak_count] = -1000;
       mmg1_peak_y_height[gem_peak_count] = -1000;
       gem_peak_pos_y[gem_peak_count] = -1000;
@@ -560,48 +549,42 @@ void trdclass_cern24::Loop() {
       
       if (gem_peak_plane_name->at(i) == "GEMTR1X") {
         gemtrkr_1_peak_pos_x[gt_1_idx_x] = gem_peak_real_pos->at(i);
-        if (gemtrkr_1_peak_pos_x[gt_1_idx_x]<0) gemtrkr_1_peak_pos_x[gt_1_idx_x]+=50.; else if (gemtrkr_1_peak_pos_x[gt_1_idx_x]>0) gemtrkr_1_peak_pos_x[gt_1_idx_x]-=50.;  gemtrkr_1_peak_pos_x[gt_1_idx_x]*=-1.;
+        if (gemtrkr_1_peak_pos_x[gt_1_idx_x]<0) gemtrkr_1_peak_pos_x[gt_1_idx_x]+=50.; else if (gemtrkr_1_peak_pos_x[gt_1_idx_x]>0) gemtrkr_1_peak_pos_x[gt_1_idx_x]-=50.;  gemtrkr_1_peak_pos_x[gt_1_idx_x]*=-1.;  gemtrkr_1_peak_pos_x[gt_1_idx_x]+=50.;
         gemtrkr_1_peak_x_height[gt_1_idx_x] = gem_peak_height->at(i);
-        gemtrkr_1_peak_xch[gt_1_idx_x] = gem_peak_index->at(i);
         gt_1_idx_x++; Count("gt1_x");
       } if (gem_peak_plane_name->at(i) == "GEMTR1Y") {
           gemtrkr_1_peak_pos_y[gt_1_idx_y] = gem_peak_real_pos->at(i);
-          if (gemtrkr_1_peak_pos_y[gt_1_idx_y]<0) gemtrkr_1_peak_pos_y[gt_1_idx_y]+=50.; else if (gemtrkr_1_peak_pos_y[gt_1_idx_y]>0) gemtrkr_1_peak_pos_y[gt_1_idx_y]-=50.;  gemtrkr_1_peak_pos_y[gt_1_idx_y]*=-1.;
+          if (gemtrkr_1_peak_pos_y[gt_1_idx_y]<0) gemtrkr_1_peak_pos_y[gt_1_idx_y]+=50.; else if (gemtrkr_1_peak_pos_y[gt_1_idx_y]>0) gemtrkr_1_peak_pos_y[gt_1_idx_y]-=50.;  gemtrkr_1_peak_pos_y[gt_1_idx_y]*=-1.;  gemtrkr_1_peak_pos_y[gt_1_idx_y]+=50.;
           gemtrkr_1_peak_y_height[gt_1_idx_y] = gem_peak_height->at(i);
-          gemtrkr_1_peak_ych[gt_1_idx_y] = gem_peak_index->at(i);
           gt_1_idx_y++; Count("gt1_y");
       } if (gem_peak_plane_name->at(i) == "GEMTR2X") {
         gemtrkr_2_peak_pos_x[gt_2_idx_x] = gem_peak_real_pos->at(i);
-        if (gemtrkr_2_peak_pos_x[gt_2_idx_x]<0) gemtrkr_2_peak_pos_x[gt_2_idx_x]+=50.; else if (gemtrkr_2_peak_pos_x[gt_2_idx_x]>0) gemtrkr_2_peak_pos_x[gt_2_idx_x]-=50.;  gemtrkr_2_peak_pos_x[gt_2_idx_x]*=-1.;
+        if (gemtrkr_2_peak_pos_x[gt_2_idx_x]<0) gemtrkr_2_peak_pos_x[gt_2_idx_x]+=50.; else if (gemtrkr_2_peak_pos_x[gt_2_idx_x]>0) gemtrkr_2_peak_pos_x[gt_2_idx_x]-=50.;  gemtrkr_2_peak_pos_x[gt_2_idx_x]*=-1.;  gemtrkr_2_peak_pos_x[gt_2_idx_x]+=50.;
         gemtrkr_2_peak_x_height[gt_2_idx_x] = gem_peak_height->at(i);
-        gemtrkr_2_peak_xch[gt_2_idx_x] = gem_peak_index->at(i);
         gt_2_idx_x++; Count("gt2_x");
       } if (gem_peak_plane_name->at(i) == "GEMTR2Y") {
           gemtrkr_2_peak_pos_y[gt_2_idx_y] = gem_peak_real_pos->at(i);
-          if (gemtrkr_2_peak_pos_y[gt_2_idx_y]<0) gemtrkr_2_peak_pos_y[gt_2_idx_y]+=50.; else if (gemtrkr_2_peak_pos_y[gt_2_idx_y]>0) gemtrkr_2_peak_pos_y[gt_2_idx_y]-=50.;  gemtrkr_2_peak_pos_y[gt_2_idx_y]*=-1.;
+          if (gemtrkr_2_peak_pos_y[gt_2_idx_y]<0) gemtrkr_2_peak_pos_y[gt_2_idx_y]+=50.; else if (gemtrkr_2_peak_pos_y[gt_2_idx_y]>0) gemtrkr_2_peak_pos_y[gt_2_idx_y]-=50.;  gemtrkr_2_peak_pos_y[gt_2_idx_y]*=-1.;  gemtrkr_2_peak_pos_y[gt_2_idx_y]+=50.;
           gemtrkr_2_peak_y_height[gt_2_idx_y] = gem_peak_height->at(i);
-          gemtrkr_2_peak_ych[gt_2_idx_y] = gem_peak_index->at(i);
           gt_2_idx_y++; Count("gt2_y");
       } if (gem_peak_plane_name->at(i) == "GEMTR3X") {
         gemtrkr_3_peak_pos_x[gt_3_idx_x] = gem_peak_real_pos->at(i);
-        if (gemtrkr_3_peak_pos_x[gt_3_idx_x]<0) gemtrkr_3_peak_pos_x[gt_3_idx_x]+=50.; else if (gemtrkr_3_peak_pos_x[gt_3_idx_x]>0) gemtrkr_3_peak_pos_x[gt_3_idx_x]-=50.;  gemtrkr_3_peak_pos_x[gt_3_idx_x]*=-1.;
+        if (gemtrkr_3_peak_pos_x[gt_3_idx_x]<0) gemtrkr_3_peak_pos_x[gt_3_idx_x]+=50.; else if (gemtrkr_3_peak_pos_x[gt_3_idx_x]>0) gemtrkr_3_peak_pos_x[gt_3_idx_x]-=50.;  gemtrkr_3_peak_pos_x[gt_3_idx_x]*=-1.;  gemtrkr_3_peak_pos_x[gt_3_idx_x]+=50.;
         gemtrkr_3_peak_x_height[gt_3_idx_x] = gem_peak_height->at(i);
-        gemtrkr_3_peak_xch[gt_3_idx_x] = gem_peak_index->at(i);
         gt_3_idx_x++; Count("gt3_x");
       } if (gem_peak_plane_name->at(i) == "GEMTR3Y") {
           gemtrkr_3_peak_pos_y[gt_3_idx_y] = gem_peak_real_pos->at(i);
-          if (gemtrkr_3_peak_pos_y[gt_3_idx_y]<0) gemtrkr_3_peak_pos_y[gt_3_idx_y]+=50.; else if (gemtrkr_3_peak_pos_y[gt_3_idx_y]>0) gemtrkr_3_peak_pos_y[gt_3_idx_y]-=50.;  gemtrkr_3_peak_pos_y[gt_3_idx_y]*=-1.;
+          if (gemtrkr_3_peak_pos_y[gt_3_idx_y]<0) gemtrkr_3_peak_pos_y[gt_3_idx_y]+=50.; else if (gemtrkr_3_peak_pos_y[gt_3_idx_y]>0) gemtrkr_3_peak_pos_y[gt_3_idx_y]-=50.;  gemtrkr_3_peak_pos_y[gt_3_idx_y]*=-1.;  gemtrkr_3_peak_pos_y[gt_3_idx_y]+=50.;
           gemtrkr_3_peak_y_height[gt_3_idx_y] = gem_peak_height->at(i);
-          gemtrkr_3_peak_ych[gt_3_idx_y] = gem_peak_index->at(i);
           gt_3_idx_y++; Count("gt3_y");
       } if (gem_peak_plane_name->at(i) == "MMG1TRDY") {
         mmg1_peak_pos_y[mmg1_idx_y] = gem_peak_real_pos->at(i);
-        if (mmg1_peak_pos_y[mmg1_idx_y]<0) mmg1_peak_pos_y[mmg1_idx_y]+=50.; else if (mmg1_peak_pos_y[mmg1_idx_y]>0) mmg1_peak_pos_y[mmg1_idx_y]-=50.;  mmg1_peak_pos_y[mmg1_idx_y]*=-1.;
+        if (mmg1_peak_pos_y[mmg1_idx_y]<0) mmg1_peak_pos_y[mmg1_idx_y]+=50.; else if (mmg1_peak_pos_y[mmg1_idx_y]>0) mmg1_peak_pos_y[mmg1_idx_y]-=50.;  mmg1_peak_pos_y[mmg1_idx_y]*=-1.;  mmg1_peak_pos_y[mmg1_idx_y]+=50.;
         mmg1_peak_y_height[mmg1_idx_y] = gem_peak_height->at(i);
         mmg1_idx_y++; Count("mmg1_y");
       } if (gem_peak_plane_name->at(i) == "VU_GEMTRDY") {
         gem_peak_pos_y[gem_idx_y] = gem_peak_real_pos->at(i);
-        if (gem_peak_pos_y[gem_idx_y]<0) gem_peak_pos_y[gem_idx_y]+=50.; else if (gem_peak_pos_y[gem_idx_y]>0) gem_peak_pos_y[gem_idx_y]-=50.;  gem_peak_pos_y[gem_idx_y]*=-1.;
+        if (gem_peak_pos_y[gem_idx_y]<0) gem_peak_pos_y[gem_idx_y]+=50.; else if (gem_peak_pos_y[gem_idx_y]>0) gem_peak_pos_y[gem_idx_y]-=50.;  gem_peak_pos_y[gem_idx_y]*=-1.;  gem_peak_pos_y[gem_idx_y]+=50.;
         gem_peak_y_height[gem_idx_y] = gem_peak_height->at(i);
         gem_idx_y++; Count("gem_y");
       }
@@ -612,7 +595,7 @@ void trdclass_cern24::Loop() {
       hgemtrkr_1_peak_y_height->Fill(gemtrkr_1_peak_y_height[j]);
       if (gemtrkr_1_peak_y_height[j]>gemtrkr1_yamp_max) {
         gemtrkr1_yamp_max=gemtrkr_1_peak_y_height[j];
-        gemtrkr1_ych_max=gemtrkr_1_peak_ych[j];
+        gemtrkr1_ych_max=gemtrkr_1_peak_pos_y[j];
       }
       for (ULong64_t k=0; k<gt_1_idx_x; k++) {
           hgemtrkr_1_peak_xy->Fill(gemtrkr_1_peak_pos_x[k], gemtrkr_1_peak_pos_y[j]);
@@ -624,7 +607,7 @@ void trdclass_cern24::Loop() {
       hgemtrkr_2_peak_y_height->Fill(gemtrkr_2_peak_y_height[j]);
       if (gemtrkr_2_peak_y_height[j]>gemtrkr2_yamp_max) {
         gemtrkr2_yamp_max=gemtrkr_2_peak_y_height[j];
-        gemtrkr2_ych_max=gemtrkr_2_peak_ych[j];
+        gemtrkr2_ych_max=gemtrkr_2_peak_pos_y[j];
       }
         for (ULong64_t k=0; k<gt_2_idx_x; k++) {
           hgemtrkr_2_peak_xy->Fill(gemtrkr_2_peak_pos_x[k], gemtrkr_2_peak_pos_y[j]);
@@ -636,7 +619,7 @@ void trdclass_cern24::Loop() {
       hgemtrkr_3_peak_y_height->Fill(gemtrkr_3_peak_y_height[j]);
       if (gemtrkr_3_peak_y_height[j]>gemtrkr3_yamp_max) {
         gemtrkr3_yamp_max=gemtrkr_3_peak_y_height[j];
-        gemtrkr3_ych_max=gemtrkr_3_peak_ych[j];
+        gemtrkr3_ych_max=gemtrkr_3_peak_pos_y[j];
       }
         for (ULong64_t k=0; k<gt_3_idx_x; k++) {
           hgemtrkr_3_peak_xy->Fill(gemtrkr_3_peak_pos_x[k], gemtrkr_3_peak_pos_y[j]);
@@ -648,7 +631,7 @@ void trdclass_cern24::Loop() {
       hgemtrkr_1_peak_x_height->Fill(gemtrkr_1_peak_x_height[k]);
       if (gemtrkr_1_peak_x_height[k]>gemtrkr1_xamp_max) {
         gemtrkr1_xamp_max=gemtrkr_1_peak_x_height[k];
-        gemtrkr1_xch_max=gemtrkr_1_peak_xch[k];
+        gemtrkr1_xch_max=gemtrkr_1_peak_pos_x[k];
       }
     }
     for (ULong64_t k=0; k<gt_2_idx_x; k++) {
@@ -656,7 +639,7 @@ void trdclass_cern24::Loop() {
       hgemtrkr_2_peak_x_height->Fill(gemtrkr_2_peak_x_height[k]);
       if (gemtrkr_2_peak_x_height[k]>gemtrkr2_xamp_max) {
         gemtrkr2_xamp_max=gemtrkr_2_peak_x_height[k];
-        gemtrkr2_xch_max=gemtrkr_2_peak_xch[k];
+        gemtrkr2_xch_max=gemtrkr_2_peak_pos_x[k];
       }
     }
     for (ULong64_t k=0; k<gt_3_idx_x; k++) {
@@ -664,7 +647,7 @@ void trdclass_cern24::Loop() {
       hgemtrkr_3_peak_x_height->Fill(gemtrkr_3_peak_x_height[k]);
       if (gemtrkr_3_peak_x_height[k]>gemtrkr3_xamp_max) {
         gemtrkr3_xamp_max=gemtrkr_3_peak_x_height[k];
-        gemtrkr3_xch_max=gemtrkr_3_peak_xch[k];
+        gemtrkr3_xch_max=gemtrkr_3_peak_pos_x[k];
       }
     }
     for (ULong64_t k=0; k<mmg1_idx_y; k++) {
@@ -684,6 +667,12 @@ void trdclass_cern24::Loop() {
         hgemtrkr_1_gem->Fill(gem_peak_pos_y[k], gemtrkr_1_peak_pos_y[j]);
       }
     }
+    
+    hgemtrkr_1_max_xch->Fill(gemtrkr1_xch_max);
+    hgemtrkr_1_max_xamp->Fill(gemtrkr1_xamp_max);
+    hgemtrkr_2_max_xch->Fill(gemtrkr2_xch_max);
+    hgemtrkr_2_max_xamp->Fill(gemtrkr2_xamp_max);
+    
     //=============== END GEMTracker (SRS) Correlations ==============
     
     //==================================================================================================
@@ -692,8 +681,8 @@ void trdclass_cern24::Loop() {
     
     if (gt_1_idx_x>0 && gt_2_idx_x>0) { //--External tracking condition
       Count("trk_hit");
-      float x1=gemtrkr1_xch_max*0.4;
-      float x2=gemtrkr2_xch_max*0.4;
+      float x1=gemtrkr1_xch_max;
+      float x2=gemtrkr2_xch_max;
       //float x3=gemtrkr3_xch_max*0.4;
       float a=(x2-x1)/(z2-z1);
       float b=((x1)*z2-(x2)*z1)/(z2-z1);
@@ -718,8 +707,10 @@ void trdclass_cern24::Loop() {
         
         if (gemChan>-1 && amp>GEM_THRESH) {
           float xgem = gemChan*0.4;
-          gem_residuals->Fill(xgem-gem_extr);
-          if (abs(xgem-gem_extr)<30) { //within 30 mm
+          float gem_correction = -6.7351 + (xgem)*0.0353;
+          gem_residuals->Fill((xgem-gem_extr)-gem_correction);
+          gem_residual_ch->Fill(gemChan, (xgem-gem_extr-gem_correction));
+          if (abs(xgem-gem_extr-gem_correction)<10) { //within 10 mm
             if (!match) {
               f125_tracker_eff->Fill(gem_extr);
               match = true;
@@ -729,8 +720,10 @@ void trdclass_cern24::Loop() {
         }
         if (mmg1Chan>-1 && amp>MMG1_THRESH) {
           float xmmg1 = mmg1Chan*0.4;
-          mmg1_residuals->Fill(xmmg1-mmg1_extr);
-          if (abs(xmmg1-mmg1_extr)<30) { //within 30 mm
+          float mmg1_correction = -5.91286 + (xmmg1)*0.02455;
+          mmg1_residuals->Fill((xmmg1-mmg1_extr)-mmg1_correction);
+          mmg1_residual_ch->Fill(mmg1Chan, (xmmg1-mmg1_extr-mmg1_correction));
+          if (abs(xmmg1-mmg1_extr-mmg1_correction)<10) { //within 10 mm
             if (!match_mmg1) {
               mmg1_f125_tracker_eff->Fill(mmg1_extr);
               match_mmg1 = true;
@@ -1429,23 +1422,27 @@ void trdclass_cern24::Loop() {
     cc=NextPlot(nxd,nyd);  gPad->SetLogy(); hcount->Draw();
     
     //---------------------  page 2a --------------------
-    htitle(" SRS GEM-TRK  ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" SRS GEM-TRKR 1  ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_1_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_x->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_y->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_x_height->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_y_height->Draw();
+    cc=NextPlot(nxd,nyd); hgemtrkr_1_max_xch->Draw();
+    cc=NextPlot(nxd,nyd); hgemtrkr_1_max_xamp->Draw();
     
-    htitle(" SRS GEM-TRK  ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" SRS GEM-TRKR 2  ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_2_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_x->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_y->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_x_height->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_y_height->Draw();
+    cc=NextPlot(nxd,nyd); hgemtrkr_2_max_xch->Draw();
+    cc=NextPlot(nxd,nyd); hgemtrkr_2_max_xamp->Draw();
     
-    htitle(" SRS GEM-TRK  ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" SRS GEM-TRKR 3  ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_3_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_x->Draw();
@@ -1453,7 +1450,7 @@ void trdclass_cern24::Loop() {
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_x_height->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_y_height->Draw();
     
-    htitle(" SRS GEM-TRK  ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" SRS GEM / MMG1  ");   if (!COMPACT) cc=NextPlot(0,0);
     nxd=2; nyd=4;
     cc=NextPlot(nxd,nyd); mmg1_peak_y->Draw();
     cc=NextPlot(nxd,nyd); hmmg1_peak_y_height->Draw();
@@ -1465,7 +1462,7 @@ void trdclass_cern24::Loop() {
     //fbox.SetFillStyle(0);
     //fbox.SetLineWidth(1);
     
-    htitle(" SRS GEM-TRK  ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" SRS GEM / MMG1  ");   if (!COMPACT) cc=NextPlot(0,0);
     nxd=2; nyd=4;
     cc=NextPlot(nxd,nyd); gem_mmg1_doubleY->Draw("colz");
     cc=NextPlot(nxd,nyd); gem_mmg1_doubleX->Draw("colz");
@@ -1514,11 +1511,12 @@ void trdclass_cern24::Loop() {
     cc=NextPlot(nxd,nyd);   mmg1_f125_amp2ds->Draw("colz");
     
     htitle("  External Tracking");    if (!COMPACT) cc=NextPlot(0,0);
-    nxd=2; nyd=4;
     cc=NextPlot(nxd,nyd);   if (f125_tracker_hits->GetEntries()!=0) { f125_tracker_hits->Sumw2(); f125_tracker_eff->Sumw2();  f125_tracker_eff->Divide(f125_tracker_hits);  f125_tracker_eff->Draw(); }
     cc=NextPlot(nxd,nyd);   if (mmg1_f125_tracker_hits->GetEntries()!=0) { mmg1_f125_tracker_hits->Sumw2(); mmg1_f125_tracker_eff->Sumw2(); mmg1_f125_tracker_eff->Divide(mmg1_f125_tracker_hits);  mmg1_f125_tracker_eff->Draw(); }
     cc=NextPlot(nxd,nyd);   gem_residuals->Draw();
     cc=NextPlot(nxd,nyd);   mmg1_residuals->Draw();
+    cc=NextPlot(nxd,nyd);   gem_residual_ch->Draw("colz");
+    cc=NextPlot(nxd,nyd);   mmg1_residual_ch->Draw("colz");
     
    //------------- MAX COMPARISONS ---------------
     htitle("  TRD (fa125) Max Amp Comparisons ");    if (!COMPACT) cc=NextPlot(0,0);
