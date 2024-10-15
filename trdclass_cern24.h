@@ -280,33 +280,16 @@ public :
    int FileNum;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
-   TH1F *h250_size;
+   //TH1F *h250_size;
    TH1D *hcount;
-   TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
-   TH1F *hCal_occ;
+   //TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
+   //TH1F *hCal_occ;
    TH1F *hCal_pulse, *hPresh_pulse, *hMult_pulse, *hCher_pulse;
    TH1F *hCal_sum,    *hPresh_sum,    *hMult_sum,    *hCher_sum;
    TH1F *hCal_sum_el, *hPresh_sum_el, *hMult_sum_el, *hCher_sum_el;
    TH1F *hCal_sum_pi, *hPresh_sum_pi, *hMult_sum_pi, *hCher_sum_pi;
-   #define  NCAL 7
-   TH1F *hCal_adc[7];  //---  FADC250 channles 0 - 8
-   TH2F *hCal_cor[7];      //---  FADC250 channles 0 - 8
-   TH2F *hCal_trk[7];      //---  FADC250 channles 0 - 8
-   TH2F *hCal_cal[7];      //---  FADC250 channles 0 - 8
-   TH1F *hCal_time[7];  //---  FADC250 channles 0 - 8
-   TH2F *cal_el_evt, *cal_pi_evt, *hCal_Presh, *hCal_Cher;
-   const int NCHER=3;
-   //TH1F *hCher_adc[3]; //-- FADC250 channels 13,14,15
+   TH2F *hCal_Presh, *hCal_Cher;
 
-   TH1F *gem_trk_fit_integral;
-
-
-   TH2F *hCCor_ud;
-   TH2F *hCCCor_u;
-   TH2F *hCCCor_dout;
-   TH1F *srs_ncl;
-   TH2F *srs_trk_el, *srs_trk_pi, *srs_gem_dx, *srs_gem_x, *srs_gem_y, *srs_cal_corr, *srs_etrd_corr, *srs_etrd_beam, *srs_etrd_pion, *srs_etrd_ratio;
-   
    TH1F *hgemtrkr_1_peak_x, *hgemtrkr_1_peak_y, *hgemtrkr_2_peak_x, *hgemtrkr_2_peak_y, *hgemtrkr_3_peak_x, *hgemtrkr_3_peak_y, *mmg1_peak_y, *gem_peak_y;
    TH1F *hgemtrkr_1_peak_x_height, *hgemtrkr_1_peak_y_height, *hgemtrkr_2_peak_x_height, *hgemtrkr_2_peak_y_height, *hgemtrkr_3_peak_x_height, *hgemtrkr_3_peak_y_height, *hmmg1_peak_y_height, *hgem_peak_y_height;
    TH2F *hgemtrkr_1_peak_xy, *hgemtrkr_2_peak_xy, *hgemtrkr_3_peak_xy;
@@ -314,14 +297,15 @@ public :
    TH2F *hgemtrkr_1_gem, *hgemtrkr_1_mmg1;
    TH1F *hgemtrkr_1_max_xch, *hgemtrkr_1_max_xamp, *hgemtrkr_2_max_xch, *hgemtrkr_2_max_xamp;
     
-   TH1F *f125_el, *f125_el_max, *f125_el_max_late, *f125_el_max_early, *f125_el_chi2, *f125_el_fita;
-   TH1F *f125_pi, *f125_pi_max, *f125_pi_max_late, *f125_pi_max_early, *f125_pi_chi2, *f125_pi_fita;
-   TH2F *f125_el_amp2d, *f125_amp2ds, *f125_el_evt_display, *f125_el_raw, *f125_el_fit, *f125_fit;
-   TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt_display, *f125_pi_raw, *f125_pi_fit;
+   TH1F *f125_el, *f125_el_max, *f125_el_max_late, *f125_el_max_early;
+   TH1F *f125_pi, *f125_pi_max, *f125_pi_max_late, *f125_pi_max_early;
+   TH2F *f125_el_amp2d, *f125_el_raw;
+   TH2F *f125_pi_amp2d, *f125_pi_raw;
+   TH2F *f125_fit, *f125_amp2ds;
    TH2F *f125_el_clu2d;
    TH2F *f125_pi_clu2d;
-   TH2F *aver2d_e;
-   TH2F *aver2d_p;
+   //TH2F *aver2d_e;
+   //TH2F *aver2d_p;
    
    TH1F *mmg1_f125_el;
    TH1F *mmg1_f125_el_max, *mmg1_f125_el_max_late, *mmg1_f125_el_max_early;
@@ -333,9 +317,9 @@ public :
    TH2F *mmg1_f125_pi_clu2d;
    TH2F *mmg1_f125_fit;
    
-   TH2F *gem_el_eff, *gem_pi_eff, *mmg1_el_eff, *mmg1_pi_eff;
+   //TH2F *gem_el_eff, *gem_pi_eff, *mmg1_el_eff, *mmg1_pi_eff;
    TH2F *gem_mmg1_doubleX, *gem_mmg1_doubleY;
-   TH2F *mhevt, *mhevti, *mhevtf, *hevt, *hevtc, *hevti, *hevtf, *hevtk, *hevtck, *hevtL;
+   TH2F *mhevt, *mhevtc, *mhevti, *mhevtf, *hevt, *hevtc, *hevti, *hevtf, *hevtk, *hevtck;
    
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
@@ -346,31 +330,33 @@ public :
    float Presh_Energy;
    float Mult_Energy;
    int gem_nhit;
-   int clu_nhit;
+   int gem_nclu;
    
    std::vector <int> gem_xpos;
-   //std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
    std::vector <float> gem_dedx;
    std::vector <bool> gem_parID;
    std::vector <float> gem_zHist_vect;
    std::vector <float> clu_xpos;
-   //std::vector <float> clu_ypos;
    std::vector <float> clu_zpos;
    std::vector <float> clu_dedx;
    std::vector <float> clu_width;
+   float clu_xpos_max;
+   float clu_zpos_max;
+   float clu_dedx_max;
+   float clu_width_max;
    TH1F *gem_zHist;
-   std::vector <float> gem_amp_max;
-   std::vector <float> gem_time_max;
+   float gem_amp_max;
+   float gem_time_max;
    std::vector <float> gem_chi2cc;
    std::vector <float> gem_integral;
    std::vector <float> a0;
    std::vector <float> a1;
-   std::vector <int> gem_xch_max;
+   int gem_xch_max;
    
    int mmg1_nhit;
+   int mmg1_nclu;
    std::vector <int> mmg1_xpos;
-   //std::vector <int> mmg1_ypos;
    std::vector <float> mmg1_zpos;
    std::vector <float> mmg1_dedx;
    std::vector <bool> mmg1_parID;
@@ -380,13 +366,17 @@ public :
    std::vector <float> mmg1_clu_zpos;
    std::vector <float> mmg1_clu_dedx;
    std::vector <float> mmg1_clu_width;
-   std::vector <float> mmg1_amp_max;
-   std::vector <float> mmg1_time_max;
+   float mmg1_clu_xpos_max;
+   float mmg1_clu_zpos_max;
+   float mmg1_clu_dedx_max;
+   float mmg1_clu_width_max;
+   float mmg1_amp_max;
+   float mmg1_time_max;
    std::vector <float> mmg1_chi2cc;
    std::vector <float> mmg1_integral;
    std::vector <float> mmg1_a0;
    std::vector <float> mmg1_a1;
-   std::vector <int> mmg1_xch_max;
+   int mmg1_xch_max;
    //---------------------------
 
    //=============================================
