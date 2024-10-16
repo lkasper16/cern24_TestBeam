@@ -17,21 +17,27 @@
 // Declaration of leaf types
 Int_t           event_num;
 Int_t           gem_nhit;
+Int_t           gem_nclu;
 Int_t           mmg1_nhit;
+Int_t           mmg1_nclu;
 float           ecal_energy;
 float           presh_energy;
 float           mult_energy;
-vector<bool>     *parID;
+
+vector<bool>    *parID;
 vector<int>     *xpos;
-//vector<int>     *ypos;
 vector<float>   *zpos;
 vector<float>   *dedx;
 vector<float>   *zHist;
 vector<float>   *xposc;
-//vector<float>   *yposc;
 vector<float>   *zposc;
 vector<float>   *dedxc;
 vector<float>   *widthc;
+
+float     xposc_max;
+float     zposc_max;
+float     dedxc_max;
+float     widthc_max;
 
 // List of branches
 TBranch        *b_event_num;   //!
@@ -39,14 +45,17 @@ TBranch        *b_ecal_energy;   //!
 TBranch        *b_presh_energy;   //!
 TBranch        *b_mult_energy;   //!
 TBranch        *b_gem_nhit;   //!
+TBranch        *b_gem_nclu;
 TBranch        *b_xpos;   //!
-//TBranch        *b_ypos;   //!
 TBranch        *b_zpos;   //!
 TBranch        *b_dedx;   //!
 TBranch        *b_parID;   //!
 TBranch        *b_zHist;   //!
 TBranch        *b_xposc;   //!
-//TBranch        *b_yposc;   //!
 TBranch        *b_zposc;   //!
 TBranch        *b_dedxc;   //!
 TBranch        *b_widthc;   //!
+TBranch        *b_xposc_max;
+TBranch        *b_zposc_max;
+TBranch        *b_dedxc_max;
+TBranch        *b_widthc_max;
