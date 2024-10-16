@@ -282,6 +282,7 @@ public :
    Long64_t FirstEvt;
    //TH1F *h250_size;
    TH1D *hcount;
+   TH1F *hgem_nhits, *hmmg1_nhits, *hgt1_nhits, *hgt2_nhits, *hgt3_nhits;
    //TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
    //TH1F *hCal_occ;
    TH1F *hCal_pulse, *hPresh_pulse, *hMult_pulse, *hCher_pulse;

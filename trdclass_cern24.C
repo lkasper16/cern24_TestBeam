@@ -136,6 +136,12 @@ void trdclass_cern24::Loop() {
     hcount->SetBit(TH1::kCanRebin);
   #endif
   
+  hgem_nhits = new TH1F("hgem_nhits","GEM-TRD Hits",100,0.5,100.5);  HistList->Add(hgem_nhits);
+  hmmg1_nhits = new TH1F("hmmg1_nhits","MMG1-TRD Hits",100,0.5,100.5);  HistList->Add(hmmg1_nhits);
+  hgt1_nhits = new TH1F("hgt1_nhits","GEM-TRKR1 Hits",50,0.5,50.5);  HistList->Add(hgt1_nhits);
+  hgt2_nhits = new TH1F("hgt2_nhits","GEM-TRKR2 Hits",50,0.5,50.5);  HistList->Add(hgt2_nhits);
+  hgt3_nhits = new TH1F("hgt3_nhits","GEM-TRKR3 Hits",50,0.5,50.5);  HistList->Add(hgt3_nhits);
+  
   //h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5);                                        HistList->Add(h250_size);
   int nx0=100;       int ny0=240; //int ny0=256;
   double Ymin=0.;    double Ymax=ny0*0.4;
@@ -194,8 +200,8 @@ void trdclass_cern24::Loop() {
   mmg1_f125_pi_max_early = new TH1F("mmg1_f125_pi_max_early","MMG1-TRD f125 Max Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg1_f125_pi_max_early);
   mmg1_f125_el_max = new TH1F("mmg1_f125_el_max","MMG1-TRD f125 Max Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg1_f125_el_max);
   mmg1_f125_pi_max = new TH1F("mmg1_f125_pi_max","MMG1-TRD f125 Max Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg1_f125_pi_max);
-  gem_mmg1_doubleX = new TH2F("gem_mmg1_doubleX","TRD X Correlation (fADC) ; GEM-TRD X Chan ; MMG1-TRD X Chan ",256,-0.5,255.5,256,-0.5,255.5);    HistList->Add(gem_mmg1_doubleX);
-  gem_mmg1_doubleY = new TH2F("gem_mmg1_doubleY","TRD Y Correlation (SRS) ; GEM-TRD Y Chan ; MMG1-TRD Y Chan ",256,-0.5,255.5,256,-0.5,255.5);    HistList->Add(gem_mmg1_doubleY);
+  gem_mmg1_doubleX = new TH2F("gem_mmg1_doubleX","TRD X Correlation (fADC) ; GEM-TRD X Chan ; MMG1-TRD X Chan ",256,-0.5,255.5,256,-0.5,255.5);    gem_mmg1_doubleX->SetStats(0); HistList->Add(gem_mmg1_doubleX);
+  gem_mmg1_doubleY = new TH2F("gem_mmg1_doubleY","TRD Y Correlation (SRS) ; GEM-TRD Y Chan ; MMG1-TRD Y Chan ",256,-0.5,255.5,256,-0.5,255.5);    gem_mmg1_doubleY->SetStats(0);  HistList->Add(gem_mmg1_doubleY);
   
   // --- SRS ---
   hgemtrkr_1_max_xch = new TH1F("hgemtrkr_1_max_xch"," GEM-TRKR1 Max X Chan ; X Chan [mm]",100,-0.5,99.5);  HistList->Add(hgemtrkr_1_max_xch);
@@ -203,22 +209,22 @@ void trdclass_cern24::Loop() {
   hgemtrkr_2_max_xch = new TH1F("hgemtrkr_2_max_xch"," GEM-TRKR2 Max X Chan ; X Chan [mm]",100,-0.5,99.5);  HistList->Add(hgemtrkr_2_max_xch);
   hgemtrkr_2_max_xamp = new TH1F("hgemtrkr_2_max_xamp"," GEM-TRKR2 Max X Amp ; ADC Amp ",100,0.,4096);  HistList->Add(hgemtrkr_2_max_xamp);
   //--GEMTracker 1
-  hgemtrkr_1_peak_xy = new TH2F("hgemtrkr_1_peak_xy","GEM-TRKR1 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_peak_xy);
-  hgemtrkr_1_atlas_xy = new TH2F("hgemtrkr_1_atlas_xy","GEM-TRKR1 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_atlas_xy);
+  hgemtrkr_1_peak_xy = new TH2F("hgemtrkr_1_peak_xy","GEM-TRKR1 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    hgemtrkr_1_peak_xy->SetStats(0); HistList->Add(hgemtrkr_1_peak_xy);
+  //hgemtrkr_1_atlas_xy = new TH2F("hgemtrkr_1_atlas_xy","GEM-TRKR1 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    hgemtrkr_1_atlas_xy->SetStats(0); HistList->Add(hgemtrkr_1_atlas_xy);
   hgemtrkr_1_peak_x = new TH1F("hgemtrkr_1_peak_x"," GEM-TRKR1 Peak X ; X [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_1_peak_x);
   hgemtrkr_1_peak_y = new TH1F("hgemtrkr_1_peak_y"," GEM-TRKR1 Peak Y ; Y [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_1_peak_y);
   hgemtrkr_1_peak_x_height = new TH1F("hgemtrkr_1_peak_x_height"," GEM-TRKR1 Peak Amplitudes in X; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_1_peak_x_height);
   hgemtrkr_1_peak_y_height = new TH1F("hgemtrkr_1_peak_y_height"," GEM-TRKR1 Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_1_peak_y_height);
   //--GEMTracker 2
-  hgemtrkr_2_peak_xy = new TH2F("hgemtrkr_2_peak_xy","GEM-TRKR2 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_2_peak_xy);
-  hgemtrkr_2_atlas_xy = new TH2F("hgemtrkr_2_atlas_xy","GEM-TRKR2 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_2_atlas_xy);
+  hgemtrkr_2_peak_xy = new TH2F("hgemtrkr_2_peak_xy","GEM-TRKR2 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5); hgemtrkr_2_peak_xy->SetStats(0); HistList->Add(hgemtrkr_2_peak_xy);
+  //hgemtrkr_2_atlas_xy = new TH2F("hgemtrkr_2_atlas_xy","GEM-TRKR2 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_2_atlas_xy);
   hgemtrkr_2_peak_x = new TH1F("hgemtrkr_2_peak_x"," GEM-TRKR2 Peak X ; X [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_2_peak_x);
   hgemtrkr_2_peak_y = new TH1F("hgemtrkr_2_peak_y"," GEM-TRKR2 Peak Y Pos ; Y [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_2_peak_y);
   hgemtrkr_2_peak_x_height = new TH1F("hgemtrkr_2_peak_x_height"," GEM-TRKR2 Peak Amplitudes in X; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_2_peak_x_height);
   hgemtrkr_2_peak_y_height = new TH1F("hgemtrkr_2_peak_y_height"," GEM-TRKR2 Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_2_peak_y_height);
   //--GEMTracker 3
-  hgemtrkr_3_peak_xy = new TH2F("hgemtrkr_3_peak_xy","GEM-TRKR3 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_3_peak_xy);
-  hgemtrkr_3_atlas_xy = new TH2F("hgemtrkr_3_atlas_xy","GEM-TRKR3 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_3_atlas_xy);
+  hgemtrkr_3_peak_xy = new TH2F("hgemtrkr_3_peak_xy","GEM-TRKR3 Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5); hgemtrkr_3_peak_xy->SetStats(0); HistList->Add(hgemtrkr_3_peak_xy);
+  //hgemtrkr_3_atlas_xy = new TH2F("hgemtrkr_3_atlas_xy","GEM-TRKR3 X-Y Correlation (ATLAS TRIGGER); Peak X [mm]; Peak Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_3_atlas_xy);
   hgemtrkr_3_peak_x = new TH1F("hgemtrkr_3_peak_x"," GEM-TRKR3 Peak X Pos ; X [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_3_peak_x);
   hgemtrkr_3_peak_y = new TH1F("hgemtrkr_3_peak_y"," GEM-TRKR3 Peak Y Pos ; Y [mm] ",100,-0.5,99.5);  HistList->Add(hgemtrkr_3_peak_y);
   hgemtrkr_3_peak_x_height = new TH1F("hgemtrkr_3_peak_x_height"," GEM-TRKR3 Peak Amplitudes in X; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_3_peak_x_height);
@@ -229,8 +235,8 @@ void trdclass_cern24::Loop() {
   gem_peak_y = new TH1F("gem_peak_y"," GEM-TRD Peak Y Pos (SRS) ; Y [mm] ",100,-0.5,99.5);  HistList->Add(gem_peak_y);
   hgem_peak_y_height = new TH1F("hgem_peak_y_height"," GEM-TRD Peak Amplitudes in Y ; ADC Value ",100,0.,4096.);  HistList->Add(hgem_peak_y_height);
   
-  hgemtrkr_1_gem = new TH2F("hgemtrkr_1_gem","GEM-TRKR1 * GEM Y Correlation; GEM-TRD Y [mm]; GEM-TRKR1 Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_gem);
-  hgemtrkr_1_mmg1 = new TH2F("hgemtrkr_1_mmg1","GEM-TRKR1 & MMG1 Y Correlation; MMG1-TRD Y [mm]; GEM-TRKR1 Y [mm] ",100,-0.5,99.5,100,-0.5,99.5);    HistList->Add(hgemtrkr_1_mmg1);
+  hgemtrkr_1_gem = new TH2F("hgemtrkr_1_gem","GEM-TRKR1 * GEM Y Correlation; GEM-TRD Y [mm]; GEM-TRKR1 Y [mm] ",100,-0.5,99.5,100,-0.5,99.5); hgemtrkr_1_gem->SetStats(0); HistList->Add(hgemtrkr_1_gem);
+  hgemtrkr_1_mmg1 = new TH2F("hgemtrkr_1_mmg1","GEM-TRKR1 & MMG1 Y Correlation; MMG1-TRD Y [mm]; GEM-TRKR1 Y [mm] ",100,-0.5,99.5,100,-0.5,99.5); hgemtrkr_1_mmg1->SetStats(0); HistList->Add(hgemtrkr_1_mmg1);
   
   //--External Tracking
   TH1F *f125_el_tracker_hits = new TH1F("f125_el_tracker_hits","GEM-TRD Track Extr. Hits for Electrons; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(f125_el_tracker_hits);
@@ -239,14 +245,14 @@ void trdclass_cern24::Loop() {
   TH1F *f125_pi_tracker_eff = new TH1F("f125_pi_tracker_eff","GEM-TRD Track Eff. for Pions; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(f125_pi_tracker_eff);
   TH1F *gem_residuals = new TH1F("gem_residuals","GEM-TRD Residual Hits; X Chan [mm] (actual - expected)",250.,-25,25);   HistList->Add(gem_residuals);
   TH1F *gem_residualscorr = new TH1F("gem_residualscorr","GEM-TRD Residual Hits WITH CORR.; X Chan [mm] (actual - expected)",250.,-25,25);   HistList->Add(gem_residualscorr);
-  TH2F *gem_residual_ch = new TH2F("gem_residual_ch","GEM-TRD Residual Hits vs Chan; X Chan [mm] (actual); X Chan [mm] (actual - expected)",65, 29.5, 55.5,35,-7.5,6.5);   HistList->Add(gem_residual_ch);
+  TH2F *gem_residual_ch = new TH2F("gem_residual_ch","GEM-TRD Residual Hits vs Chan; X Chan [mm] (actual); X Chan [mm] (actual - expected)",65, 29.5, 55.5,35,-7.5,6.5); gem_residual_ch->SetStats(0); HistList->Add(gem_residual_ch);
   TH1F *mmg1_f125_el_tracker_hits = new TH1F("mmg1_f125_el_tracker_hits","MMG1-TRD Track Extr. Hits for Electrons; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(mmg1_f125_el_tracker_hits);
   TH1F *mmg1_f125_pi_tracker_hits = new TH1F("mmg1_f125_pi_tracker_hits","MMG1-TRD Track Extr. Hits for Pions; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(mmg1_f125_pi_tracker_hits);
   TH1F *mmg1_f125_el_tracker_eff = new TH1F("mmg1_f125_el_tracker_eff","MMG1-TRD Track Eff. for Electrons; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(mmg1_f125_el_tracker_eff);
   TH1F *mmg1_f125_pi_tracker_eff = new TH1F("mmg1_f125_pi_tracker_eff","MMG1-TRD Track Eff. for Pions; X Chan [mm]",100.,-0.5,99.5);   HistList->Add(mmg1_f125_pi_tracker_eff);
   TH1F *mmg1_residuals = new TH1F("mmg1_residuals","MMG1-TRD Residual Hits; X Chan [mm] (actual - expected)",250.,-25,25);   HistList->Add(mmg1_residuals);
   TH1F *mmg1_residualscorr = new TH1F("mmg1_residualscorr","MMG1-TRD Residual Hits WITH CORR.; X Chan [mm] (actual - expected)",250.,-25,25);   HistList->Add(mmg1_residualscorr);
-  TH2F *mmg1_residual_ch = new TH2F("mmg1_residual_ch","MMG1-TRD Residual Hits vs Chan; X Chan [mm] (actual); X Chan [mm] (actual - expected)",65, 29.5, 55.5,35,-7.5,6.5);   HistList->Add(mmg1_residual_ch);
+  TH2F *mmg1_residual_ch = new TH2F("mmg1_residual_ch","MMG1-TRD Residual Hits vs Chan; X Chan [mm] (actual); X Chan [mm] (actual - expected)",65, 29.5, 55.5,35,-7.5,6.5); mmg1_residual_ch->SetStats(0); HistList->Add(mmg1_residual_ch);
   
   //---- GEM-TRD --
   float GEM_THRESH=140.; //175
@@ -257,17 +263,17 @@ void trdclass_cern24::Loop() {
   f125_pi_raw = new TH2F("f125_pi_raw","GEM-TRD raw for Pions ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);    HistList->Add(f125_pi_raw);
   f125_pi_raw->SetStats(0);  f125_pi_raw->SetMinimum(GEM_THRESH);   f125_pi_raw->SetMaximum(1000.);
   
-  f125_amp2ds = new TH2F("f125_amp2ds","GEM-TRD ADC Amp in Time (EXT. TRK) ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);           HistList->Add(f125_amp2ds);
-  f125_el_amp2d = new TH2F("f125_el_amp2d","GEM-TRD ADC Amp in Time for Electrons ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);           HistList->Add(f125_el_amp2d);
-  f125_pi_amp2d = new TH2F("f125_pi_amp2d","GEM-TRD ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);           HistList->Add(f125_pi_amp2d);
-  mmg1_f125_amp2ds = new TH2F("mmg1_f125_amp2ds","MMG1-TRD ADC Amp in Time (EXT. TRK) ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);           HistList->Add(mmg1_f125_amp2ds);
-  mmg1_f125_el_amp2d = new TH2F("mmg1_f125_el_amp2d","MMG1-TRD ADC Amp in Time for Electrons ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);   HistList->Add(mmg1_f125_el_amp2d);
-  mmg1_f125_pi_amp2d = new TH2F("mmg1_f125_pi_amp2d","MMG1-TRD ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5);   HistList->Add(mmg1_f125_pi_amp2d);
+  //f125_amp2ds = new TH2F("f125_amp2ds","GEM-TRD ADC Amp in Time (EXT. TRK) ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); f125_amp2ds->SetStats(0); HistList->Add(f125_amp2ds);
+  f125_el_amp2d = new TH2F("f125_el_amp2d","GEM-TRD ADC Amp in Time for Electrons ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); f125_el_amp2d->SetStats(0); HistList->Add(f125_el_amp2d);
+  f125_pi_amp2d = new TH2F("f125_pi_amp2d","GEM-TRD ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); f125_pi_amp2d->SetStats(0); HistList->Add(f125_pi_amp2d);
+  //mmg1_f125_amp2ds = new TH2F("mmg1_f125_amp2ds","MMG1-TRD ADC Amp in Time (EXT. TRK) ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); mmg1_f125_amp2ds->SetStats(0); HistList->Add(mmg1_f125_amp2ds);
+  mmg1_f125_el_amp2d = new TH2F("mmg1_f125_el_amp2d","MMG1-TRD ADC Amp in Time for Electrons ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); mmg1_f125_el_amp2d->SetStats(0); HistList->Add(mmg1_f125_el_amp2d);
+  mmg1_f125_pi_amp2d = new TH2F("mmg1_f125_pi_amp2d","MMG1-TRD ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); mmg1_f125_pi_amp2d->SetStats(0); HistList->Add(mmg1_f125_pi_amp2d);
   
-  f125_el_clu2d = new TH2F("f125_el_clu2d","GEM-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);               HistList->Add(f125_el_clu2d);
-  f125_pi_clu2d = new TH2F("f125_pi_clu2d","GEM-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);               HistList->Add(f125_pi_clu2d);
-  mmg1_f125_el_clu2d = new TH2F("mmg1_f125_el_clu2d","MMG1-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);    HistList->Add(mmg1_f125_el_clu2d);
-  mmg1_f125_pi_clu2d = new TH2F("mmg1_f125_pi_clu2d","MMG1-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);    HistList->Add(mmg1_f125_pi_clu2d);
+  f125_el_clu2d = new TH2F("f125_el_clu2d","GEM-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5); f125_el_clu2d->SetStats(0); HistList->Add(f125_el_clu2d);
+  f125_pi_clu2d = new TH2F("f125_pi_clu2d","GEM-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5); f125_pi_clu2d->SetStats(0); HistList->Add(f125_pi_clu2d);
+  mmg1_f125_el_clu2d = new TH2F("mmg1_f125_el_clu2d","MMG1-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5); mmg1_f125_el_clu2d->SetStats(0); HistList->Add(mmg1_f125_el_clu2d);
+  mmg1_f125_pi_clu2d = new TH2F("mmg1_f125_pi_clu2d","MMG1-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5); mmg1_f125_pi_clu2d->SetStats(0); HistList->Add(mmg1_f125_pi_clu2d);
   
   //=========================================
   gem_zHist = new  TH1F("gem_zHist", "gem_zHist", 20, 80., 200.);
@@ -502,6 +508,7 @@ void trdclass_cern24::Loop() {
     //===========================================================
     
     ULong64_t gt_1_idx_x = 0, gt_1_idx_y=0, gt_2_idx_x = 0, gt_2_idx_y = 0, gt_3_idx_x = 0, gt_3_idx_y = 0, mmg1_idx_y=0, gem_idx_y=0;
+    int gt1_nhit=0, gt2_nhit=0, gt3_nhit=0;
     
     double gemtrkr1_xamp_max=-1., gemtrkr1_xch_max=-1000.;
     double gemtrkr1_yamp_max=-1., gemtrkr1_ych_max=-1000.;
@@ -599,8 +606,8 @@ void trdclass_cern24::Loop() {
         gemtrkr1_ych_max=gemtrkr_1_peak_pos_y[j];
       }
       for (ULong64_t k=0; k<gt_1_idx_x; k++) {
-          hgemtrkr_1_peak_xy->Fill(gemtrkr_1_peak_pos_x[k], gemtrkr_1_peak_pos_y[j]);
-          if (atlas_trigger) hgemtrkr_1_atlas_xy->Fill(gemtrkr_1_peak_pos_x[k], gemtrkr_1_peak_pos_y[j]);
+        hgemtrkr_1_peak_xy->Fill(gemtrkr_1_peak_pos_x[k], gemtrkr_1_peak_pos_y[j]);
+        //if (atlas_trigger) hgemtrkr_1_atlas_xy->Fill(gemtrkr_1_peak_pos_x[k], gemtrkr_1_peak_pos_y[j]);
       }
     }
     for (ULong64_t j=0; j<gt_2_idx_y; j++) {
@@ -610,9 +617,9 @@ void trdclass_cern24::Loop() {
         gemtrkr2_yamp_max=gemtrkr_2_peak_y_height[j];
         gemtrkr2_ych_max=gemtrkr_2_peak_pos_y[j];
       }
-        for (ULong64_t k=0; k<gt_2_idx_x; k++) {
-          hgemtrkr_2_peak_xy->Fill(gemtrkr_2_peak_pos_x[k], gemtrkr_2_peak_pos_y[j]);
-          if (atlas_trigger) hgemtrkr_2_atlas_xy->Fill(gemtrkr_2_peak_pos_x[k], gemtrkr_2_peak_pos_y[j]);
+      for (ULong64_t k=0; k<gt_2_idx_x; k++) {
+        hgemtrkr_2_peak_xy->Fill(gemtrkr_2_peak_pos_x[k], gemtrkr_2_peak_pos_y[j]);
+        //if (atlas_trigger) hgemtrkr_2_atlas_xy->Fill(gemtrkr_2_peak_pos_x[k], gemtrkr_2_peak_pos_y[j]);
       }
     }
     for (ULong64_t j=0; j<gt_3_idx_y; j++) {
@@ -622,9 +629,9 @@ void trdclass_cern24::Loop() {
         gemtrkr3_yamp_max=gemtrkr_3_peak_y_height[j];
         gemtrkr3_ych_max=gemtrkr_3_peak_pos_y[j];
       }
-        for (ULong64_t k=0; k<gt_3_idx_x; k++) {
-          hgemtrkr_3_peak_xy->Fill(gemtrkr_3_peak_pos_x[k], gemtrkr_3_peak_pos_y[j]);
-          if (atlas_trigger) hgemtrkr_3_atlas_xy->Fill(gemtrkr_3_peak_pos_x[k], gemtrkr_3_peak_pos_y[j]);
+      for (ULong64_t k=0; k<gt_3_idx_x; k++) {
+        hgemtrkr_3_peak_xy->Fill(gemtrkr_3_peak_pos_x[k], gemtrkr_3_peak_pos_y[j]);
+        //if (atlas_trigger) hgemtrkr_3_atlas_xy->Fill(gemtrkr_3_peak_pos_x[k], gemtrkr_3_peak_pos_y[j]);
       }
     }
     for (ULong64_t k=0; k<gt_1_idx_x; k++) {
@@ -674,86 +681,16 @@ void trdclass_cern24::Loop() {
     hgemtrkr_2_max_xch->Fill(gemtrkr2_xch_max);
     hgemtrkr_2_max_xamp->Fill(gemtrkr2_xamp_max);
     
+    if (gt_1_idx_x == gt_1_idx_y && gt_1_idx_x!=0) gt1_nhit++;
+    if (gt_2_idx_x == gt_2_idx_y && gt_2_idx_x!=0) gt2_nhit++;
+    if (gt_3_idx_x == gt_3_idx_y && gt_3_idx_x!=0) gt3_nhit++;
     //=============== END GEMTracker (SRS) Correlations ==============
     
     //==================================================================================================
     //                    Process Fa125  Pulse  data
     //==================================================================================================
     
-    if (gt_1_idx_x>0 && gt_2_idx_x>0) { //--External tracking condition
-      Count("trk_hit");
-      float x1=gemtrkr1_xch_max;
-      float x2=gemtrkr2_xch_max;
-      //float x3=gemtrkr3_xch_max*0.4;
-      float a=(x2-x1)/(z2-z1);
-      float b=((x1)*z2-(x2)*z1)/(z2-z1);
-      float gem_extr = a*zgem+b;
-      float mmg1_extr = a*zmmg1+b;
-      if (electron_tag) {
-        f125_el_tracker_hits->Fill(gem_extr);
-        mmg1_f125_el_tracker_hits->Fill(mmg1_extr);
-      } else if (pion_tag) {
-        f125_pi_tracker_hits->Fill(gem_extr);
-        mmg1_f125_pi_tracker_hits->Fill(mmg1_extr);
-      }
-      bool match = false, match_mmg1 = false;
-      
-      for (ULong64_t i=0; i<f125_pulse_count; i++) {
-        
-        float peak_amp = f125_pulse_peak_amp->at(i);
-        float ped = f125_pulse_pedestal->at(i);
-        if (0 > ped || ped > 200 ) ped = 100;
-        float amp = peak_amp-ped;
-        if (amp<0) amp=0;
-        float time = f125_pulse_peak_time->at(i);
-        int fADCSlot = f125_pulse_slot->at(i);
-        int fADCChan = f125_pulse_channel->at(i);
-        int gemChan = GetGEMChan(fADCChan, fADCSlot);
-        int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
-        
-        if (gemChan>-1 && amp>GEM_THRESH) {
-          float xgem = gemChan*0.4;
-          float gem_correction = -3.42515 + (xgem)*0.0160113;
-          gem_residuals->Fill((xgem-gem_extr));
-          gem_residualscorr->Fill((xgem-gem_extr)-gem_correction);
-          gem_residual_ch->Fill(gemChan*0.4, (xgem-gem_extr-gem_correction));
-          if (abs(xgem-gem_extr-gem_correction)<10) { //within 10 mm
-            if (!match) {
-              if (electron_tag) {
-                f125_el_tracker_eff->Fill(gem_extr);
-              } else if (pion_tag) {
-               f125_pi_tracker_eff->Fill(gem_extr); 
-              }
-              match = true;
-            }
-            f125_amp2ds->Fill(time,gemChan,amp);
-          }
-        }
-        if (mmg1Chan>-1 && amp>MMG1_THRESH) {
-          float xmmg1 = mmg1Chan*0.4;
-          float mmg1_correction = -7.98182 + (xmmg1)*0.105534;
-          mmg1_residuals->Fill((xmmg1-mmg1_extr));
-          mmg1_residualscorr->Fill((xmmg1-mmg1_extr)-mmg1_correction);
-          mmg1_residual_ch->Fill(mmg1Chan*0.4, (xmmg1-mmg1_extr-mmg1_correction));
-          if (abs(xmmg1-mmg1_extr-mmg1_correction)<10) { //within 10 mm
-            if (!match_mmg1) {
-              if (electron_tag) {
-                mmg1_f125_el_tracker_eff->Fill(mmg1_extr);
-              } else if (pion_tag) {
-                mmg1_f125_pi_tracker_eff->Fill(mmg1_extr); 
-              }
-              match_mmg1 = true;
-            }
-            mmg1_f125_amp2ds->Fill(time,mmg1Chan,amp);
-          }
-        }
-      } //---- End Fadc125 Pulse Loop ----
-    } //-- End external tracker condition
-    
     #if 1
-      //==================================================================================================
-      //                    Again Process Fa125  Pulse  data
-      //==================================================================================================
       
       //--------- Event Histogram Filling ---------
       f125_fit->Reset();
@@ -765,6 +702,23 @@ void trdclass_cern24::Loop() {
       double gem_ampmax=-1., mmg1_ampmax=-1., gem_xchmax=-1, mmg1_xchmax=-1;
       int gem_timemax=0, mmg1_timemax=0;
       float ped_max=0;
+      
+      if (gt_1_idx_x>0 && gt_2_idx_x>0) { //--External tracking condition
+      Count("trk_hit");
+      float x1=gemtrkr1_xch_max;
+      float x2=gemtrkr2_xch_max;
+      float a=(x2-x1)/(z2-z1);
+      float b=((x1)*z2-(x2)*z1)/(z2-z1);
+      float gem_extr = a*zgem+b;
+      float mmg1_extr = a*zmmg1+b;
+      if (electron_tag) {
+        f125_el_tracker_hits->Fill(gem_extr);
+        mmg1_f125_el_tracker_hits->Fill(mmg1_extr);
+      } else if (pion_tag) {
+        f125_pi_tracker_hits->Fill(gem_extr);
+        mmg1_f125_pi_tracker_hits->Fill(mmg1_extr);
+      }    
+      bool match = false, match_mmg1 = false;
       
       for (ULong64_t i=0; i<f125_pulse_count; i++) {
         
@@ -782,12 +736,21 @@ void trdclass_cern24::Loop() {
       	if (amp<0) amp=0;
       	
       	if (gemChan>-1 && amp>GEM_THRESH) {
-          //for (ULong64_t j=0; j<f125_pulse_count; j++) {
-          //if (mmg1Chan>-1 && amp>MMG1_THRESH) {
-          //  gem_mmg1_doubleX->Fill(gemChan,mmg1Chan,1.);
-          //}
-          //}
           
+          float xgem = gemChan*0.4;
+          float gem_correction = -3.42515 + (xgem)*0.0160113;
+          gem_residuals->Fill((xgem-gem_extr));
+          gem_residualscorr->Fill((xgem-gem_extr)-gem_correction);
+          gem_residual_ch->Fill(gemChan*0.4, (xgem-gem_extr-gem_correction));
+          if (abs(xgem-gem_extr-gem_correction)<10) { //within 10 mm
+          if (!match) {
+            if (electron_tag) {
+              f125_el_tracker_eff->Fill(gem_extr);
+            } else if (pion_tag) {
+             f125_pi_tracker_eff->Fill(gem_extr);
+            }
+            match = true;
+          }
           f125_fit->Fill(time,gemChan,amp);
           //------------ for Clusters -------------
           int TimeWindowStart = 45;
@@ -796,6 +759,7 @@ void trdclass_cern24::Loop() {
             hevtck->SetBinContent(time0,gemChan,amp/10);
             hevtk->SetBinContent(time0,gemChan,amp/10);
           }
+          
     	    if (gem_ampmax<amp) {
             gem_ampmax=amp;
             gem_timemax=time;
@@ -822,8 +786,23 @@ void trdclass_cern24::Loop() {
             gem_nhit++;
             //gem_zHist->Fill(time, amp);
           }
+          } //-- END within 10mm
     	  }
     	  if (amp>MMG1_THRESH && mmg1Chan>-1) {
+          float xmmg1 = mmg1Chan*0.4;
+          float mmg1_correction = -7.98182 + (xmmg1)*0.105534;
+          mmg1_residuals->Fill((xmmg1-mmg1_extr));
+          mmg1_residualscorr->Fill((xmmg1-mmg1_extr)-mmg1_correction);
+          mmg1_residual_ch->Fill(mmg1Chan*0.4, (xmmg1-mmg1_extr-mmg1_correction));
+          if (abs(xmmg1-mmg1_extr-mmg1_correction)<10) { //within 10 mm
+          if (!match_mmg1) {
+            if (electron_tag) {
+              mmg1_f125_el_tracker_eff->Fill(mmg1_extr);
+            } else if (pion_tag) {
+              mmg1_f125_pi_tracker_eff->Fill(mmg1_extr);
+            }
+            match_mmg1 = true;
+          }
           mmg1_f125_fit->Fill(time,mmg1Chan,amp);
     	    if (mmg1_ampmax<amp) {
             mmg1_ampmax=amp;
@@ -851,8 +830,11 @@ void trdclass_cern24::Loop() {
             mmg1_nhit++;
             //mmg1_zHist->Fill(time, amp);
           }
+          } //-- END within 10mm
     	  }
     	} //--- end Fa125 Pulse Loop ---
+      
+      } //-- End external tracker condition !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       
       //===================================================================
       //                    Chi^2 Fit Calculation
@@ -918,6 +900,13 @@ void trdclass_cern24::Loop() {
         gem_zHist_vect.push_back(gem_zHist->GetBinContent(i));
         mmg1_zHist_vect.push_back(mmg1_zHist->GetBinContent(i));
       }
+      
+      if (gem_nhit>0.) hgem_nhits->Fill(gem_nhit);
+      if (mmg1_nhit>0.) hmmg1_nhits->Fill(mmg1_nhit);
+      if (gt1_nhit>0.) hgt1_nhits->Fill(gt1_nhit);
+      if (gt2_nhit>0.) hgt2_nhits->Fill(gt2_nhit);
+      if (gt3_nhit>0.) hgt3_nhits->Fill(gt3_nhit);
+      
     #endif
     //======================= End Process Fa125 Pulse data ================================
     
@@ -1553,12 +1542,12 @@ void trdclass_cern24::Loop() {
   cout<<" # of electrons="<<el_count<<" # of pions="<<pi_count<<" # of atlas triggers="<<atlas_trigger_count<<endl;
   
   //---Drift time distribution plot ---
-  TH1D *f125_drift = f125_el_amp2d->ProjectionX("f125_drift",110,140);
-  TH1D *f125_drift_c = new TH1D(*f125_drift);
+  TH1D *f125_drift = f125_el_amp2d->ProjectionX("f125_drift",100,130);
+  TH1D *f125_drift_c = new TH1D(*f125_drift); f125_drift_c->SetStats(0);
   double gemDriftScale = 1./f125_drift_c->GetEntries();
   f125_drift_c->Scale(gemDriftScale);
-  TH1D *mmg1_f125_drift = mmg1_f125_el_amp2d->ProjectionX("mmg1_f125_drift",110,140);
-  TH1D *mmg1_f125_drift_c = new TH1D(*mmg1_f125_drift);
+  TH1D *mmg1_f125_drift = mmg1_f125_el_amp2d->ProjectionX("mmg1_f125_drift",100,130);
+  TH1D *mmg1_f125_drift_c = new TH1D(*mmg1_f125_drift); mmg1_f125_drift_c->SetStats(0);
   double mmg1DriftScale = 1./mmg1_f125_drift_c->GetEntries();
   mmg1_f125_drift_c->Scale(mmg1DriftScale);
   f125_drift_c->SetLineColor(4);  HistList->Add(f125_drift_c);
@@ -1618,12 +1607,18 @@ void trdclass_cern24::Loop() {
     
     //---------------------  page 1 --------------------
     htitle(" Count ");   // if (!COMPACT) cc=NextPlot(0,0);
+    nxd=2; nyd=4;
     cc=NextPlot(nxd,nyd);  gPad->SetLogy(); hcount->Draw();
+    cc=NextPlot(nxd,nyd);  hgem_nhits->Draw();
+    cc=NextPlot(nxd,nyd);  hmmg1_nhits->Draw();
+    cc=NextPlot(nxd,nyd);  hgt1_nhits->Draw();
+    cc=NextPlot(nxd,nyd);  hgt2_nhits->Draw();
+    cc=NextPlot(nxd,nyd);  hgt3_nhits->Draw();
     
     //---------------------  page 2a --------------------
     htitle(" SRS GEM-TRKR 1  ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_xy->Draw("colz");
-    cc=NextPlot(nxd,nyd); hgemtrkr_1_atlas_xy->Draw("colz");
+    //cc=NextPlot(nxd,nyd); hgemtrkr_1_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_x->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_y->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_x_height->Draw();
@@ -1633,7 +1628,7 @@ void trdclass_cern24::Loop() {
     
     htitle(" SRS GEM-TRKR 2  ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_xy->Draw("colz");
-    cc=NextPlot(nxd,nyd); hgemtrkr_2_atlas_xy->Draw("colz");
+    //cc=NextPlot(nxd,nyd); hgemtrkr_2_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_x->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_y->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_2_peak_x_height->Draw();
@@ -1643,7 +1638,7 @@ void trdclass_cern24::Loop() {
     
     htitle(" SRS GEM-TRKR 3  ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_xy->Draw("colz");
-    cc=NextPlot(nxd,nyd); hgemtrkr_3_atlas_xy->Draw("colz");
+    //cc=NextPlot(nxd,nyd); hgemtrkr_3_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_x->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_y->Draw();
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_x_height->Draw();
@@ -1724,8 +1719,8 @@ void trdclass_cern24::Loop() {
     cc=NextPlot(nxd,nyd);   mmg1_residualscorr->Draw();
     cc=NextPlot(nxd,nyd);   gem_residual_ch->Draw("colz");
     cc=NextPlot(nxd,nyd);   mmg1_residual_ch->Draw("colz");
-    cc=NextPlot(nxd,nyd);   f125_amp2ds->Draw("colz");
-    cc=NextPlot(nxd,nyd);   mmg1_f125_amp2ds->Draw("colz");
+    //cc=NextPlot(nxd,nyd);   f125_amp2ds->Draw("colz");
+    //cc=NextPlot(nxd,nyd);   mmg1_f125_amp2ds->Draw("colz");
     
    //------------- MAX COMPARISONS ---------------
     htitle("  TRD (fa125) Max Amp Comparisons ");    if (!COMPACT) cc=NextPlot(0,0);
