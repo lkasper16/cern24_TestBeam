@@ -26,6 +26,11 @@
 #include "trd_mlp_cern.h"
 #include "PlotLib.C"
 
+//--  0-dEdx 1-Params 2-dEdx+Params ; change MAXpar to 17 !
+#define NN_MODE 3
+//#define VERBOSE
+#define ANALYZE_MERGED 1
+
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
 void Count(const char *tit, double cut1, double cut2);
@@ -161,7 +166,7 @@ std::pair<double,double> Reject(TH1 *hp, TH1 *he, double thr) {
 }
 //---------------------------------------------------------------------
 
-int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
+int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3, int nEntries) {
   
   // Set object pointer
   ecal_energy=0;
@@ -343,6 +348,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
         case 5302:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
         case 5303:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
         case 5304:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5306:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
         
         default:
 	      tw1=67;
@@ -537,14 +543,18 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   #ifdef VERBOSE
     printf("escale_trk=%f\n",escale_trk);
   #endif
-  int NORM=1; //-- scale hist using no entries
+  int NORM=1; //-- scale hist using num entries
   int DRAW=2; // 1=draw 2= two stat boxes
   int nxd=3;
   int nyd=5;
   int COMPACT=0;
   TCanvas *c1,*c0; 
   char ctit[120];
-  sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",RunNum);    
+  #if ANALYZE_MERGED
+    sprintf(G_DIR,"mlpOutput/cern24/merged/hd_rawdata_%06d_%06dEntries.root",RunNum,nEntries);
+  #else
+    sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",RunNum);    
+  #endif
   sprintf(ctit,"File=%s",G_DIR);
   htitle(ctit);
   
@@ -623,7 +633,11 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
 
 //==================================================================
 
+#if ANALYZE_MERGED
+void trd_mlp_cern(int RunNum, int nEntries) {
+#else
 void trd_mlp_cern(int RunNum) {
+#endif
   
   hcount= new TH1D("hcount","Count",3,0,3); 
   hcount->SetStats(0);   hcount->SetFillColor(38);   hcount->SetMinimum(1.);
@@ -638,7 +652,11 @@ void trd_mlp_cern(int RunNum) {
   gStyle->SetTitleSize(0.05,"XY");
   
   char rootfile[256];
-  sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_Run_%06d.root",RunNum);
+  #if ANALYZE_MERGED
+    sprintf(rootfile,"RootOutput/cern24/merged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+  #else
+    sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_Run_%06d.root",RunNum);
+  #endif
   char basename[120];
   char *hd = strstr(rootfile,"/"); 
   strncpy(basename,&hd[1],120-1);   char *dot= strstr(basename,"."); *dot=0;
@@ -658,7 +676,11 @@ void trd_mlp_cern(int RunNum) {
   
   TTree *gem_hits = (TTree *) input->Get("gem_hits");
   char mlpname[128];
-  sprintf(mlpname,"mlpOutput/cern24/mlp_run%06d.root",RunNum);
+  #if ANALYZE_MERGED
+    sprintf(mlpname,"mlpOutput/cern24/merged/mlp_run%06d_%06dEntries.root",RunNum,nEntries);
+  #else
+    sprintf(mlpname,"mlpOutput/cern24/mlp_run%06d.root",RunNum);
+  #endif
   TFile* f = new TFile(mlpname,"RECREATE");
   
   TTree *sig_tst = new TTree("sig_tst", "Filtered Events"); 
@@ -666,8 +688,11 @@ void trd_mlp_cern(int RunNum) {
   TTree *signal = new TTree("signal", "Filtered Events"); 
   TTree *background = new TTree("background", "Filtered Events"); 
   TTree *simu = new TTree("simu", "Filtered Events");
-  
-  char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",RunNum); 
+  #if ANALYZE_MERGED
+    char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_%06d",RunNum,nEntries);
+  #else
+    char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",RunNum); 
+  #endif
   dispe =  new TH2F("dispe","disp e; time ; X strip",300,-0.5,299.5,200,40.5,240.5);
   disppi = new TH2F("disppi","disp pi; time ; X strip",100,0.5,100.5,350,-0.5,349.5);
   dispe->SetStats(0);
@@ -700,7 +725,7 @@ void trd_mlp_cern(int RunNum) {
     cout << " Get trees signal=" << signal << endl;
   #endif
   int rtw1,rtw3;
-  int nn_mode = fill_trees(gem_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3);
+  int nn_mode = fill_trees(gem_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3, nEntries);
   
   #ifdef VERBOSE
     signal->Print();

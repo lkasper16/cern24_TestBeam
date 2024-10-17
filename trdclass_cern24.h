@@ -41,7 +41,7 @@
 #include "TBox.h"
 
 #include "stdio.h"
-
+#define ANALYZE_MERGED 1
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
@@ -259,8 +259,11 @@ public :
    TBranch        *b_gem_peak_width;   //!
    TBranch        *b_gem_peak_area;   //!
    TBranch        *b_gem_peak_real_pos;   //!
-
-   trdclass_cern24(int RunNum, int MaxEvt, int FirstEvt, int FileNum);
+   #if ANALYZE_MERGED
+    trdclass_cern24(int RunNum, int nEntries, int nTrees, int MaxEvt, int FirstEvt);
+   #else
+    trdclass_cern24(int RunNum, int MaxEvt, int FirstEvt, int FileNum);
+   #endif
    virtual ~trdclass_cern24();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -277,6 +280,8 @@ public :
    //==================  histograms ========================
 
    int RunNum;
+   int nEntries;
+   int nTrees;
    int FileNum;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
@@ -386,6 +391,45 @@ public :
 #endif
 
 #ifdef trdclass_cern24_cxx
+
+#if ANALYZE_MERGED
+
+trdclass_cern24::trdclass_cern24(int RunNum_in, int nEntries_in=0, int nTrees_in=0, int MaxEvt_in=0,  int FirstEvt_in=0 ) : fChain(0)
+{
+  RunNum=RunNum_in;
+  nEntries=nEntries_in;
+  nTrees=nTrees_in;
+  MaxEvt=MaxEvt_in;
+  FirstEvt=FirstEvt_in;
+  
+  printf("====== trdclass constructor MERGED, last Run=%d ============\n",RunNum);
+  
+  TChain* chain;
+  TTree *tree=NULL;
+  char chainFiles[128];
+  
+  // if parameter tree is not specified (or zero), connect the file
+  // used to generate this class and read the Tree.
+  if (tree == 0) {
+    char FileName[128];
+    sprintf(FileName,"ROOT_MERGED/eventsChain%0d_%0dEntries_%01dTrees.root",RunNum,nEntries,nTrees);
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
+    if (!f || !f->IsOpen()) {
+      f = new TFile(FileName);
+      printf("---> Open file = %s \n",FileName);
+    } else {
+      sprintf(FileName,"ROOT_MERGED/eventsChain%0d_%0dEntries_%01dTrees.root",RunNum,nEntries,nTrees);
+      f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
+      printf("---> Open file = %s \n",FileName);
+    }
+    f->GetObject("events",tree);
+   }
+   Init(tree);
+}
+
+  
+#else
+
 trdclass_cern24::trdclass_cern24(int RunNum_in, int MaxEvt_in=0,  int FirstEvt_in=0, int FileNum_in=0) : fChain(0)
 {
   RunNum=RunNum_in;
@@ -426,6 +470,8 @@ trdclass_cern24::trdclass_cern24(int RunNum_in, int MaxEvt_in=0,  int FirstEvt_i
    }
    Init(tree);
 }
+
+#endif //--END ANALYZE_MERGED check
 
 trdclass_cern24::~trdclass_cern24()
 {

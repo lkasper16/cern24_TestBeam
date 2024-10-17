@@ -30,9 +30,10 @@
 //
 #define SAVE_TRACK_HITS
 #define SAVE_PDF
-#define WRITE_CSV
+//#define WRITE_CSV
 #define DEBUG 0
 //
+#define ANALYZE_MERGED 1
 //-- For single evt clustering display, uncomment BOTH:
 //#define SHOW_EVTbyEVT
 //#define SHOW_EVT_DISPLAY
@@ -136,11 +137,11 @@ void trdclass_cern24::Loop() {
     hcount->SetBit(TH1::kCanRebin);
   #endif
   
-  hgem_nhits = new TH1F("hgem_nhits","GEM-TRD Hits",100,0.5,100.5);  HistList->Add(hgem_nhits);
-  hmmg1_nhits = new TH1F("hmmg1_nhits","MMG1-TRD Hits",100,0.5,100.5);  HistList->Add(hmmg1_nhits);
-  hgt1_nhits = new TH1F("hgt1_nhits","GEM-TRKR1 Hits",50,0.5,50.5);  HistList->Add(hgt1_nhits);
-  hgt2_nhits = new TH1F("hgt2_nhits","GEM-TRKR2 Hits",50,0.5,50.5);  HistList->Add(hgt2_nhits);
-  hgt3_nhits = new TH1F("hgt3_nhits","GEM-TRKR3 Hits",50,0.5,50.5);  HistList->Add(hgt3_nhits);
+  hgem_nhits = new TH1F("hgem_nhits","GEM-TRD Hits",100,0,100);  HistList->Add(hgem_nhits);
+  hmmg1_nhits = new TH1F("hmmg1_nhits","MMG1-TRD Hits",100,0,100);  HistList->Add(hmmg1_nhits);
+  hgt1_nhits = new TH1F("hgt1_nhits","GEM-TRKR1 Hits",50,0,50);  HistList->Add(hgt1_nhits);
+  hgt2_nhits = new TH1F("hgt2_nhits","GEM-TRKR2 Hits",50,0,50);  HistList->Add(hgt2_nhits);
+  hgt3_nhits = new TH1F("hgt3_nhits","GEM-TRKR3 Hits",50,0,50);  HistList->Add(hgt3_nhits);
   
   //h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5);                                        HistList->Add(h250_size);
   int nx0=100;       int ny0=240; //int ny0=256;
@@ -281,7 +282,11 @@ void trdclass_cern24::Loop() {
   
   TFile* fHits;
   #ifdef SAVE_TRACK_HITS
+    #if ANALYZE_MERGED
+    char hitsFileName[256]; sprintf(hitsFileName, "RootOutput/cern24/merged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    #else
     char hitsFileName[256]; sprintf(hitsFileName, "RootOutput/cern24/trd_singleTrackHits_Run_%06d.root", RunNum);
+    #endif
     fHits = new TFile(hitsFileName, "RECREATE");
     //-- GEM-TRD
     EVENT_VECT_GEM = new TTree("gem_hits","GEM TTree with single track hit info");
@@ -608,6 +613,7 @@ void trdclass_cern24::Loop() {
       for (ULong64_t k=0; k<gt_1_idx_x; k++) {
         hgemtrkr_1_peak_xy->Fill(gemtrkr_1_peak_pos_x[k], gemtrkr_1_peak_pos_y[j]);
         //if (atlas_trigger) hgemtrkr_1_atlas_xy->Fill(gemtrkr_1_peak_pos_x[k], gemtrkr_1_peak_pos_y[j]);
+        gt1_nhit++;
       }
     }
     for (ULong64_t j=0; j<gt_2_idx_y; j++) {
@@ -620,6 +626,7 @@ void trdclass_cern24::Loop() {
       for (ULong64_t k=0; k<gt_2_idx_x; k++) {
         hgemtrkr_2_peak_xy->Fill(gemtrkr_2_peak_pos_x[k], gemtrkr_2_peak_pos_y[j]);
         //if (atlas_trigger) hgemtrkr_2_atlas_xy->Fill(gemtrkr_2_peak_pos_x[k], gemtrkr_2_peak_pos_y[j]);
+        gt2_nhit++;
       }
     }
     for (ULong64_t j=0; j<gt_3_idx_y; j++) {
@@ -632,6 +639,7 @@ void trdclass_cern24::Loop() {
       for (ULong64_t k=0; k<gt_3_idx_x; k++) {
         hgemtrkr_3_peak_xy->Fill(gemtrkr_3_peak_pos_x[k], gemtrkr_3_peak_pos_y[j]);
         //if (atlas_trigger) hgemtrkr_3_atlas_xy->Fill(gemtrkr_3_peak_pos_x[k], gemtrkr_3_peak_pos_y[j]);
+        gt3_nhit++;
       }
     }
     for (ULong64_t k=0; k<gt_1_idx_x; k++) {
@@ -681,9 +689,9 @@ void trdclass_cern24::Loop() {
     hgemtrkr_2_max_xch->Fill(gemtrkr2_xch_max);
     hgemtrkr_2_max_xamp->Fill(gemtrkr2_xamp_max);
     
-    if (gt_1_idx_x == gt_1_idx_y && gt_1_idx_x!=0) gt1_nhit++;
-    if (gt_2_idx_x == gt_2_idx_y && gt_2_idx_x!=0) gt2_nhit++;
-    if (gt_3_idx_x == gt_3_idx_y && gt_3_idx_x!=0) gt3_nhit++;
+    //if (gt_1_idx_x>0. && gt_1_idx_y>0.) gt1_nhit++;
+    //if (gt_2_idx_x>0. && gt_2_idx_y>0.) gt2_nhit++;
+    //if (gt_3_idx_x>0. && gt_3_idx_y>0.) gt3_nhit++;
     //=============== END GEMTracker (SRS) Correlations ==============
     
     //==================================================================================================
@@ -1542,18 +1550,19 @@ void trdclass_cern24::Loop() {
   cout<<" # of electrons="<<el_count<<" # of pions="<<pi_count<<" # of atlas triggers="<<atlas_trigger_count<<endl;
   
   //---Drift time distribution plot ---
-  TH1D *f125_drift = f125_el_amp2d->ProjectionX("f125_drift",100,130);
+  TH1D *f125_drift = f125_el_amp2d->ProjectionX("f125_drift",100,135);
   TH1D *f125_drift_c = new TH1D(*f125_drift); f125_drift_c->SetStats(0);
   double gemDriftScale = 1./f125_drift_c->GetEntries();
   f125_drift_c->Scale(gemDriftScale);
-  TH1D *mmg1_f125_drift = mmg1_f125_el_amp2d->ProjectionX("mmg1_f125_drift",100,130);
+  TH1D *mmg1_f125_drift = mmg1_f125_el_amp2d->ProjectionX("mmg1_f125_drift",95,130);
   TH1D *mmg1_f125_drift_c = new TH1D(*mmg1_f125_drift); mmg1_f125_drift_c->SetStats(0);
   double mmg1DriftScale = 1./mmg1_f125_drift_c->GetEntries();
   mmg1_f125_drift_c->Scale(mmg1DriftScale);
   f125_drift_c->SetLineColor(4);  HistList->Add(f125_drift_c);
   mmg1_f125_drift_c->SetLineColor(2); HistList->Add(mmg1_f125_drift_c);
   f125_drift_c->GetXaxis()->SetTitle("Time Response (8ns)");
-  f125_drift_c->SetTitle("Drift Time Distribution");
+  f125_drift_c->GetYaxis()->SetTitle("1. / nEntries");
+  f125_drift_c->SetTitle("Drift Time Distribution (Electron Response)");
   TLegend *l1 = new TLegend(0.75,0.65,0.9,0.9);
   l1->SetNColumns(2);
   l1->AddEntry(f125_drift_c, "GEM", "l");
@@ -1569,7 +1578,11 @@ void trdclass_cern24::Loop() {
   //===                 S A V E   H I S T O G R A M S                                ====
   //=====================================================================================
   TFile* fOut;
-  char rootFileName[256]; sprintf(rootFileName, "RootOutput/cern24/Run_%06d_Output.root", RunNum);
+  #if ANALYZE_MERGED
+  char rootFileName[256]; sprintf(rootFileName, "RootOutput/cern24/merged/Run_%06d_%0dEntries_Output.root",RunNum,nEntries);
+  #else 
+  char rootFileName[256]; sprintf(rootFileName, "RootOutput/cern24/Run_%06d_Output.root",RunNum);  
+  #endif
   fOut = new TFile(rootFileName, "RECREATE");
   fOut->cd();
   cout<<"Writing Output File: "<<rootFileName<<endl;
@@ -1593,11 +1606,19 @@ void trdclass_cern24::Loop() {
   //=====================================================================================
   //===                 P L O T  H I S T O G R A M S                                  ===
   //=====================================================================================
-  const char *OutputDir="RootOutput/cern24";
+  #if ANALYZE_MERGED
+    const char *OutputDir="RootOutput/cern24/merged";
+  #else
+    const char *OutputDir="RootOutput/cern24";
+  #endif
   #ifdef SAVE_PDF
-    int NN_MODE = 8;
+    //int NN_MODE = 8;
     char ctit[120];
-    sprintf(G_DIR,"%s/Run_%06d",OutputDir,RunNum);
+    #if ANALYZE_MERGED
+      sprintf(G_DIR,"%s/Run_%06d_%06dEntries",OutputDir,RunNum,nEntries);
+    #else
+      sprintf(G_DIR,"%s/Run_%06d",OutputDir,RunNum);
+    #endif
     sprintf(ctit,"File=%s",G_DIR);
     bool COMPACT=false;
     TCanvas *cc;
@@ -1617,6 +1638,7 @@ void trdclass_cern24::Loop() {
     
     //---------------------  page 2a --------------------
     htitle(" SRS GEM-TRKR 1  ");   if (!COMPACT) cc=NextPlot(0,0);
+    nxd=2; nyd=4;
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_xy->Draw("colz");
     //cc=NextPlot(nxd,nyd); hgemtrkr_1_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_1_peak_x->Draw();
@@ -1637,6 +1659,7 @@ void trdclass_cern24::Loop() {
     cc=NextPlot(nxd,nyd); hgemtrkr_2_max_xamp->Draw();
     
     htitle(" SRS GEM-TRKR 3  ");   if (!COMPACT) cc=NextPlot(0,0);
+    nxd=2; nyd=3;
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_xy->Draw("colz");
     //cc=NextPlot(nxd,nyd); hgemtrkr_3_atlas_xy->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_x->Draw();
@@ -1645,7 +1668,7 @@ void trdclass_cern24::Loop() {
     cc=NextPlot(nxd,nyd); hgemtrkr_3_peak_y_height->Draw();
     
     htitle(" SRS GEM / MMG1  ");   if (!COMPACT) cc=NextPlot(0,0);
-    nxd=2; nyd=4;
+    nxd=2; nyd=3;
     cc=NextPlot(nxd,nyd); mmg1_peak_y->Draw();
     cc=NextPlot(nxd,nyd); hmmg1_peak_y_height->Draw();
     cc=NextPlot(nxd,nyd); gem_peak_y->Draw();
@@ -1656,10 +1679,10 @@ void trdclass_cern24::Loop() {
     //fbox.SetFillStyle(0);
     //fbox.SetLineWidth(1);
     
-    htitle(" SRS GEM / MMG1  ");   if (!COMPACT) cc=NextPlot(0,0);
-    nxd=2; nyd=4;
-    cc=NextPlot(nxd,nyd); gem_mmg1_doubleY->Draw("colz");
-    cc=NextPlot(nxd,nyd); gem_mmg1_doubleX->Draw("colz");
+    //htitle(" SRS GEM / MMG1  ");   if (!COMPACT) cc=NextPlot(0,0);
+    //nxd=2; nyd=4;
+    //cc=NextPlot(nxd,nyd); gem_mmg1_doubleY->Draw("colz");
+    //cc=NextPlot(nxd,nyd); gem_mmg1_doubleX->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_1_gem->Draw("colz");
     cc=NextPlot(nxd,nyd); hgemtrkr_1_mmg1->Draw("colz");
     
@@ -1674,7 +1697,7 @@ void trdclass_cern24::Loop() {
     
    //---------------------  page 3a --------------------
     htitle("  GEM-TRD (fa125) Amp 2D");    if (!COMPACT) cc=NextPlot(0,0);
-    nxd=2; nyd=4;
+    nxd=2; nyd=3;
     cc=NextPlot(nxd,nyd);   f125_el_amp2d->Draw("colz");
     cc=NextPlot(nxd,nyd);   f125_pi_amp2d->Draw("colz");
     cc=NextPlot(nxd,nyd);   f125_el_clu2d->Draw("colz");
@@ -1688,7 +1711,7 @@ void trdclass_cern24::Loop() {
   */
     
     htitle("  MMG1-TRD (fa125) Amp 2D");    if (!COMPACT) cc=NextPlot(0,0);
-    nxd=2; nyd=4;
+    nxd=2; nyd=3;
     cc=NextPlot(nxd,nyd);   mmg1_f125_el_amp2d->Draw("colz");
     cc=NextPlot(nxd,nyd);   mmg1_f125_pi_amp2d->Draw("colz");
     cc=NextPlot(nxd,nyd);   mmg1_f125_el_clu2d->Draw("colz");
@@ -1706,7 +1729,7 @@ void trdclass_cern24::Loop() {
     cc=NextPlot(nxd,nyd);   mmg1_f125_pi_tracker_eff->Draw();
     
     htitle("  External Tracking");    if (!COMPACT) cc=NextPlot(0,0);
-    nxd=2; nyd=4;
+    nxd=2; nyd=3;
     cc=NextPlot(nxd,nyd);   if (f125_el_tracker_hits->GetEntries()!=0) { f125_el_tracker_hits->Sumw2(); f125_el_tracker_eff->Sumw2();  f125_el_tracker_eff->Divide(f125_el_tracker_hits);  f125_el_tracker_eff->Draw(); }
     cc=NextPlot(nxd,nyd);   if (mmg1_f125_el_tracker_hits->GetEntries()!=0) { mmg1_f125_el_tracker_hits->Sumw2(); mmg1_f125_el_tracker_eff->Sumw2(); mmg1_f125_el_tracker_eff->Divide(mmg1_f125_el_tracker_hits);  mmg1_f125_el_tracker_eff->Draw(); }
     cc=NextPlot(nxd,nyd);   if (f125_pi_tracker_hits->GetEntries()!=0) { f125_pi_tracker_hits->Sumw2(); f125_pi_tracker_eff->Sumw2();  f125_pi_tracker_eff->Divide(f125_pi_tracker_hits);  f125_pi_tracker_eff->Draw(); }
