@@ -41,7 +41,7 @@
 #include "TBox.h"
 
 #include "stdio.h"
-#define ANALYZE_MERGED 1
+#define ANALYZE_MERGED 0
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"

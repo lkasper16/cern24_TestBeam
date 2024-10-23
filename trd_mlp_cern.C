@@ -29,7 +29,7 @@
 //--  0-dEdx 1-Params 2-dEdx+Params ; change MAXpar to 17 !
 #define NN_MODE 3
 //#define VERBOSE
-#define ANALYZE_MERGED 1
+#define ANALYZE_MERGED 0
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
@@ -165,9 +165,11 @@ std::pair<double,double> Reject(TH1 *hp, TH1 *he, double thr) {
   return std::make_pair(Rej, relRejError);
 }
 //---------------------------------------------------------------------
-
+#if ANALYZE_MERGED
 int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3, int nEntries) {
-  
+#else
+int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
+#endif  
   // Set object pointer
   ecal_energy=0;
   presh_energy=0;
@@ -337,18 +339,19 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
       switch (RunNum) {
         
         case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=104;  e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
-        case 5264:   tw1=65; tw2=115; tw3=135; e_chan1=104;  e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
-        case 5281:   tw1=67; tw2=85; tw3=135; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5282:   tw1=67; tw2=85; tw3=135; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5283:   tw1=67; tw2=85; tw3=135; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5268:   tw1=67; tw2=85; tw3=135; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5264:   tw1=65; tw2=104; tw3=141; e_chan1=104;  e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5281:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5282:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5283:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        //case 5283:   tw1=67; tw2=85; tw3=135; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5268:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
         
         //-- For Second Xe Bottle !!
-        case 5301:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
-        case 5302:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5303:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5304:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5306:   tw1=117; tw2=135; tw3=165; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5301:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5302:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5303:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5304:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5306:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
         
         default:
 	      tw1=67;
@@ -725,7 +728,11 @@ void trd_mlp_cern(int RunNum) {
     cout << " Get trees signal=" << signal << endl;
   #endif
   int rtw1,rtw3;
+  #if ANALYZE_MERGED
   int nn_mode = fill_trees(gem_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3, nEntries);
+  #else
+  int nn_mode = fill_trees(gem_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3);
+  #endif
   
   #ifdef VERBOSE
     signal->Print();

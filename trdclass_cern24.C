@@ -33,7 +33,7 @@
 //#define WRITE_CSV
 #define DEBUG 0
 //
-#define ANALYZE_MERGED 1
+//#define ANALYZE_MERGED 0
 //-- For single evt clustering display, uncomment BOTH:
 //#define SHOW_EVTbyEVT
 //#define SHOW_EVT_DISPLAY
@@ -144,7 +144,9 @@ void trdclass_cern24::Loop() {
   hgt3_nhits = new TH1F("hgt3_nhits","GEM-TRKR3 Hits",50,0,50);  HistList->Add(hgt3_nhits);
   
   //h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5);                                        HistList->Add(h250_size);
-  int nx0=100;       int ny0=240; //int ny0=256;
+  int nx0=100;
+  /////////////if (RunNum>5284) int nx0=130;
+  int ny0=240;
   double Ymin=0.;    double Ymax=ny0*0.4;
   double Xmin=0.;    double Xmax=26.; //double Xmax=30.;
   mhevt  = new TH2F("mhevt","MMG1-TRD Event Display; z pos [mm]; y pos [mm]",nx0+110.,Xmin,Xmax+2.,ny0,Ymin,Ymax); mhevt->SetStats(0); mhevt->SetMaximum(10.); mhevt->SetMinimum(0.);
@@ -259,11 +261,6 @@ void trdclass_cern24::Loop() {
   float GEM_THRESH=140.; //175
   float MMG1_THRESH=125.; //150
 
-  f125_el_raw = new TH2F("f125_el_raw","GEM-TRD raw for Electrons ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);    HistList->Add(f125_el_raw);
-  f125_el_raw->SetStats(0);  f125_el_raw->SetMinimum(GEM_THRESH);   f125_el_raw->SetMaximum(1000.);
-  f125_pi_raw = new TH2F("f125_pi_raw","GEM-TRD raw for Pions ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);    HistList->Add(f125_pi_raw);
-  f125_pi_raw->SetStats(0);  f125_pi_raw->SetMinimum(GEM_THRESH);   f125_pi_raw->SetMaximum(1000.);
-  
   //f125_amp2ds = new TH2F("f125_amp2ds","GEM-TRD ADC Amp in Time (EXT. TRK) ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); f125_amp2ds->SetStats(0); HistList->Add(f125_amp2ds);
   f125_el_amp2d = new TH2F("f125_el_amp2d","GEM-TRD ADC Amp in Time for Electrons ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); f125_el_amp2d->SetStats(0); HistList->Add(f125_el_amp2d);
   f125_pi_amp2d = new TH2F("f125_pi_amp2d","GEM-TRD ADC Amp in Time for Pions ; Time Response (8ns) ; X Channel ",200,0.5,200.5,240,0.5,240.5); f125_pi_amp2d->SetStats(0); HistList->Add(f125_pi_amp2d);
@@ -450,8 +447,6 @@ void trdclass_cern24::Loop() {
     
     //h250_size->Fill(f250_wraw_count);
     double CalSum=0;
-    bool electron=false;
-    bool pion=false;
     int ch_cal     = 0;
     int ch_presh   = 1;
     int ch_cher    = 2;
@@ -476,9 +471,21 @@ void trdclass_cern24::Loop() {
       if (fadc_chan==ch_cher) hCher_pulse->Reset();
       if (fadc_chan==ch_mult) hMult_pulse->Reset();
       
-      int ped=100; //CHANGE LATER...
+      //--ped calculation for f250 raw data
+      int nped = 0, ped=100;
+      double ped_sum = 0.;
+      if (fadc_window > 15) {
+        for (int si=20; si<35; si++) {
+          int ped_samp = f250_wraw_samples->at(f250_wraw_samples_index->at(i)+si);
+          ped_sum += ped_samp;
+          nped++;
+        }
+      }
+      if (nped>0.) ped = ped_sum / nped;
+      if (0. > ped || ped > 200 ) ped = 100; 
+      //cout<<"evt: "<<event_num<<"  wraw_ped= "<<ped<<endl;
+      
       for (int si=0; si<fadc_window; si++) {
-        //ped = f250_wraw_samples->at(f250_wraw_samples_index->at(i)+si-10.); //???
         int adc = f250_wraw_samples->at(f250_wraw_samples_index->at(i)+si);
         if (fadc_chan==ch_cal)   hCal_pulse->Fill(si+0.5,adc+0.);
         if (fadc_chan==ch_cher)  hCher_pulse->Fill(si+0.5,adc+0.);
@@ -491,7 +498,6 @@ void trdclass_cern24::Loop() {
       } // --  end of fadc window samples loop --
       if (fadc_chan==ch_cal) { CalSum=calIntegral; }
     } // -- end of fadc250 channels loop --
-    
     Ecal_Energy=CalSum;
     Presh_Energy=preshIntegral;
     Mult_Energy=multIntegral;
@@ -709,9 +715,11 @@ void trdclass_cern24::Loop() {
       hevtck->Reset();
       double gem_ampmax=-1., mmg1_ampmax=-1., gem_xchmax=-1, mmg1_xchmax=-1;
       int gem_timemax=0, mmg1_timemax=0;
-      float ped_max=0;
+      //float ped_max=0;
+      int gem_trk_hit=0, mmg1_trk_hit=0;
       
       if (gt_1_idx_x>0 && gt_2_idx_x>0) { //--External tracking condition
+      
       Count("trk_hit");
       float x1=gemtrkr1_xch_max;
       float x2=gemtrkr2_xch_max;
@@ -750,7 +758,9 @@ void trdclass_cern24::Loop() {
           gem_residuals->Fill((xgem-gem_extr));
           gem_residualscorr->Fill((xgem-gem_extr)-gem_correction);
           gem_residual_ch->Fill(gemChan*0.4, (xgem-gem_extr-gem_correction));
+          gem_trk_hit=0;
           if (abs(xgem-gem_extr-gem_correction)<10) { //within 10 mm
+          Count ("gem_trk_hit");
           if (!match) {
             if (electron_tag) {
               f125_el_tracker_eff->Fill(gem_extr);
@@ -759,6 +769,7 @@ void trdclass_cern24::Loop() {
             }
             match = true;
           }
+          gem_trk_hit++;
           f125_fit->Fill(time,gemChan,amp);
           //------------ for Clusters -------------
           int TimeWindowStart = 45;
@@ -802,7 +813,9 @@ void trdclass_cern24::Loop() {
           mmg1_residuals->Fill((xmmg1-mmg1_extr));
           mmg1_residualscorr->Fill((xmmg1-mmg1_extr)-mmg1_correction);
           mmg1_residual_ch->Fill(mmg1Chan*0.4, (xmmg1-mmg1_extr-mmg1_correction));
+          mmg1_trk_hit=0;
           if (abs(xmmg1-mmg1_extr-mmg1_correction)<10) { //within 10 mm
+          Count ("mmg1_trk_hit");
           if (!match_mmg1) {
             if (electron_tag) {
               mmg1_f125_el_tracker_eff->Fill(mmg1_extr);
@@ -811,6 +824,7 @@ void trdclass_cern24::Loop() {
             }
             match_mmg1 = true;
           }
+          mmg1_trk_hit++;
           mmg1_f125_fit->Fill(time,mmg1Chan,amp);
     	    if (mmg1_ampmax<amp) {
             mmg1_ampmax=amp;
@@ -893,7 +907,7 @@ void trdclass_cern24::Loop() {
           if (mmg1_timemax<90) mmg1_f125_pi_max_early->Fill(mmg1_ampmax);
         }
       }
-      gem_amp_max= gem_ampmax;
+      gem_amp_max=gem_ampmax;
       gem_time_max=gem_timemax;
       gem_xch_max=gem_xchmax;
       gem_chi2cc.push_back(chi2cc_gem);
@@ -940,32 +954,42 @@ void trdclass_cern24::Loop() {
         int fADCChan = f125_wraw_channel->at(i);
         int gemChan = GetGEMChan(fADCChan, fADCSlot);
         int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
-        //if (gemChan<0) continue;
-        double DEDX_THR = GEM_THRESH;
+        double DEDX_THR = GEM_THRESH, mDEDX_THR = MMG1_THRESH;
         int TimeWindowStart = 45;
         int TimeMin = 0;
         int TimeMax = 140;
         
+        //--ped calculation for f125 raw data
+        int nped = 0, ped = 100;
+        double ped_sum = 0.;
+        for (int si=TimeWindowStart-15; si<TimeWindowStart; si++) {
+          int ped_samp = f125_wraw_samples->at(f125_wraw_samples_index->at(i)+si);
+          ped_sum += ped_samp;
+          nped++;
+        }
+        ped = ped_sum / nped;
+        if (0. > ped || ped > 200 ) ped = 100;
+        //cout<<"wraw ped = "<<ped<<endl;
+
         for (int si=0; si<fadc_window; si++) {
           int time=si;
           int adc = f125_wraw_samples->at(f125_wraw_samples_index->at(i)+si);
+          adc = adc - ped;
           if (adc>4090) printf("!!!!!!!!!!!!!!!!!!!!!! ADC 125 overflow: %d \n",adc);
           if (adc>DEDX_THR) {
             if (gemChan>-1) {
-              if (electron_tag)  {
-                f125_el_raw->Fill(time,gemChan,adc);
-              } else if (pion_tag) {
-                f125_pi_raw->Fill(time,gemChan,adc);
-              }
               time-=TimeWindowStart;
-              if ( TimeMin > time || time > TimeMax ) continue; // --- drop early and late hits ---
+              ///////////////if ( TimeMin > time || time > TimeMax ) continue; // --- drop early and late hits ---
               
               hevtc->SetBinContent(time,gemChan,adc/100.);
               hevt->SetBinContent(time,gemChan,adc/100.);
             }
+          }
+          if (adc > mDEDX_THR) {
             if (mmg1Chan>-1) {
-              mhevtc->SetBinContent(time-35,mmg1Chan,adc/100.);
-              mhevt->SetBinContent(time-35,mmg1Chan,adc/100.);
+              time-=(TimeWindowStart-35);
+              mhevtc->SetBinContent(time,mmg1Chan,adc/100.);
+              mhevt->SetBinContent(time,mmg1Chan,adc/100.);
             }
           }
         } // --  end of samples loop
@@ -1418,7 +1442,8 @@ void trdclass_cern24::Loop() {
             
             #ifdef SHOW_EVTbyEVT
               if (NTRACKS!=1) continue;  // --- skip event ----
-              if (nhits<3)    continue;  // --- skip event ----
+              //if (nhits<3)    continue;  // --- skip event ----
+              if (gem_trk_hit<1) continue;
                 char mgTitle[80]; sprintf(mgTitle,"GEM ML-FPGA response, #Tracks=%d; z pos [mm]; y pos [mm]",NTRACKS);
                 mg->SetTitle(mgTitle);
                 c2->cd(3); mg->Draw("AP");
@@ -1477,8 +1502,8 @@ void trdclass_cern24::Loop() {
     //=====================================================================================
     
     #ifdef SAVE_TRACK_HITS
-      if (gem_nhit>0) EVENT_VECT_GEM->Fill();
-      if (mmg1_nhit>0)EVENT_VECT_MMG1->Fill();
+      //if (gem_nhit>0) EVENT_VECT_GEM->Fill();
+      //if (mmg1_nhit>0)EVENT_VECT_MMG1->Fill();
       float gem_max_clu_dEdx=-1.;
       float gem_max_clu_Xpos=-1.;
       float gem_max_clu_Zpos=-1.;
