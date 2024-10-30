@@ -29,7 +29,7 @@
 //--  0-dEdx 1-Params 2-dEdx+Params ; change MAXpar to 17 !
 #define NN_MODE 3
 //#define VERBOSE
-#define ANALYZE_MERGED 0
+#define ANALYZE_MERGED 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
@@ -338,20 +338,23 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
       
       switch (RunNum) {
         
-        case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=104;  e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
-        case 5264:   tw1=65; tw2=104; tw3=141; e_chan1=104;  e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5254:   tw1=65; tw2=118; tw3=134; e_chan1=112;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5256:   tw1=65; tw2=118; tw3=134; e_chan1=112;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5264:   tw1=65; tw2=90;  tw3=141; e_chan1=109;   e_chan2=130;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5268:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5278:   tw1=65; tw2=95; tw3=141; e_chan1=109;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
         case 5281:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         case 5282:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         case 5283:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        //case 5283:   tw1=67; tw2=85; tw3=135; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5268:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5284:   tw1=67; tw2=90;  tw3=141; e_chan1=110;   e_chan2=129;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         
         //-- For Second Xe Bottle !!
         case 5301:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
         case 5302:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
         case 5303:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
         case 5304:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5306:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5306:   tw1=70; tw2=125; tw3=170; e_chan1=108; e_chan2=129;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         
         default:
 	      tw1=67;

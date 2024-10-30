@@ -41,7 +41,7 @@
 #include "TBox.h"
 
 #include "stdio.h"
-#define ANALYZE_MERGED 0
+#define ANALYZE_MERGED 1
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
@@ -262,7 +262,7 @@ public :
    #if ANALYZE_MERGED
     trdclass_cern24(int RunNum, int nEntries, int nTrees, int MaxEvt, int FirstEvt);
    #else
-    trdclass_cern24(int RunNum, int MaxEvt, int FirstEvt, int FileNum);
+    trdclass_cern24(int RunNum, int MaxEvt, int FirstEvt);
    #endif
    virtual ~trdclass_cern24();
    virtual Int_t    Cut(Long64_t entry);
@@ -282,7 +282,6 @@ public :
    int RunNum;
    int nEntries;
    int nTrees;
-   int FileNum;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
    //TH1F *h250_size;
@@ -299,9 +298,9 @@ public :
    TH1F *hgemtrkr_1_peak_x, *hgemtrkr_1_peak_y, *hgemtrkr_2_peak_x, *hgemtrkr_2_peak_y, *hgemtrkr_3_peak_x, *hgemtrkr_3_peak_y, *mmg1_peak_y, *gem_peak_y;
    TH1F *hgemtrkr_1_peak_x_height, *hgemtrkr_1_peak_y_height, *hgemtrkr_2_peak_x_height, *hgemtrkr_2_peak_y_height, *hgemtrkr_3_peak_x_height, *hgemtrkr_3_peak_y_height, *hmmg1_peak_y_height, *hgem_peak_y_height;
    TH2F *hgemtrkr_1_peak_xy, *hgemtrkr_2_peak_xy, *hgemtrkr_3_peak_xy;
-   TH2F *hgemtrkr_1_atlas_xy, *hgemtrkr_2_atlas_xy, *hgemtrkr_3_atlas_xy;
+   TH2F *hgemtrkr_1_max_xy, *hgemtrkr_2_max_xy, *hgemtrkr_3_max_xy;
    TH2F *hgemtrkr_1_gem, *hgemtrkr_1_mmg1;
-   TH1F *hgemtrkr_1_max_xch, *hgemtrkr_1_max_xamp, *hgemtrkr_2_max_xch, *hgemtrkr_2_max_xamp;
+   TH1F *hgemtrkr_1_max_xch, *hgemtrkr_1_max_xamp, *hgemtrkr_2_max_xch, *hgemtrkr_2_max_xamp, *hgemtrkr_3_max_xch, *hgemtrkr_3_max_xamp;
     
    TH1F *f125_el, *f125_el_max, *f125_el_max_late, *f125_el_max_early;
    TH1F *f125_pi, *f125_pi_max, *f125_pi_max_late, *f125_pi_max_early;
@@ -430,43 +429,31 @@ trdclass_cern24::trdclass_cern24(int RunNum_in, int nEntries_in=0, int nTrees_in
   
 #else
 
-trdclass_cern24::trdclass_cern24(int RunNum_in, int MaxEvt_in=0,  int FirstEvt_in=0, int FileNum_in=0) : fChain(0)
+trdclass_cern24::trdclass_cern24(int RunNum_in, int MaxEvt_in=0,  int FirstEvt_in=0) : fChain(0)
 {
   RunNum=RunNum_in;
-  FileNum=FileNum_in;
   MaxEvt=MaxEvt_in;
   FirstEvt=FirstEvt_in;
-
-  printf("====== trdclass constructor Run=%d File=%d  ============\n",RunNum,FileNum);
-
+  
+  printf("========== trdclass_cern24 constructor Run=%d  ============\n",RunNum);
+  
   TChain* chain;
   TTree *tree=NULL;
   char chainFiles[128];
-  
-  if (FileNum<0) {
-    sprintf(chainFiles,"ROOT/Run_%06d_*.root",RunNum);
-    chain = new TChain("events");
-    chain->Add(chainFiles);
-    //chain->Print();
-    tree=chain;
-  } 
   
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
      char FileName[128];
-     sprintf(FileName,"ROOT/Run_%06d_%03d.root",RunNum,FileNum);
+     sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
-         f = new TFile(FileName);
-       printf("---> Open file = %s \n",FileName);
-     } else {
-       sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
-       f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
-       printf("---> Open file = %s \n",FileName);
+        f = new TFile(FileName);
+        printf("---> Opening file = %s \n",FileName);
+      } else {
+        printf("---> File %s cannot be opened !\n",FileName);
       }
       f->GetObject("events",tree);
-
    }
    Init(tree);
 }

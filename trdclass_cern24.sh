@@ -16,7 +16,7 @@ if [[ ${RUNNUM} == "none" ]] ; then
     exit 0;
 fi
 
-echo "====>  Process RUN=$RUNNUM <=========="
+echo "==========>  Process RUN=$RUNNUM <=========="
 
 root --web=off -l <<EOC
 .L trdclass_cern24.C+g
