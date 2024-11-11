@@ -46,6 +46,8 @@ TBranch        *b_presh_energy;   //!
 TBranch        *b_mult_energy;   //!
 TBranch        *b_gem_nhit;   //!
 TBranch        *b_gem_nclu;
+TBranch        *b_mmg1_nhit;   //!
+TBranch        *b_mmg1_nclu;
 TBranch        *b_xpos;   //!
 TBranch        *b_zpos;   //!
 TBranch        *b_dedx;   //!

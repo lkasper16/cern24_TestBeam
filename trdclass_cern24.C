@@ -27,6 +27,8 @@
 #define USE_125_RAW
 #define USE_250_PULSE
 #define MAX_CLUST 500
+#define MAX_NODES 100
+#define USE_MAXPOS 1
 //
 #define SAVE_TRACK_HITS
 #define SAVE_PDF
@@ -324,6 +326,9 @@ void trdclass_cern24::Loop() {
     EVENT_VECT_MMG1->Branch("event_num",&event_num,"event_num/I");
     EVENT_VECT_MMG1->Branch("nhit",&mmg1_nhit,"mmg1_nhit/I");
     EVENT_VECT_MMG1->Branch("nclu",&mmg1_nclu,"mmg1_nclu/I");
+    EVENT_VECT_MMG1->Branch("ecal_energy",&Ecal_Energy,"Ecal_Energy/float");
+    EVENT_VECT_MMG1->Branch("presh_energy",&Presh_Energy,"Presh_Energy/float");
+    EVENT_VECT_MMG1->Branch("mult_energy",&Mult_Energy,"Mult_Energy/float");
     EVENT_VECT_MMG1->Branch("xpos",&mmg1_xpos);
     EVENT_VECT_MMG1->Branch("zpos",&mmg1_zpos);
     EVENT_VECT_MMG1->Branch("dedx",&mmg1_dedx);
@@ -1034,7 +1039,11 @@ void trdclass_cern24::Loop() {
       //==================================================================================================
       #if (USE_CLUST>0)
         // -------------------------------   hist dist clustering         ------------------------
-        //--GEMTRD
+        //--GEM-TRD
+        float clust_Xmax[MAX_CLUST];
+        float clust_Zmax[MAX_CLUST];
+        float clust_Emax[MAX_CLUST];
+        
         float clust_Xpos[MAX_CLUST];
         float clust_Zpos[MAX_CLUST];
         float clust_dEdx[MAX_CLUST];
@@ -1048,6 +1057,10 @@ void trdclass_cern24::Loop() {
         float hits_Width[MAX_CLUST];  // y1, y2, dy ; strips
         float hits_Length[MAX_CLUST]; // x1, x2, dx ; time
         //--MMG1TRD
+        float mmg1_clust_Xmax[MAX_CLUST];
+        float mmg1_clust_Zmax[MAX_CLUST];
+        float mmg1_clust_Emax[MAX_CLUST];
+        
         float mmg1_clust_Xpos[MAX_CLUST];
         float mmg1_clust_Zpos[MAX_CLUST];
         float mmg1_clust_dEdx[MAX_CLUST];
@@ -1062,11 +1075,13 @@ void trdclass_cern24::Loop() {
         float mmg1_hits_Length[MAX_CLUST]; // x1, x2, dx ; time
         
         for (int k=0; k<MAX_CLUST; k++) {
-          clust_Xpos[k]=0; clust_Zpos[k]=0; clust_dEdx[k]=0;  clust_Size[k]=0;
+	        clust_Xpos[k]=0; clust_Zpos[k]=0; clust_dEdx[k]=0;  clust_Size[k]=0;
+	        clust_Xmax[k]=0; clust_Zmax[k]=0; clust_Emax[k]=0;
           clust_Width[k][0]=999999;   	clust_Width[k][1]=-999999;   	clust_Width[k][2]=0;
           clust_Length[k][0]=999999;  	clust_Length[k][1]=-999999;  	clust_Length[k][2]=0;
           
           mmg1_clust_Xpos[k]=0; mmg1_clust_Zpos[k]=0; mmg1_clust_dEdx[k]=0;  mmg1_clust_Size[k]=0;
+          mmg1_clust_Xmax[k]=0; mmg1_clust_Zmax[k]=0; mmg1_clust_Emax[k]=0;
           mmg1_clust_Width[k][0]=999999;     mmg1_clust_Width[k][1]=-999999;    mmg1_clust_Width[k][2]=0;
           mmg1_clust_Length[k][0]=999999;    mmg1_clust_Length[k][1]=-999999;   mmg1_clust_Length[k][2]=0;
         }
@@ -1097,18 +1112,19 @@ void trdclass_cern24::Loop() {
           float CL_DIST=3.3; // mm
           double THR2 = 0.01;
         #else
-          float CL_DIST=2.7; //2.9; // mm
+          float CL_DIST=2.9; // mm
           double THR2 = 0.2;
         #endif
         
-        for (int ix=0; ix<nx; ix++) {  //-------------------- Clustering Loop (GEMTRD) ------------------------------------
-          for (int iy=0; iy<ny; iy++) {
+        for (int iy=0; iy<ny; iy++) {  //-------------------- Clustering Loop (GEMTRD) ------------------------------------
+          for (int ix=0; ix<nx; ix++) {
             double c1 = hpc->GetBinContent(ix,iy);                    // energy
             double x1=double(ix)/double(nx)*(xma-xmi)+xmi-binx/2.;    // drift time
             double y1=double(iy)/double(ny)*(yma-ymi)+ymi-biny/2.;    // X strip
             if (c1<THR2) continue;
             if (nclust==0) {
-              clust_Xpos[nclust]=y1; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
+	            clust_Xpos[nclust]=y1; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
+	            clust_Xmax[nclust]=y1; clust_Zmax[nclust]=x1;  clust_Emax[nclust]=c1;
               clust_Width[nclust][0]=y1;   	clust_Width[nclust][1]=y1;   	clust_Width[nclust][2]=0;
               clust_Length[nclust][0]=x1;  	clust_Length[nclust][1]=x1;  	clust_Length[nclust][2]=0;
               nclust++; continue;
@@ -1119,6 +1135,11 @@ void trdclass_cern24::Loop() {
               if (dist<CL_DIST) {
                 clust_Xpos[k]=(y1*c1+clust_Xpos[k]*clust_dEdx[k])/(c1+clust_dEdx[k]);  //--  new X pos
                 clust_Zpos[k]=(x1*c1+clust_Zpos[k]*clust_dEdx[k])/(c1+clust_dEdx[k]);  //--  new Z pos
+	              if (c1>clust_Emax[k]) {
+		              clust_Xmax[k]=y1;
+		              clust_Zmax[k]=x1;
+		              clust_Emax[k]=c1;
+	              }
                 clust_dEdx[k]=c1+clust_dEdx[k];  // new dEdx
                 clust_Size[k]=1+clust_Size[k];  // clust size in pixels
                 if (y1<clust_Width[k][0]) clust_Width[k][0]=y1; if (y1>clust_Width[k][1]) clust_Width[k][1]=y1; clust_Width[k][2]=clust_Width[k][1]-clust_Width[k][0];
@@ -1129,7 +1150,8 @@ void trdclass_cern24::Loop() {
             }
             if (added==0) {
               if (nclust+1>=MAX_CLUST) continue;
-              clust_Xpos[nclust]=y1; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
+	            clust_Xpos[nclust]=y1; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1; 
+	            clust_Xmax[nclust]=y1; clust_Zmax[nclust]=x1;  clust_Emax[nclust]=c1;
               clust_Width[nclust][0]=y1;   	clust_Width[nclust][1]=y1;   	clust_Width[nclust][2]=0;
               clust_Length[nclust][0]=x1;  	clust_Length[nclust][1]=x1;  	clust_Length[nclust][2]=0;
               nclust++;
@@ -1137,14 +1159,15 @@ void trdclass_cern24::Loop() {
           }
         } //---------------------- End Clustering Loop (GEMTRD) ------------------------------
         
-        for (int ix=0; ix<nmx; ix++) {  //-------------------- Clustering Loop (MMG1TRD) ------------------------------------
-          for (int iy=0; iy<nmy; iy++) {
+        for (int iy=0; iy<nmy; iy++) {  //-------------------- Clustering Loop (MMG1TRD) ------------------------------------
+          for (int ix=0; ix<nmx; ix++) {
             double c1 = hmpc->GetBinContent(ix,iy);                       // energy
             double x1=double(ix)/double(nmx)*(xmma-xmmi)+xmmi-binmx/2.;   // drift time
             double y1=double(iy)/double(nmy)*(ymma-ymmi)+ymmi-binmy/2.;        // X strip
             if (c1<THR2) continue;
             if (mmg1_nclust==0) {
               mmg1_clust_Xpos[mmg1_nclust]=y1; mmg1_clust_Zpos[mmg1_nclust]=x1;  mmg1_clust_dEdx[mmg1_nclust]=c1;  mmg1_clust_Size[mmg1_nclust]=1;
+              mmg1_clust_Xmax[mmg1_nclust]=y1; mmg1_clust_Zmax[mmg1_nclust]=x1;  mmg1_clust_Emax[mmg1_nclust]=c1;
               mmg1_clust_Width[mmg1_nclust][0]=y1;    mmg1_clust_Width[mmg1_nclust][1]=y1;    mmg1_clust_Width[mmg1_nclust][2]=0;
               mmg1_clust_Length[mmg1_nclust][0]=x1;   mmg1_clust_Length[mmg1_nclust][1]=x1;   mmg1_clust_Length[mmg1_nclust][2]=0;
               mmg1_nclust++; continue;
@@ -1155,6 +1178,11 @@ void trdclass_cern24::Loop() {
               if (dist<CL_DIST) {
                 mmg1_clust_Xpos[k]=(y1*c1+mmg1_clust_Xpos[k]*mmg1_clust_dEdx[k])/(c1+mmg1_clust_dEdx[k]);  //--  new X pos
                 mmg1_clust_Zpos[k]=(x1*c1+mmg1_clust_Zpos[k]*mmg1_clust_dEdx[k])/(c1+mmg1_clust_dEdx[k]);  //--  new Z pos
+                if (c1>clust_Emax[k]) {
+		              mmg1_clust_Xmax[k]=y1;
+		              mmg1_clust_Zmax[k]=x1;
+		              mmg1_clust_Emax[k]=c1;
+	              }                
                 mmg1_clust_dEdx[k]=c1+mmg1_clust_dEdx[k];  // new dEdx
                 mmg1_clust_Size[k]=1+mmg1_clust_Size[k];  // clust size in pixels
                 if (y1<mmg1_clust_Width[k][0]) mmg1_clust_Width[k][0]=y1; if (y1>mmg1_clust_Width[k][1]) mmg1_clust_Width[k][1]=y1; mmg1_clust_Width[k][2]=mmg1_clust_Width[k][1]-mmg1_clust_Width[k][0];
@@ -1166,6 +1194,7 @@ void trdclass_cern24::Loop() {
             if (mmg1_added==0) {
               if (mmg1_nclust+1>=MAX_CLUST) continue;
               mmg1_clust_Xpos[mmg1_nclust]=y1; mmg1_clust_Zpos[mmg1_nclust]=x1;  mmg1_clust_dEdx[mmg1_nclust]=c1;  mmg1_clust_Size[mmg1_nclust]=1;
+              mmg1_clust_Xmax[mmg1_nclust]=y1; mmg1_clust_Zmax[mmg1_nclust]=x1;  mmg1_clust_Emax[mmg1_nclust]=c1;
               mmg1_clust_Width[mmg1_nclust][0]=y1;    mmg1_clust_Width[mmg1_nclust][1]=y1;    mmg1_clust_Width[mmg1_nclust][2]=0;
               mmg1_clust_Length[mmg1_nclust][0]=x1;   mmg1_clust_Length[mmg1_nclust][1]=x1;   mmg1_clust_Length[mmg1_nclust][2]=0;
               mmg1_nclust++;
@@ -1200,8 +1229,13 @@ void trdclass_cern24::Loop() {
           #endif
           //-------------  Cluster Filter (GEMTRD) -----------------
           if ((clust_Size[k] >= MinClustSize && zStart < clust_Zpos[k] && clust_Zpos[k] < zEnd && clust_Width[k][2]>MinClustWidth) || clust_Length[k][2]<MaxClustLength) {
-        	  hits_Xpos[ii]=clust_Xpos[k];
-        	  hits_Zpos[ii]=clust_Zpos[k];
+        	  #if (USE_MAXPOS>0)
+	            hits_Xpos[ii]=clust_Xmax[k];
+	            hits_Zpos[ii]=clust_Zmax[k];
+            #else
+              hits_Xpos[ii]=clust_Xpos[k];
+        	    hits_Zpos[ii]=clust_Zpos[k];
+            #endif
         	  hits_dEdx[ii]=clust_dEdx[k];
             hits_Width[ii]=clust_Width[k][2];
             hits_Length[ii]=clust_Length[k][2];
@@ -1247,7 +1281,11 @@ void trdclass_cern24::Loop() {
           	int pmt=22, pmt0 = 20; // PM type
             int max2draw = nclust;
             for (int i=0; i<max2draw; i++) {
-          	  TMarker m = TMarker(clust_Zpos[i], clust_Xpos[i], pmt);
+              #if (USE_MAXPOS>0) 
+	              TMarker m = TMarker(clust_Zmax[i],clust_Xmax[i],pmt);
+              #else
+          	    TMarker m = TMarker(clust_Zpos[i], clust_Xpos[i], pmt);
+              #endif
           	  int tcol=2;
           	  if (clust_Size[i]<MinClustSize) pmt=22; else pmt=pmt0;
           	  int mcol = COLMAP[tcol-1];   m.SetMarkerColor(mcol);   m.SetMarkerStyle(pmt);
@@ -1262,7 +1300,11 @@ void trdclass_cern24::Loop() {
             int mpmt=22, mpmt0 = 20; // PM type
             int mmax2draw = mmg1_nclust;
             for (int i=0; i<mmax2draw; i++) {
-              TMarker m = TMarker(mmg1_clust_Zpos[i], mmg1_clust_Xpos[i], mpmt);
+              #if (USE_MAXPOS>0) 
+	              TMarker m = TMarker(mmg1_clust_Zmax[i],mmg1_clust_Xmax[i], mpmt);
+              #else
+                TMarker m = TMarker(mmg1_clust_Zpos[i], mmg1_clust_Xpos[i], mpmt);
+              #endif
               int tcol=2;
               if (mmg1_clust_Size[i]<MinClustSize) mpmt=22; else mpmt=mpmt0;
               int mcol = mCOLMAP[tcol-1];   m.SetMarkerColor(mcol);   m.SetMarkerStyle(mpmt);

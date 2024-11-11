@@ -30,15 +30,12 @@
 #define NN_MODE 3
 //#define VERBOSE
 #define ANALYZE_MERGED 1
+//#define MMG_RUN
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
 void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
-
-//--  0-dEdx 1-Params 2-dEdx+Params ; change MAXpar to 17 !
-#define NN_MODE 3
-//#define VERBOSE
 
 const int MaxNDEslices =10;
 const int NFixed = 8;
@@ -166,16 +163,18 @@ std::pair<double,double> Reject(TH1 *hp, TH1 *he, double thr) {
 }
 //---------------------------------------------------------------------
 #if ANALYZE_MERGED
-int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3, int nEntries) {
+int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3, int nEntries) {
 #else
-int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
+int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
 #endif  
   // Set object pointer
   ecal_energy=0;
   presh_energy=0;
   mult_energy=0;
   gem_nhit = 0;
-  gem_nclu=0;
+  gem_nclu = 0;
+  mmg1_nhit = 0;
+  mmg1_nclu = 0;
   xpos = 0;
   zpos = 0;
   dedx = 0;
@@ -191,9 +190,15 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
   widthc_max = 0;
   
   // Set branch addresses and branch pointers
-  if (!gem_hits) return -1;
+  //#ifdef MMG_RUN
+  //if (!mmg1_hits) return -1;
+  //TTree *fChain;
+  //fChain = mmg1_hits;
+  //#else
+  if (!ttree_hits) return -1;
   TTree *fChain;
-  fChain = gem_hits;
+  fChain = ttree_hits;
+  //#endif
   fChain->SetMakeClass(1);
   
   fChain->SetBranchAddress("event_num", &event_num, &b_event_num);
@@ -201,8 +206,8 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
   fChain->SetBranchAddress("presh_energy", &presh_energy, &b_presh_energy);
   fChain->SetBranchAddress("mult_energy", &mult_energy, &b_mult_energy);
   fChain->SetBranchAddress("parID", &parID, &b_parID);
-  fChain->SetBranchAddress("nhit", &gem_nhit, &b_gem_nhit);
-  fChain->SetBranchAddress("nclu", &gem_nclu, &b_gem_nclu);
+  //fChain->SetBranchAddress("nhit", &gem_nhit, &b_gem_nhit);
+  //fChain->SetBranchAddress("nclu", &gem_nclu, &b_gem_nclu);
   fChain->SetBranchAddress("xpos", &xpos, &b_xpos);
   fChain->SetBranchAddress("zpos", &zpos, &b_zpos);
   fChain->SetBranchAddress("dedx", &dedx, &b_dedx);
@@ -215,7 +220,13 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
   fChain->SetBranchAddress("zposc_max", &zposc_max, &b_zposc_max);
   fChain->SetBranchAddress("dedxc_max", &dedxc_max, &b_dedxc_max);
   fChain->SetBranchAddress("widthc_max", &widthc_max, &b_widthc_max);
-  
+  #ifdef MMG_RUN
+    fChain->SetBranchAddress("nhit", &mmg1_nhit, &b_mmg1_nhit);
+    fChain->SetBranchAddress("nclu", &mmg1_nclu, &b_mmg1_nclu);
+  #else
+    fChain->SetBranchAddress("nhit", &gem_nhit, &b_gem_nhit);
+    fChain->SetBranchAddress("nclu", &gem_nclu, &b_gem_nclu);
+  #endif
   //========================================
   TH2F *hits2d_e = new TH2F("hits2d_e","hits2d_e",125,0.5,250.5,240,-0.5,239.5);
   TH2F *hits2d_pi = new TH2F("hits2d_pi","hits2d_pi",125,0.5,250.5,240,-0.5,239.5);
@@ -232,7 +243,7 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
   TH1F *hpion_dedxtotal = new TH1F("hpion_dedxtotal","Pion e_total",600,0.5,150000.5);
   
   TH1F *time_e  = new TH1F("time_e","Electron Amplitude in Time",250,0.5,250.5);
-  TH1F *time_pi = new TH1F("time_pi","Pion Amplitdue in Time",250,0.5,250.5);
+  TH1F *time_pi = new TH1F("time_pi","Pion Amplitude in Time",250,0.5,250.5);
   
   TH1F *par_e[MAXpar]; 
   TH1F *par_pi[MAXpar];
@@ -255,7 +266,7 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
     cout << " hist: nx=" << nx << " xmi=" << xmi << " xma=" << xma << " noent= " << noent << endl;
   #endif
   
-  Long64_t nentries = gem_hits->GetEntries();
+  Long64_t nentries = ttree_hits->GetEntries();
   Long64_t nbytes = 0;
   int ntest=nentries*0.25;
   #ifdef VERBOSE
@@ -277,7 +288,7 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
   //                   E V E N T    L O O P
   //--------------------------------------------------------------------------------
   for (Long64_t iev = 0; iev < nentries; iev++) {  
-    nbytes += gem_hits->GetEntry(iev);
+    nbytes += ttree_hits->GetEntry(iev);
     ievent=iev;
     Count("EVT");
     if (!(iev % 1000)) cout << " ===> Event = "  << iev << " of " << nentries << endl;
@@ -330,43 +341,51 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
       Ascale=10.;       
       e_chan1=40;          //-- first TR channel
       e_chan2=55;         //-- last  TR channel
-      pi_chan1=e_chan1+1;  //-- first pion (no-rad) channel
-      pi_chan2=e_chan2+1;  //-- last  pion (no-rad) channel
+      pi_chan1=e_chan1;  //-- first pion (no-rad) channel
+      pi_chan2=e_chan2;  //-- last  pion (no-rad) channel
       tw1 = 110;
       tw2 = 160;
       tw3 = 185;
       
       switch (RunNum) {
         
-        case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        #ifdef MMG_RUN
+        case 5264:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5268:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5278:   tw1=46; tw2=95;  tw3=193; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5283:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5284:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        
+        #else
+        case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
         case 5254:   tw1=65; tw2=118; tw3=134; e_chan1=112;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
         case 5256:   tw1=65; tw2=118; tw3=134; e_chan1=112;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
         case 5264:   tw1=65; tw2=90;  tw3=141; e_chan1=109;   e_chan2=130;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
-        case 5268:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
-        case 5278:   tw1=65; tw2=95; tw3=141; e_chan1=109;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
-        case 5281:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5282:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5283:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5284:   tw1=67; tw2=90;  tw3=141; e_chan1=110;   e_chan2=129;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5268:   tw1=67; tw2=95;  tw3=141; e_chan1=109;   e_chan2=129;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5278:   tw1=61; tw2=90;  tw3=140; e_chan1=106;   e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5281:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5282:   tw1=67; tw2=104; tw3=141; e_chan1=104;   e_chan2=129;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5283:   tw1=61; tw2=90;  tw3=140; e_chan1=106;   e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5284:   tw1=61; tw2=90;  tw3=140; e_chan1=106;   e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         
         //-- For Second Xe Bottle !!
-        case 5301:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- No Rad
-        case 5302:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5303:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5304:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5301:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5302:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5303:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5304:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         case 5306:   tw1=70; tw2=125; tw3=170; e_chan1=108; e_chan2=129;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
-        
+        #endif
         default:
 	      tw1=67;
 	      tw2=85;
 	      tw3=135;
         e_chan1=104;
         e_chan2=127;
-        pi_chan1=e_chan1+1;
+        pi_chan1=e_chan1;
         pi_chan2=e_chan2;
       }
     } else {
-      printf(" Run %d not found in the GEM range - exiting \n",RunNum);
+      printf(" Run %d not found in the CERN 2024 range - exiting \n",RunNum);
       exit(1);
     }
     
@@ -405,27 +424,48 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
       if (dedxc->at(icl)>max_dedxc) max_dedxc=dedxc->at(icl);
     }
     */
-    int clu_nhits=gem_nclu;
+    #ifdef MMG_RUN
+      int clu_nhits=mmg1_nclu;
+      hNhits->Fill(mmg1_nhit);
+      hNclu->Fill(mmg1_nclu);
+    #else
+      int clu_nhits=gem_nclu;
+      hNhits->Fill(gem_nhit);
+      hNclu->Fill(gem_nclu);
+    #endif
     float max_widthc=widthc_max;
     float max_dedxc=dedxc_max;
     
-    hNhits->Fill(gem_nhit);
-    hNclu->Fill(gem_nclu);
+    //hNhits->Fill(gem_nhit);
+    //hNclu->Fill(gem_nclu);
     //=================== Loop to  calculate average and RMS  ========
     double xaver=0, xaver2=0;
     int    naver=0;
-    for (int i=0;i<gem_nhit;i++){ // count fixed parameters 
+    #ifdef MMG_RUN
+    for (int i=0;i<mmg1_nhit;i++){ // count fixed parameters 
       if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
       xaver+=xpos->at(i); naver++; 
     }
+    #else
+    for (int i=0;i<gem_nhit;i++){ // count fixed parameters 
+      if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
+      xaver+=xpos->at(i); naver++;
+    }
+    #endif
     xaver=xaver/naver;
     
-    //====================================================================    
-    for (int i=0;i<gem_nhit;i++) { // count fixed parameters 
-      
+    //====================================================================
+    #ifdef MMG_RUN
+    for (int i=0;i<mmg1_nhit;i++) { // count fixed parameters
       Count("Gem_Hits");
       if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
       Count("Gem_zHits");
+    #else
+    for (int i=0;i<gem_nhit;i++) { // count fixed parameters 
+      Count("mmg1_Hits");
+      if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
+      Count("mmg1_zHits");
+    #endif
       xaver2+=((xpos->at(i)-xaver)*(xpos->at(i)-xaver));
       if (dedx->at(i)>THR1)  {
   	    if (type==1) hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
@@ -557,9 +597,17 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
   TCanvas *c1,*c0; 
   char ctit[120];
   #if ANALYZE_MERGED
-    sprintf(G_DIR,"mlpOutput/cern24/merged/hd_rawdata_%06d_%06dEntries.root",RunNum,nEntries);
+    #ifdef MMG_RUN
+      sprintf(G_DIR,"mlpOutput/cern24/merged/hd_rawdata_mmg_%06d_%06dEntries.root",RunNum,nEntries);
+    #else
+      sprintf(G_DIR,"mlpOutput/cern24/merged/hd_rawdata_%06d_%06dEntries.root",RunNum,nEntries);
+    #endif
   #else
-    sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",RunNum);    
+    #ifdef MMG_RUN
+      sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_mmg_%06d.root",RunNum);
+    #else
+      sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",RunNum);    
+    #endif
   #endif
   sprintf(ctit,"File=%s",G_DIR);
   htitle(ctit);
@@ -582,8 +630,13 @@ int fill_trees(TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_tst
   c1=NextPlot(nxd,nyd);  aver2d_p->Draw("colz");
   c1=NextPlot(nxd,nyd);  hNclu->SetLineColor(6);  hNclu->Draw();  hNhits->SetLineColor(209);  hNhits->Draw("same");
   TLegend *l1 = new TLegend(.7, .7, .9, .9);
+  #ifdef MMG_RUN
+  l1->AddEntry(hNhits, "mmg1_nhits");
+  l1->AddEntry(hNclu, "mmg1_nclu");
+  #else
   l1->AddEntry(hNhits, "gem_nhits");
   l1->AddEntry(hNclu, "gem_nclu");
+  #endif
   l1->Draw();
   
   //---------------------------------------------------------------------
@@ -659,9 +712,17 @@ void trd_mlp_cern(int RunNum) {
   
   char rootfile[256];
   #if ANALYZE_MERGED
-    sprintf(rootfile,"RootOutput/cern24/merged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    //#ifdef MMG_RUN
+      //sprintf(rootfile,"RootOutput/cern24/merged/trd_singleTrackHits_mmg_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    //#else
+      sprintf(rootfile,"RootOutput/cern24/merged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    //#endif
   #else
-    sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_Run_%06d.root",RunNum);
+    //#ifdef MMG_RUN
+      //sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_mmg_Run_%06d.root",RunNum);
+    //#else
+      sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_Run_%06d.root",RunNum);
+    //#endif
   #endif
   char basename[120];
   char *hd = strstr(rootfile,"/"); 
@@ -673,21 +734,32 @@ void trd_mlp_cern(int RunNum) {
   // Prepare inputs
   // The 2 trees are merged into one, and a "type" branch, 
   // equal to 1 for the signal and 0 for the background is added.
-  TFile *input = 0;
-  input = new TFile(rootfile);
-  if (!input) {
+  TFile *inputFile = 0;
+  inputFile = new TFile(rootfile);
+  if (!inputFile) {
     cout<<"Input file "<<rootfile<<" does not exist - exiting..."<<endl;
     return;
   }
-  
-  TTree *gem_hits = (TTree *) input->Get("gem_hits");
+  #ifdef MMG_RUN
+    TTree *ttree_hits = (TTree *) inputFile->Get("mmg1_hits");
+  #else
+    TTree *ttree_hits = (TTree *) inputFile->Get("gem_hits");
+  #endif
   char mlpname[128];
   #if ANALYZE_MERGED
-    sprintf(mlpname,"mlpOutput/cern24/merged/mlp_run%06d_%06dEntries.root",RunNum,nEntries);
+    #ifdef MMG_RUN
+      sprintf(mlpname,"mlpOutput/cern24/merged/mlp_mmg_run%06d_%06dEntries.root",RunNum,nEntries);
+    #else
+      sprintf(mlpname,"mlpOutput/cern24/merged/mlp_run%06d_%06dEntries.root",RunNum,nEntries);
+    #endif
   #else
-    sprintf(mlpname,"mlpOutput/cern24/mlp_run%06d.root",RunNum);
+    #ifdef MMG_RUN
+      sprintf(mlpname,"mlpOutput/cern24/mlp_mmg_run%06d.root",RunNum);
+    #else
+      sprintf(mlpname,"mlpOutput/cern24/mlp_run%06d.root",RunNum);
+    #endif
   #endif
-  TFile* f = new TFile(mlpname,"RECREATE");
+  TFile* outputFile = new TFile(mlpname,"RECREATE");
   
   TTree *sig_tst = new TTree("sig_tst", "Filtered Events"); 
   TTree *bg_tst = new TTree("bg_tst", "Filtered Events"); 
@@ -695,9 +767,17 @@ void trd_mlp_cern(int RunNum) {
   TTree *background = new TTree("background", "Filtered Events"); 
   TTree *simu = new TTree("simu", "Filtered Events");
   #if ANALYZE_MERGED
-    char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_%06d",RunNum,nEntries);
+    #ifdef MMG_RUN
+      char ctit[120];   sprintf(ctit,"hd_rawdata_mmg_%06d_%06d",RunNum,nEntries);
+    #else
+      char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_%06d",RunNum,nEntries);
+    #endif
   #else
-    char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",RunNum); 
+    #ifdef MMG_RUN
+      char ctit[120];   sprintf(ctit,"hd_rawdata_mmg_%06d_000",RunNum); 
+    #else
+      char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",RunNum);
+    #endif
   #endif
   dispe =  new TH2F("dispe","disp e; time ; X strip",300,-0.5,299.5,200,40.5,240.5);
   disppi = new TH2F("disppi","disp pi; time ; X strip",100,0.5,100.5,350,-0.5,349.5);
@@ -732,9 +812,9 @@ void trd_mlp_cern(int RunNum) {
   #endif
   int rtw1,rtw3;
   #if ANALYZE_MERGED
-  int nn_mode = fill_trees(gem_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3, nEntries);
+  int nn_mode = fill_trees(ttree_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3, nEntries);
   #else
-  int nn_mode = fill_trees(gem_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3);
+  int nn_mode = fill_trees(ttree_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3);
   #endif
   
   #ifdef VERBOSE
@@ -806,7 +886,11 @@ void trd_mlp_cern(int RunNum) {
   latex.SetTextSize(0.05);
   latex.SetTextAlign(13);  //align at top
   double ystep=0.07, ypos=0.95;
-  sprintf(text,"GEM-TRD Mode=%d",nn_mode);
+  #ifdef MMG_RUN
+    sprintf(text,"MMG1-TRD Mode=%d",nn_mode);
+  #else
+    sprintf(text,"GEM-TRD Mode=%d",nn_mode);
+  #endif
   latex.DrawLatex(0.05,ypos-=ystep,text);
   latex.DrawLatex(0.05,ypos-=ystep,rootfile);
   latex.DrawLatex(0.05,ypos-=ystep,NNcfg.data());
@@ -887,12 +971,18 @@ void trd_mlp_cern(int RunNum) {
       #ifdef VERBOSE
         printf(" pi high : out=%f type=%d iev=%d par=%5.1f %5.0f  %5.1f %5.1f %5.1f  \n",out,type,ievent,Par[0],Par[1],Par[2],Par[3],Par[4]);
       #endif
-      gem_hits->GetEntry(ievent);
+      ttree_hits->GetEntry(ievent);
       c2->cd(); disppi->Reset();
       char htit[128]; sprintf(htit,"#pi event %d; time 8 ns/bin ; x-strip ",ievent);   disppi->SetTitle(htit);
+      #ifdef MMG_RUN
+      for (int i=0;i<mmg1_nhit;i++) {
+        if (dedx->at(i)>0) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
+      }
+      #else
       for (int i=0;i<gem_nhit;i++) {
 	      if (dedx->at(i)>0) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
       }
+      #endif
       disppi->Draw("colz");
       TLine lin1(0.,rtw1,350.,rtw1);   TLine lin2(0.,rtw3,350.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();  
       c2->Modified(); c2->Update();
@@ -923,13 +1013,17 @@ void trd_mlp_cern(int RunNum) {
       #ifdef VERBOSE
         printf(" e low : out=%f type=%d iev=%d par=%5.1f %5.0f  %5.1f %5.1f %5.1f  \n",out,type,ievent,Par[0],Par[1],Par[2],Par[3],Par[4]);
       #endif
-      gem_hits->GetEntry(ievent);
+      ttree_hits->GetEntry(ievent);
       c2->cd(1);  dispe->Reset();
       char htit[128]; sprintf(htit,"electrons event %d ; time 8 ns/bin ; x-strip",ievent);  dispe->SetTitle(htit);
       int ii=0; double x[1000], y[1000],ey[1000];
       double yaver=0;
+      #ifdef MMG_RUN
+      for (int i=0;i<mmg1_nhit;i++) {
+      #else
       for (int i=0;i<gem_nhit;i++) {
-	      if (dedx->at(i)>0) {
+	    #endif
+        if (dedx->at(i)>0) {
 	        dispe->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
 	        if ( 110 < zpos->at(i) && zpos->at(i) < 185 ) {
 	          x[ii]=zpos->at(i);  y[ii]=xpos->at(i); if (dedx->at(i)==0) ey[ii]=100; else ey[ii]=1000./dedx->at(i); ii++; yaver+=y[ii];
@@ -1091,12 +1185,16 @@ void trd_mlp_cern(int RunNum) {
   latex.DrawLatex(0.05,ypos-=ystep,str2.data());
   #endif
   //---------------------------------------------
-  sprintf(text,"mlpOutput/%s_m%d.png",basename,nn_mode);
+  #ifdef MMG_RUN
+    sprintf(text,"mlpOutput/%s_mmg_m%d.png",basename,nn_mode);
+  #else
+    sprintf(text,"mlpOutput/%s_m%d.png",basename,nn_mode);
+  #endif
   mlpa_canvas->Print(text);
   mlpa_canvas->cd(0);
   
-  f->Write();
-  delete input;
+  outputFile->Write();
+  delete inputFile;
   cout << "============== END RUN " << RunNum << "===============" <<endl;
 }
 
