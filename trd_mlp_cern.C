@@ -356,6 +356,11 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
         case 5283:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         case 5284:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         
+        //-- For Second Xe Bottle !!
+        case 5303:   tw1=49; tw2=105; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5304:   tw1=49; tw2=105; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5306:   tw1=55; tw2=105; tw3=193; e_chan1=102; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+
         #else
         case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
         case 5254:   tw1=65; tw2=118; tw3=134; e_chan1=112;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
@@ -371,9 +376,9 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
         //-- For Second Xe Bottle !!
         case 5301:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
         case 5302:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5303:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5303:   tw1=68; tw2=105; tw3=170; e_chan1=106; e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         case 5304:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5306:   tw1=70; tw2=125; tw3=170; e_chan1=108; e_chan2=129;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5306:   tw1=68; tw2=105; tw3=170; e_chan1=106; e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         #endif
         default:
 	      tw1=67;
@@ -1214,4 +1219,3 @@ void Count(const char *tit, double cut1, double cut2) {
   hcount->Fill(clab,1);
 }
 //------------------------------------------------------------------
-

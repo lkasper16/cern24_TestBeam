@@ -146,14 +146,17 @@ void trdclass_cern24::Loop() {
   hgt3_nhits = new TH1F("hgt3_nhits","GEM-TRKR3 Hits",50,0,50);  HistList->Add(hgt3_nhits);
   
   //h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5);                                        HistList->Add(h250_size);
+  cout<<"**************************RunNum="<<RunNum<<endl;
   int nx0=100;
-  /////////////if (RunNum>5284) int nx0=130;
+  int mfac=110;
+  if (RunNum>5284.) {nx0=130; mfac=70;}
+  cout<<"**************************nx0="<<nx0<<endl;
   int ny0=240;
   double Ymin=0.;    double Ymax=ny0*0.4;
   double Xmin=0.;    double Xmax=26.; //double Xmax=30.;
-  mhevt  = new TH2F("mhevt","MMG1-TRD Event Display; z pos [mm]; y pos [mm]",nx0+110.,Xmin,Xmax+2.,ny0,Ymin,Ymax); mhevt->SetStats(0); mhevt->SetMaximum(10.); mhevt->SetMinimum(0.);
-  mhevtc = new TH2F("mhevtc","Clustering; FADC bins; MMG1 strips",nx0+110,-0.5,(nx0+110)-0.5,ny0,-0.5,ny0-0.5);  mhevtc->SetStats(0);   mhevtc->SetMinimum(0.07); mhevtc->SetMaximum(40.);
-  mhevtf = new TH2F("mhevtf","MMG1: Clusters for FPGA; z pos [mm]; y pos [mm]",nx0+110.,Xmin,Xmax+2.,ny0,Ymin,Ymax);  mhevtf->SetStats(0); mhevtf->SetMaximum(10.);
+  mhevt  = new TH2F("mhevt","MMG1-TRD Event Display; z pos [mm]; y pos [mm]",nx0+mfac,Xmin,Xmax+2.,ny0,Ymin,Ymax); mhevt->SetStats(0); mhevt->SetMaximum(10.); mhevt->SetMinimum(0.);
+  mhevtc = new TH2F("mhevtc","Clustering; FADC bins; MMG1 strips",nx0+mfac,-0.5,(nx0+mfac)-0.5,ny0,-0.5,ny0-0.5);  mhevtc->SetStats(0);   mhevtc->SetMinimum(0.07); mhevtc->SetMaximum(40.);
+  mhevtf = new TH2F("mhevtf","MMG1: Clusters for FPGA; z pos [mm]; y pos [mm]",nx0+mfac,Xmin,Xmax+2.,ny0,Ymin,Ymax);  mhevtf->SetStats(0); mhevtf->SetMaximum(10.);
   
   hevt  = new TH2F("hevt","GEM-TRD Event display; z pos [mm]; y pos [mm]",nx0,Xmin,Xmax,ny0,Ymin,Ymax); hevt->SetStats(0); hevt->SetMaximum(10.); hevt->SetMinimum(0.);
   hevtc = new TH2F("hevtc","Clustering; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5); hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
