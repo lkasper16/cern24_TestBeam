@@ -228,6 +228,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     fChain->SetBranchAddress("nclu", &gem_nclu, &b_gem_nclu);
   #endif
   //========================================
+  //TList *HistList = new TList();
   TH2F *hits2d_e = new TH2F("hits2d_e","hits2d_e",125,0.5,250.5,240,-0.5,239.5);
   TH2F *hits2d_pi = new TH2F("hits2d_pi","hits2d_pi",125,0.5,250.5,240,-0.5,239.5);
   
@@ -357,6 +358,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
         case 5284:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         
         //-- For Second Xe Bottle !!
+        case 5301:   tw1=49; tw2=105; tw3=193; e_chan1=102; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
         case 5303:   tw1=49; tw2=105; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         case 5304:   tw1=49; tw2=105; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         case 5306:   tw1=55; tw2=105; tw3=193; e_chan1=102; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
@@ -374,7 +376,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
         case 5284:   tw1=61; tw2=90;  tw3=140; e_chan1=106;   e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         
         //-- For Second Xe Bottle !!
-        case 5301:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5301:   tw1=68; tw2=105; tw3=170; e_chan1=106; e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
         case 5302:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         case 5303:   tw1=68; tw2=105; tw3=170; e_chan1=106; e_chan2=133;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
         case 5304:   tw1=70; tw2=135; tw3=170; e_chan1=104; e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
@@ -913,21 +915,21 @@ void trd_mlp_cern(int RunNum) {
   
   //-------------------------------
   TMLPAnalyzer ana(mlp);
-  // Initialisation
-  ana.GatherInformations();
-  // output to the console
+  ana.GatherInformations(); // Initialisation
   #ifdef VERBOSE
-    ana.CheckNetwork();
+    ana.CheckNetwork(); // output to the terminal
   #endif
   mlpa_canvas->cd(ipad++);
-  // shows how each variable influences the network
-  ana.DrawDInputs();
+  ana.DrawDInputs(); // shows how each variable influences the network
+  //HistList->Add(ana.DrawDInputs());
+  //gPad->WaitPrimitive(); /////////////////////////////////////////////
   mlpa_canvas->cd(ipad++);
-  // shows the network structure
-  mlp->Draw();
+  mlp->Draw(); // shows the network structure
+  //HistList->Add(mlp);
   mlpa_canvas->cd(ipad++);
-  // draws the resulting network
-  ana.DrawNetwork(0,"type==1","type==0");
+  gPad->WaitPrimitive(); /////////////////////////////////////////////
+  ana.DrawNetwork(0,"type==1","type==0"); // draws the resulting network
+  //HistList->Add(ana.DrawNetwork(0,"type==1","type==0"));
   // Use the NN to plot the results for each sample
   // This will give approx. the same result as DrawNetwork.
   // All entries are used, while DrawNetwork focuses on 
@@ -1120,11 +1122,14 @@ void trd_mlp_cern(int RunNum) {
   TGraph *gr = new TGraph(ngr,Xgr,Ygr); gr->SetName("e #pi efficiency");gr->SetTitle("Efficiency single module");
   TMultiGraph *mg = new TMultiGraph();
   mg->Add(gr,"lp");
+  mg->SetTitle("Efficiency single module");
+  mg->GetXaxis()->SetTitle("El Efficiency"); mg->GetYaxis()->SetTitle("#pi Efficiency");
   mlpa_canvas->cd(ipad++);
   mg->Draw("a");
   
   //---------------------------------------------------------------------
   mlpa_canvas->cd(ipad++);   gPad->SetLogy(); hcount->Draw();
+  gPad->WaitPrimitive();
   //---------------------------------------------------------------------
   std::pair<double,double> rej70 = Reject(bg, sig, 0.7);
   cout << "---------------------------------------- \n" << endl;
@@ -1198,6 +1203,7 @@ void trd_mlp_cern(int RunNum) {
   mlpa_canvas->Print(text);
   mlpa_canvas->cd(0);
   
+  //HistList->Write("HistDQM", TObject::kSingleKey);
   outputFile->Write();
   delete inputFile;
   cout << "============== END RUN " << RunNum << "===============" <<endl;
