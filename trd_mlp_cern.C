@@ -29,9 +29,11 @@
 //--  0-dEdx 1-Params 2-dEdx+Params ; change MAXpar to 17 !
 #define NN_MODE 3
 //#define VERBOSE
-//#define ANALYZE_MERGED 1
-//#define MMG_RUN
+#define ANALYZE_MERGED 1
+#define MMG_RUN
 //#define USE_CLUSTERS
+#define FERMI_NN
+#define NO_RAD_COMPARE 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1); //////
@@ -167,7 +169,7 @@ std::pair<double,double> Reject(TH1 *hp, TH1 *he, double thr) {
 int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3, int nEntries) {
 #else
 int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
-#endif  
+#endif
   // Set object pointer
   ecal_energy=0;
   presh_energy=0;
@@ -383,15 +385,25 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     
     double dt=(tw3-tw1)/NDE;
     
-    #if 1          
+    #if 1
       type=-1;
-      if (parID->size()>0) {
-        if(parID->at(0)==1 && ecal_energy > 4000. && presh_energy > 1000. ) {
-	        type=1; ntrk_e++; Count("ntrk_e");
-        } else  if(parID->at(0)==0 && ecal_energy < 400. && presh_energy < 400. ) { 
-	        type=0; ntrk_pi++; Count("ntrk_pi");
+      #if NO_RAD_COMPARE
+        if (parID->size()>0) {
+          if(parID->at(0)==1 && ecal_energy > 4000. && presh_energy > 1000. ) {
+            type=1; ntrk_e++; Count("ntrk_e");
+          } else  if(parID->at(0)==0) { 
+            type=0; ntrk_pi++; Count("ntrk_pi");
+          }
         }
-      }
+      #else
+        if (parID->size()>0) {
+          if(parID->at(0)==1 && ecal_energy > 4000. && presh_energy > 1000. ) {
+	          type=1; ntrk_e++; Count("ntrk_e");
+          } else  if(parID->at(0)==0 && ecal_energy < 400. && presh_energy < 400. ) { 
+	          type=0; ntrk_pi++; Count("ntrk_pi");
+          }
+        }
+      #endif
     #else
       type=-1;
       if(ecal_energy > 4000.) {
@@ -747,17 +759,23 @@ void trd_mlp_cern(int RunNum) {
   
   char rootfile[256];
   #if ANALYZE_MERGED
-    sprintf(rootfile,"RootOutput/cern24/merged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    #if NO_RAD_COMPARE
+      sprintf(rootfile,"RootOutput/cern24/merged/nrc_trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    #else
+      sprintf(rootfile,"RootOutput/cern24/merged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    #endif
   #else
     sprintf(rootfile,"RootOutput/cern24/trd_singleTrackHits_Run_%06d.root",RunNum);
   #endif
-  char basename[120];
+  char basename[200];
   char *hd = strstr(rootfile,"/"); 
-  strncpy(basename,&hd[1],120-1);   char *dot= strstr(basename,"."); *dot=0;
+  strncpy(basename,&hd[1],200-1);   char *dot= strstr(basename,"."); *dot=0;
   printf("Base of input file name = %s \n",basename);
-  
-  Int_t ntrain=50;    // epoch //-- FERMI
-  //Int_t ntrain=101;   // epoch //-- CERN
+  #ifdef FERMI_NN
+    Int_t ntrain=50;    // epoch //-- FERMI
+  #else
+    Int_t ntrain=101;   // epoch //-- CERN
+  #endif
   int Nmod=3;
   // Prepare inputs
   // The 2 trees are merged into one, and a "type" branch, 
@@ -880,8 +898,11 @@ void trd_mlp_cern(int RunNum) {
     stringstream ss;  ss << il;  string si = ss.str();
     INL=INL+"@par"+si;   if (il<(NPAR-1)) INL=INL+",";
   }
-  //NNcfg=INL+":35:5:type"; //-- CERN
-  NNcfg=INL+":25:8:type"; //-- FERMI
+  #ifdef FERMI_NN
+    NNcfg=INL+":25:8:type"; //-- FERMI
+  #else
+    NNcfg=INL+":35:5:type"; //-- CERN
+  #endif
   #ifdef VERBOSE 
     cout<<" INL="<<INL<<endl;
     cout<<" NNcfg="<<NNcfg<<endl;
@@ -910,7 +931,7 @@ void trd_mlp_cern(int RunNum) {
   int ipad=1;
   mlpa_canvas->cd(ipad++);
   TLatex latex;
-  char text[120];
+  char text[200];
   latex.SetTextSize(0.05);
   latex.SetTextAlign(13);  //align at top
   double ystep=0.07, ypos=0.95;
@@ -1239,8 +1260,10 @@ void trd_mlp_cern(int RunNum) {
   #else
     sprintf(text,"mlpOutput/%s_m%d.png",basename,nn_mode);
   #endif
+  //mlpa_canvas->WaitPrimitive();
   mlpa_canvas->Print(text);
   mlpa_canvas->cd(0);
+  //mlpa_canvas->WaitPrimitive();
   
   //HistList->Write("HistDQM", TObject::kSingleKey);
   outputFile->Write();
