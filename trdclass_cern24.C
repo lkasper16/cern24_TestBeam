@@ -1208,7 +1208,8 @@ void trdclass_cern24::Loop() {
           if (adc>4090) printf("!!!!!!!!!!!!!!!!!!!!!! ADC 125 overflow: %d \n",adc);
           if (adc>DEDX_THR) {
             if (gemChan>-1) {
-              time-=TimeWindowStart;
+              if (RunNum>5284.) { time-=(TimeWindowStart+35); } //--Second Xe Bottle
+              else { time-=TimeWindowStart; }
               ///////////////if ( TimeMin > time || time > TimeMax ) continue; // --- drop early and late hits ---
               
               hevtc->SetBinContent(100-time,gemChan+1,adc/100.);
