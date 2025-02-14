@@ -30,14 +30,13 @@
 #define NN_MODE 3
 //#define VERBOSE
 #define ANALYZE_MERGED 1
-#define MMG_RUN
-//#define USE_CLUSTERS
+//#define MMG_RUN
 #define FERMI_NN
-#define NO_RAD_COMPARE 1
+//#define NO_RAD_COMPARE 1
 
 void Count(const char *tit);
-void Count(const char *tit, double cut1); //////
-void Count(const char *tit, double cut1, double cut2); /////
+void Count(const char *tit, double cut1);
+void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
 
 const int MaxNDEslices =10;
@@ -105,7 +104,7 @@ int hscale(TH1 *he, TH1 *hpi, double scale, int NORM, int DRAW) {
     gPad->Modified(); gPad->Update(); 
   }
   return ret;
-}
+} //-- end hscale
 
 //----------------------- Rejection Factor Calculation ---------------------------------
 std::pair<double,double> Reject(TH1 *hp, TH1 *he, double thr) {
@@ -164,6 +163,7 @@ std::pair<double,double> Reject(TH1 *hp, TH1 *he, double thr) {
   cout << "===> " << etitle << " <=== Rejection = " << 1./Rej << endl;
   return std::make_pair(Rej, relRejError);
 }
+
 //---------------------------------------------------------------------
 #if ANALYZE_MERGED
 int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3, int nEntries) {
@@ -191,6 +191,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   zposc_max = 0;
   dedxc_max = 0;
   widthc_max = 0;
+  dedxc_tot = 0;
   
   // Set branch addresses and branch pointers
   if (!ttree_hits) return -1;
@@ -215,6 +216,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   fChain->SetBranchAddress("zposc_max", &zposc_max, &b_zposc_max);
   fChain->SetBranchAddress("dedxc_max", &dedxc_max, &b_dedxc_max);
   fChain->SetBranchAddress("widthc_max", &widthc_max, &b_widthc_max);
+  fChain->SetBranchAddress("dedxc_tot", &dedxc_tot, &b_dedxc_tot);
   #ifdef MMG_RUN
     fChain->SetBranchAddress("nhit", &mmg1_nhit, &b_mmg1_nhit);
     fChain->SetBranchAddress("nclu", &mmg1_nclu, &b_mmg1_nclu);
@@ -223,13 +225,17 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     fChain->SetBranchAddress("nclu", &gem_nclu, &b_gem_nclu);
   #endif
   //========================================
-  //TList *HistList = new TList();
-  TH2F *hits2d_e = new TH2F("hits2d_e","hits2d_e",125,0.5,250.5,240,-0.5,239.5);
-  TH2F *hits2d_pi = new TH2F("hits2d_pi","hits2d_pi",125,0.5,250.5,240,-0.5,239.5);
+  TH2F *hits2d_e = new TH2F("hits2d_e","Electron dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
+  TH2F *hits2d_pi = new TH2F("hits2d_pi","Pion dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
+  
+  TH2F *clu2d_e = new TH2F("clu2d_e","Electron Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
+  TH2F *clu2d_pi = new TH2F("clu2d_pi","Pion Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
   
   TH2F *aver2d_e = new TH2F("aver2d_e","aver-rms electrons",120,0.,240.,100,0.,10.);
-  TH2F *aver2d_p = new TH2F("aver2d_p","aver-rms pions",120,0.,240.,100,0.,10.);
+  TH2F *aver2d_pi = new TH2F("aver2d_pi","aver-rms pions",120,0.,240.,100,0.,10.);
   
+  TH2F *c_aver2d_e = new TH2F("c_aver2d_e","aver-rms electrons (clusters)",50,0.,100.,100,0.,10.);
+  TH2F *c_aver2d_pi = new TH2F("c_aver2d_pi","aver-rms pions (clusters)",50,0.,100.,100,0.,10.);
   TH1F *hNhits  = new TH1F("hNhits","",70,-0.5,69.5);  hNhits->SetStats(0);
   TH1F *hNclu  = new TH1F("hNclu","",70,-0.5,69.5);  hNclu->SetStats(0);
   
@@ -238,8 +244,14 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   TH1F *helectron_dedxtotal = new TH1F("helectron_dedxtotal","Electron e_total",600,0.5,150000.5);
   TH1F *hpion_dedxtotal = new TH1F("hpion_dedxtotal","Pion e_total",600,0.5,150000.5);
   
-  TH1F *time_e  = new TH1F("time_e","Electron Amplitude in Time",250,0.5,250.5);
-  TH1F *time_pi = new TH1F("time_pi","Pion Amplitude in Time",250,0.5,250.5);
+  TH1F *helectron_maxcamp = new TH1F("helectron_maxcamp","Electron max cluster amp",65,0.5,1500.5);
+  TH1F *hpion_maxcamp = new TH1F("hpion_maxcamp","Pion max cluster amp",65,0.5,1500.5);
+  
+  TH1F *time_e  = new TH1F("time_e","Electron Amplitude in Time;Time (*8ns)",250,0.5,250.5);
+  TH1F *time_pi = new TH1F("time_pi","Pion Amplitude in Time;Time (*8ns)",250,0.5,250.5);
+  
+  TH1F *ctime_e  = new TH1F("ctime_e","Electron Amp in Time (Clusters);Time (*8ns)",250,0.5,250.5);
+  TH1F *ctime_pi = new TH1F("ctime_pi","Pion Amp in Time (Clusters);Time (*8ns)",250,0.5,250.5);
   
   TH1F *par_e[MAXpar]; 
   TH1F *par_pi[MAXpar];
@@ -261,15 +273,16 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     cout << " hist: nx=" << nx << " xmi=" << xmi << " xma=" << xma << " noent= " << noent << endl;
   #endif
   Long64_t nentries = ttree_hits->GetEntries();
-  Long64_t nbytes = 0; //////
-  int ntest=nentries*0.25; ////////
+  Long64_t nbytes = 0;
+  int ntest=nentries*0.25;
   #ifdef VERBOSE
-    //cout << " ntest=" << ntest << endl;
+    cout << " ntest=" << ntest << endl;
   #endif
   
   //==============================================================================
   const int NDE=MaxNDEslices;
   double dEdx[NDE];
+  double dEdxc[NDE];
   int NPF=MAXpar; // number of parameters filled
   int ntrk_e=0, ntrk_pi=0;
   int e_chan1=0;    //-- first TR channel
@@ -282,43 +295,35 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   //                   E V E N T    L O O P
   //--------------------------------------------------------------------------------
   for (Long64_t iev = 0; iev < nentries; iev++) {  
-    nbytes += ttree_hits->GetEntry(iev); ///////
+    nbytes += ttree_hits->GetEntry(iev);
     ievent=iev;
     Count("EVT");
     if (!(iev % 1000)) cout<<" ===> Event = "<<iev<<" out of "<<nentries<<endl;
     for (int ip=0; ip<MAXpar; ip++) Par[ip]=0;
-    for (int i=0; i<NDE; i++) dEdx[i]=0;
+    for (int i=0; i<NDE; i++) { dEdx[i]=0; dEdxc[i]=0; }
     channel = 22;
     //------------------------------------------------------------------------------
     //                 G E M 
     //------------------------------------------------------------------------------
     
     int USE_TRACK = 0;
-    /*
-    if ( USE_TRACK ) {
-      if (abs(13-channel/27-trkch)<3.) { // tracking cut 
-	      h2xdiff->Fill(channel,trkch);
-	      hbeamX->Fill(channel);
-      }
-    } else {
-      h2xdiff->Fill(channel,trkch);
-      hbeamX->Fill(channel);
-    }
-    */
     float amax2=-1.;
     float emax2=-1.;
+    float amax2_c=-1;
     
     int khit=0;
     int NTR=0;
+    int NTRc=0;
     
     float THR1=100.;
     float THR2=500.;
-    float Escale=400.; //1.
-    float Ascale=40.; //1.
+    float Escale=400.;
+    float Ascale=40.;
        
     float atot=0.;
     float etot=0.;
     float etrzon=0.;
+    float etrzonc=0.;
     
     int tw1=0;
     int tw2=tw1+1;
@@ -391,7 +396,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
         if (parID->size()>0) {
           if(parID->at(0)==1 && ecal_energy > 4000. && presh_energy > 1000. ) {
             type=1; ntrk_e++; Count("ntrk_e");
-          } else  if(parID->at(0)==0) { 
+          } else  if(parID->at(0)==0) {
             type=0; ntrk_pi++; Count("ntrk_pi");
           }
         }
@@ -440,120 +445,164 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     double xaver=0, xaver2=0;
     int naver=0;
     #ifdef MMG_RUN
-      #ifdef USE_CLUSTERS
-        for (int i=0;i<mmg1_nhit;i++){ // count fixed parameters 
-          if (tw1 > zposc->at(i) || zposc->at(i) > tw3) continue;
-          xaver+=xposc->at(i); naver++;
-        }
-      #else
-        for (int i=0;i<mmg1_nhit;i++){ // count fixed parameters 
-          if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-          xaver+=xpos->at(i); naver++; 
-        }
-      #endif
+      for (int i=0;i<mmg1_nhit;i++){ // count fixed parameters 
+        if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
+        xaver+=xpos->at(i); naver++; 
+      }
     #else
-      #ifdef USE_CLUSTERS
-        for (int i=0;i<gem_nhit;i++){ // count fixed parameters 
-          if (tw1 > zposc->at(i) || zposc->at(i) > tw3) continue;
-          xaver+=xposc->at(i); naver++;
-        }
-      #else
-        for (int i=0;i<gem_nhit;i++){ // count fixed parameters 
-          if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-          xaver+=xpos->at(i); naver++;
-        }
-      #endif
+      for (int i=0;i<gem_nhit;i++){ // count fixed parameters 
+        if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
+        xaver+=xpos->at(i); naver++;
+      }
     #endif
     xaver=xaver/naver;
+    //=== Same for clusters ===
+    double clu_xaver=0, clu_xaver2=0;
+    int ncaver=0;
+    #ifdef MMG_RUN
+    for (int i=0; i<mmg1_nclu; i++) {
+    #else
+    for (int i=0; i<gem_nclu; i++) {
+    #endif
+      float ztimec=zposc->at(i);
+      ztimec = -1.*(ztimec/0.3)+100.5+100.; //DOUBLE CHECK TIME OFFSET FOR MMG
+      if (tw1 > ztimec || ztimec > tw3) continue;
+      clu_xaver+=xposc->at(i); ncaver++;
+    }
+    clu_xaver=clu_xaver/ncaver;
     
     //====================================================================
     #ifdef MMG_RUN
-    for (int i=0;i<mmg1_nhit;i++) { // count fixed parameters
-      Count("mmg1_Hits");
-      #ifdef USE_CLUSTERS
-        if (tw1 > zposc->at(i) || zposc->at(i) > tw3) continue;
-      #else
+      for (int i=0;i<mmg1_nhit;i++) { // count fixed parameters
+        Count("mmg1_Hits");
         if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-      #endif
-      Count("mmg1_zHits");
+        Count("mmg1_zHits");
     #else
-    for (int i=0;i<gem_nhit;i++) { // count fixed parameters 
-      Count("Gem_Hits");
-      #ifdef USE_CLUSTERS
-        if (tw1 > zposc->at(i) || zposc->at(i) > tw3) continue;
-      #else
+      for (int i=0;i<gem_nhit;i++) { // count fixed parameters 
+        Count("Gem_Hits");
         if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-      #endif
-      Count("Gem_zHits");
+        Count("Gem_zHits");
     #endif
-      
-    #ifdef USE_CLUSTERS
-      xaver2+=((xposc->at(i)-xaver)*(xposc->at(i)-xaver));
-      if (dedxc->at(i)>THR1) {
-  	    if (type==1) hits2d_e->Fill(zposc->at(i),xposc->at(i),dedxc->at(i));
-	      else if (type==0) hits2d_pi->Fill(zposc->at(i),xposc->at(i),dedxc->at(i));
-      }
-      if(dedxc->at(i)>amax2 && tw1<zposc->at(i) && zposc->at(i)<tw3) { //-- tw2 or tw1 ????
-	      amax2=dedxc->at(i);
-      }
-      if(dedxc->at(i)>emax2) {  // currently same as amp
-	      emax2=dedxc->at(i);
-      }
-      
-      if (type>=0) {  //-- rad.pos. window OK
-	      if (tw1<zposc->at(i) && zposc->at(i)<tw3 && dedxc->at(i)>THR1) {
-	        khit++; etot+=dedxc->at(i); atot+=dedxc->at(i);
-	        int ibin=(zposc->at(i)-tw1)/dt; ibin=min(max(0,ibin),(NDE-1)); dEdx[ibin]+=dedxc->at(i)/10;
-	      }
-	      if (tw2 < zposc->at(i) && zposc->at(i) < tw3) { etrzon+=dedxc->at(i); }
-	      if (dedxc->at(i)>THR2) { NTR++; Count("NTR"); }
-      }
-      
-      if (dedxc->at(i)>THR1) {
-	      if (type==1) time_e->Fill(zposc->at(i),dedxc->at(i));
-	      if (type==0) time_pi->Fill(zposc->at(i),dedxc->at(i));
-      }
-    #else
     xaver2+=((xpos->at(i)-xaver)*(xpos->at(i)-xaver));
-      if (dedx->at(i)>THR1)  {
+      if (dedx->at(i)>THR1) {
         if (type==1) hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
         else if (type==0) hits2d_pi->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
       }
       if(dedx->at(i)>amax2 && tw1<zpos->at(i) && zpos->at(i)<tw3) { //-- tw2 or tw1 ????
         amax2=dedx->at(i);
       }
-      if(dedx->at(i)>emax2)  {  // currently same as amp
+      if(dedx->at(i)>emax2) {  // currently same as amp
         emax2=dedx->at(i);
       }
-
+      
       if (type>=0 ) {  //-- rad.pos. window OK
         if (tw1<zpos->at(i) && zpos->at(i)<tw3 && dedx->at(i)>THR1) {
-          khit++; etot+=dedx->at(i); atot+=dedx->at(i);
-          int ibin=(zpos->at(i)-tw1)/dt;  ibin=min(max(0,ibin),(NDE-1)); dEdx[ibin]+=dedx->at(i)/10;
+          khit++;
+          etot+=dedx->at(i);
+          atot+=dedx->at(i);
+          int ibin=(zpos->at(i)-tw1)/dt;
+          ibin=min(max(0,ibin),(NDE-1));
+          dEdx[ibin]+=dedx->at(i)/10;
         }
-        if (tw2 < zpos->at(i) && zpos->at(i) < tw3)  {  etrzon+=dedx->at(i); }
+        if (tw2 < zpos->at(i) && zpos->at(i) < tw3)  { etrzon+=dedx->at(i); }
         if (dedx->at(i)>THR2) { NTR++;  Count("NTR"); }
       }
 
-      if (dedx->at(i)>THR1)  {
+      if (dedx->at(i)>THR1) {
         if (type==1) time_e->Fill(zpos->at(i),dedx->at(i));
         if (type==0) time_pi->Fill(zpos->at(i),dedx->at(i));
       }
-    #endif
     } //--- End Loop over detector nhits
     
+    //--NEW
+    #ifdef MMG_RUN
+    for (int i=0; i<mmg1_nclu; i++) {
+      Count("mmg1_Clus");
+      float ztimec=zposc->at(i);
+      ztimec = -1.*(ztimec/0.3)+100.5+100.; //DOUBLE CHECK MMG TIME OFFSET
+      if (tw1 > ztimec || ztimec > tw3) continue;
+      Count("mmg1_zClus");
+      clu_xaver2+=((xposc->at(i)-clu_xaver)*(xposc->at(i)-clu_xaver));
+      if (dedxc->at(i)>THR1) {
+        if (type==1) {
+          clu2d_e->Fill(ztimec,xposc->at(i),dedxc->at(i));
+          ctime_e->Fill(ztimec,dedxc->at(i));
+        } else if (type==0) {
+          clu2d_pi->Fill(ztimec,xposc->at(i),dedxc->at(i));
+          ctime_pi->Fill(ztimec,dedxc->at(i));
+        }
+      }
+      if(dedxc->at(i)>amax2_c && tw1<ztimec && ztimec<tw3) {
+        amax2_c=dedxc->at(i);
+      }
+      if (type>=0 ) {  //-- rad.pos. window OK
+        //if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>THR1) { /////
+        if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>0.) {
+          int ibinc=(ztimec-tw1)/dt; ////
+          ibinc=min(max(0,ibinc),(NDE-1));
+          dEdxc[ibinc]+=dedxc->at(i)/10;
+        }
+        if (tw2<ztimec && ztimec<tw3)  { etrzonc+=dedxc->at(i); }
+        if (dedxc->at(i)>THR2) { NTRc++;  Count("NTRc"); }
+      }
+    }
+    #else
+    for (int i=0; i<gem_nclu; i++) {
+      Count("Gem_Clus");
+      float ztimec=zposc->at(i);
+      ztimec = -1.*(ztimec/0.3)+100.5+100.;
+      if (tw1 > ztimec || ztimec > tw3) continue;
+      Count("Gem_zClus");
+      clu_xaver2+=((xposc->at(i)-clu_xaver)*(xposc->at(i)-clu_xaver));
+      if (dedxc->at(i)>THR1) {
+        if (type==1) {
+          clu2d_e->Fill(ztimec,xposc->at(i),dedxc->at(i)); /////
+          ctime_e->Fill(ztimec,dedxc->at(i)); /////
+        } else if (type==0) {
+          clu2d_pi->Fill(ztimec,xposc->at(i),dedxc->at(i)); /////
+          ctime_pi->Fill(ztimec,dedxc->at(i)); /////
+        }
+      }
+      if(dedxc->at(i)>amax2_c && tw1<ztimec && ztimec<tw3) { /////
+        amax2_c=dedxc->at(i);
+      }
+      if (type>=0 ) {  //-- rad.pos. window OK
+        //if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>THR1) { /////
+        if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>0.) { /////
+          int ibinc=(ztimec-tw1)/dt; ////
+          ibinc=min(max(0,ibinc),(NDE-1));
+          dEdxc[ibinc]+=dedxc->at(i)/10;
+        }
+        if (tw2<ztimec && ztimec<tw3)  { etrzonc+=dedxc->at(i); } /////
+        if (dedxc->at(i)>THR2) { NTRc++;  Count("NTRc"); }
+      }
+    }
+    #endif
     //=================================================================
     
     xaver2=sqrt(xaver2/naver); 
     if (type==1 ) { 
       Count("el");
       aver2d_e->Fill(xaver,xaver2); 
-    } else {
+    } else if (type==0) {
       Count("pi");
-      aver2d_p->Fill(xaver,xaver2);
+      aver2d_pi->Fill(xaver,xaver2);
     }
-    if (e_chan1 > xaver || xaver > e_chan2) continue; //--- radiator  area  ; for Y - need a track
+    if (e_chan1 > xaver || xaver > e_chan2) continue; //--- radiator  area
     Count("radAreaHits");
+    //=== For clusters ===
+    clu_xaver2=sqrt(clu_xaver2/ncaver);
+    if (type==1 ) {
+      Count("el_c");
+      c_aver2d_e->Fill(clu_xaver,clu_xaver2);
+    } else if (type==0) {
+      Count("pi_c");
+      c_aver2d_pi->Fill(clu_xaver,clu_xaver2);
+    }
+    //if (e_chan1 > clu_xaver || clu_xaver > e_chan2) continue; //--- radiator  area
+    Count("radAreaHits_c");
+    //if (ncaver<3) continue; // --- too small number of hits ----
+    Count("nClus");
     
     //--------------------------------------------------------------------------------
     //                    electron case
@@ -561,6 +610,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     if (type==1) {
       helectron_maxamp->Fill(amax2);
       helectron_dedxtotal->Fill(etot);
+      helectron_maxcamp->Fill(amax2_c);
     }
     //--------------------------------------------------------------------------------
     //                    pion case
@@ -568,6 +618,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     if (type==0) {
       hpion_maxamp->Fill(amax2);
       hpion_dedxtotal->Fill(etot);
+      hpion_maxcamp->Fill(amax2_c);
     }
     //-----------------------------------------------
     if (type<0) continue;
@@ -578,16 +629,26 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       Par[0]=amax2/Ascale/5.;
       Par[1]=clu_nhits*5;
       Par[2]=xaver2*8;
-      Par[3]=atot/Escale/50.; //atot or etot ???
-      Par[4]=etrzon/Escale/50.;
+      Par[3]=atot/Escale/50.; //CHECK TO REMOVE
+      Par[4]=etrzon/Escale/50.; //CHECK TO REMOVE
       Par[5]=NTR;
       Par[6]=max_widthc*5.;
       Par[7]=max_dedxc/Ascale/5.;
+      //Par[8]=gem_nhit*2; //CHANGE TO BE GEM OR MMG
+      //Par[9]=zposc_max*3; //zposc_max*5.;
+      //Par[10]=dedxc_tot/18.; //dedxc_tot/5.;
+      //Par[11]=etrzonc;
+      //Par[12]=clu_xaver2*14;
+      //Par[13]=amax2_c/8.;
       int np=NDE;
       double coef=Ascale/2.;
       for (int ip=0; ip<np; ip++) { 
 	      Par[ip+NFixed]=dEdx[ip]/coef; 
       }
+/*      for (int ip=0; ip<np; ip++) {
+        Par[ip+NFixed+NDE]=dEdxc[NDE-1-ip];
+      }
+*/
     } else if (NN_MODE==4) {  //-- dEdx(amp) + Par
       Par[0]=amax2/Ascale/5.;
       Par[1]=khit;  // -- hits > THR1 = 100
@@ -653,19 +714,19 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     #ifdef MMG_RUN
       sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_mmg_%06d.root",RunNum);
     #else
-      sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",RunNum);    
+      sprintf(G_DIR,"mlpOutput/cern24/hd_rawdata_%06d.root",RunNum);
     #endif
   #endif
   sprintf(ctit,"File=%s",G_DIR);
   htitle(ctit);
   
   c1=NextPlot(nxd,nyd);   hits2d_e->Draw("colz"); 
-  TLine *lin1 = new TLine(0.,e_chan1,300.,e_chan1);    TLine *lin2 = new TLine(0.,e_chan2,300.,e_chan2);  // -1?
+  TLine *lin1 = new TLine(0.,e_chan1,250.,e_chan1);    TLine *lin2 = new TLine(0.,e_chan2,250.,e_chan2);
   lin1->SetLineColor(kRed);   lin2->SetLineColor(kRed);   lin1->Draw();  lin2->Draw();
   gPad->Modified(); gPad->Update();
   
   c1=NextPlot(nxd,nyd);   hits2d_pi->Draw("colz");
-  TLine *lin1p = new TLine(0.,pi_chan1-1,300.,pi_chan1); TLine *lin2p = new TLine(0.,pi_chan2-1,300.,pi_chan2); // -1?
+  TLine *lin1p = new TLine(0.,pi_chan1,250.,pi_chan1); TLine *lin2p = new TLine(0.,pi_chan2,250.,pi_chan2);
   lin1p->SetLineColor(kCyan); lin2p->SetLineColor(kCyan); lin1p->Draw(); lin2p->Draw();
   gPad->Modified(); gPad->Update();
   
@@ -674,7 +735,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   #endif
   
   c1=NextPlot(nxd,nyd);  aver2d_e->Draw("colz");
-  c1=NextPlot(nxd,nyd);  aver2d_p->Draw("colz");
+  c1=NextPlot(nxd,nyd);  aver2d_pi->Draw("colz");
   c1=NextPlot(nxd,nyd);  hNclu->SetLineColor(6);  hNclu->Draw();  hNhits->SetLineColor(209);  hNhits->Draw("same");
   TLegend *l1 = new TLegend(.7, .7, .9, .9);
   #ifdef MMG_RUN
@@ -704,24 +765,36 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     hscale(par_e[ip],par_pi[ip],escale_trk,1,2);
   }
   c1=NextPlot(-1,-1);
-  
   //------------------------------------------------------------
-  //char pngname[120];
-  //sprintf(pngname,"%s_dqm_m%d.png",G_DIR,NN_MODE);
-  //c1->Print(pngname);
   char pdfname[120];
   sprintf(pdfname,"%s_dqm_m%d.pdf",G_DIR,NN_MODE);
   c1->Print(pdfname);
   
-  c0 = new TCanvas("Plot","Plot",400,200,1200,900);     c0->Divide(2,2);
+  c0 = new TCanvas("Plot","Plot",400,200,1200,900);     c0->Divide(3,3);
   c0->cd(1);  hscale(time_e,time_pi,1.,0,2); // --- already scaled before 
   
-  c0->cd(3);  hits2d_e->Draw("colz"); // --- already scaled before 
+  c0->cd(2);  hscale(ctime_e,ctime_pi,escale_trk,NORM,2); // --- scale clustering time hist here
+  
+  c0->cd(4);  hits2d_e->Draw("colz");
   lin1->Draw();  lin2->Draw();  
   gPad->Modified(); gPad->Update();
   
-  c0->cd(4);  hits2d_pi->Draw("colz"); // --- already scaled before 
+  c0->cd(7);  hits2d_pi->Draw("colz");
   lin1p->Draw(); lin2p->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(5);  clu2d_e->Draw("colz");
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(8);  clu2d_pi->Draw("colz");
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(3);  hscale(helectron_maxcamp,hpion_maxcamp,0.,NORM,2); // --- scale clustering amp  hist here
+  
+  c0->cd(6);  c_aver2d_e->Draw("colz");
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(9);  c_aver2d_pi->Draw("colz");
   gPad->Modified(); gPad->Update();
   
   #ifdef VERBOSE
@@ -856,7 +929,7 @@ void trd_mlp_cern(int RunNum) {
   #ifdef VERBOSE
     cout << " Get trees signal=" << signal << endl;
   #endif
-  int rtw1,rtw3;
+  int rtw1, rtw3;
   #if ANALYZE_MERGED
     int nn_mode = fill_trees(ttree_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3, nEntries);
   #else
@@ -872,14 +945,14 @@ void trd_mlp_cern(int RunNum) {
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
   //-----------------------------------------------
-  type=1;
+  type=1; //-- electron
   Int_t i;
   for (i=0; i<signal->GetEntries(); i++) {
     signal->GetEntry(i);
     simu->Fill();
   }
   //-----------------------------------------------
-  type=0;
+  type=0; //-- pion
   for (i=0; i<background->GetEntries(); i++) {
     background->GetEntry(i);
     simu->Fill();
@@ -888,11 +961,8 @@ void trd_mlp_cern(int RunNum) {
   // Build and train the NN par1 is used as a weight since we are primarly 
   // interested  by high pt events.
   // The datasets used here are the same as the default ones.
-  //  TMultiLayerPerceptron *mlp = 
-  //   new TMultiLayerPerceptron("@par2,@par1,@par3:5:3:type",
-  //                             "par1",simu,"Entry$%2","(Entry$+1)%2");
   //----------------------------
-  const int NPAR=MAXpar; // 5 , MAXpar=10
+  const int NPAR=MAXpar;
   string INL, NNcfg;
   for (int il=0; il<NPAR; il++) {
     stringstream ss;  ss << il;  string si = ss.str();
@@ -908,13 +978,7 @@ void trd_mlp_cern(int RunNum) {
     cout<<" NNcfg="<<NNcfg<<endl;
   #endif
   TMultiLayerPerceptron *mlp = new TMultiLayerPerceptron(NNcfg.data(),simu,"Entry$%2","(Entry$+1)%2");
-    //new TMultiLayerPerceptron(NNcfg.data(),simu,"Entry$%2","(Entry$+1)%2", TNeuron::kTanh);
-    //new TMultiLayerPerceptron("@par1,@par2,@par3,@par4,@par5,@par6:16:8:type",
-    //new TMultiLayerPerceptron("par1,par2,par3,par4,par5,par6:16:8:type",
-    //new TMultiLayerPerceptron("@par1,@par3:8:3:type",
-    //                          simu,"Entry$%2","(Entry$+1)%2");
   //----------------------------
-  
   // The learning method is defined using the TMultiLayerPerceptron::SetLearningMethod() . Learning methods are :
   //
   // TMultiLayerPerceptron::kStochastic,
@@ -954,7 +1018,6 @@ void trd_mlp_cern(int RunNum) {
     mlp->Train(ntrain, "graph,update=10,current");
   #endif
   mlp->Export("trd_ann","C++");
-  
   //-------------------------------
   TMLPAnalyzer ana(mlp);
   ana.GatherInformations(); // Initialisation
@@ -963,24 +1026,21 @@ void trd_mlp_cern(int RunNum) {
   #endif
   mlpa_canvas->cd(ipad++);
   ana.DrawDInputs(); // shows how each variable influences the network
-  //HistList->Add(ana.DrawDInputs());
   mlpa_canvas->cd(ipad++);
   mlp->Draw(); // shows the network structure
-  //HistList->Add(mlp);
   mlpa_canvas->cd(ipad++);
   //gPad->WaitPrimitive(); /////////////////////////////////////////////
   ana.DrawNetwork(0,"type==1","type==0"); // draws the resulting network
-  //HistList->Add(ana.DrawNetwork(0,"type==1","type==0"));
   // Use the NN to plot the results for each sample
   // This will give approx. the same result as DrawNetwork.
   // All entries are used, while DrawNetwork focuses on 
   // the test sample. Also the xaxis range is manually set.
-  TH1F *bg = new TH1F("bgh", "NN bg output, single mod",115, -0.05, 1.1);
-  TH1F *sig = new TH1F("sigh", "NN sig output, single mod",115, -0.05, 1.1);
+  TH1F *bg = new TH1F("bgh", "NN bg output, single mod",120, -0.1, 1.1);
+  TH1F *sig = new TH1F("sigh", "NN sig output, single mod",120, -0.1, 1.1);
   
   char htit[120]; sprintf(htit,"NN output, Nmod=%d",Nmod);
-  TH1F *bgm = new TH1F("bgm",htit, 115, -.05, 1.1);
-  TH1F *sigm = new TH1F("sigm",htit,115, -.05, 1.1);
+  TH1F *bgm = new TH1F("bgm",htit, 120, -0.1, 1.1);
+  TH1F *sigm = new TH1F("sigm",htit,120, -0.1, 1.1);
   TH1F *hrejection_errors = new TH1F("hrejection_errors","Rej Factor Relative Error; Electron Purity %; Rejection Factor",6,62.5,92.5); hrejection_errors->SetStats(0);
   
   //---------------------------------------------------------------------
@@ -989,7 +1049,7 @@ void trd_mlp_cern(int RunNum) {
   
   double tout1=0.44, tout2=0.46;
   int GAUSS=0; double g_mean1=0.2, g_sigma1=0.3, g_mean2=0.8, g_sigma2=0.3;
-  int DISP=0; //0;
+  int DISP=0;
   if (DISP>0) {
     c2 = new TCanvas("Event Display","Event Display",1200,10,2000,1000); c2->SetRightMargin(0.15);
     c2->Divide(2,1);
@@ -1024,27 +1084,18 @@ void trd_mlp_cern(int RunNum) {
       char htit[128]; sprintf(htit,"#pi event %d; time 8 ns/bin ; x-strip ",ievent);   disppi->SetTitle(htit);
       #ifdef MMG_RUN
       for (int i=0;i<mmg1_nhit;i++) {
-        #ifdef USE_CLUSTERS
-          if (dedxc->at(i)>0) disppi->Fill(xposc->at(i),zposc->at(i),dedxc->at(i));
-        #else
           if (dedx->at(i)>0) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
-        #endif
       }
       #else
       for (int i=0;i<gem_nhit;i++) {
-        #ifdef USE_CLUSTERS
-          if (dedxc->at(i)>0) disppi->Fill(xposc->at(i),zposc->at(i),dedxc->at(i));
-        #else
 	        if (dedx->at(i)>0) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
-        #endif
       }
       #endif
       if (disppi->GetEntries()!=0) disppi->Draw("colz");
-      TLine lin1(0.,rtw1,300.,rtw1);   TLine lin2(0.,rtw3,300.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();  
+      TLine lin1(0.,rtw1,300.,rtw1);   TLine lin2(0.,rtw3,300.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();
       c2->Modified(); c2->Update();
     }
   } //-- End bg_tst entry loop
-  
   sum=0;
   for (i=0; i<sig_tst->GetEntries(); i++) {
     sig_tst->GetEntry(i);
@@ -1057,13 +1108,11 @@ void trd_mlp_cern(int RunNum) {
       sum=0;
     }
     sig->Fill(out);
-    
+    #ifdef VERBOSE
     if (tout1<out && out<tout2) {
-      #ifdef VERBOSE
         for (int ip=0; ip<NPAR; ip++) printf(" %f ",params[ip]); printf(" type = %d out=%f iev=%d \n",type,out,ievent);
-      #endif
     }
-    
+    #endif
     //-------------------------------------------------------------
     if (out<0.1 && DISP>1 ) {
       #ifdef VERBOSE
@@ -1072,28 +1121,19 @@ void trd_mlp_cern(int RunNum) {
       ttree_hits->GetEntry(ievent);
       c2->cd(1);  dispe->Reset();
       char htit[128]; sprintf(htit,"electrons event %d ; time 8 ns/bin ; x-strip",ievent);  dispe->SetTitle(htit);
-      int ii=0; double x[1000], y[1000],ey[1000];
+      int ii=0; double x[1000], y[1000], ey[1000];
       double yaver=0;
       #ifdef MMG_RUN
       for (int i=0;i<mmg1_nhit;i++) {
       #else
       for (int i=0;i<gem_nhit;i++) {
 	    #endif
-      #ifdef USE_CLUSTERS
-        if (dedxc->at(i)>0) {
-          dispe->Fill(zposc->at(i),xposc->at(i),dedxc->at(i));
-          if (rtw1 < zposc->at(i) && zposc->at(i) < rtw3) {
-            x[ii]=zposc->at(i);  y[ii]=xposc->at(i); if (dedxc->at(i)==0) ey[ii]=100; else ey[ii]=1000./dedxc->at(i); ii++; yaver+=y[ii];
-          }
-        }
-      #else
         if (dedx->at(i)>0) {
 	        dispe->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
 	        if (rtw1 < zpos->at(i) && zpos->at(i) < rtw3) {
 	          x[ii]=zpos->at(i);  y[ii]=xpos->at(i); if (dedx->at(i)==0) ey[ii]=100; else ey[ii]=1000./dedx->at(i); ii++; yaver+=y[ii];
   	      }
 	      }
-      #endif
       }
       yaver/=ii;
       TF1 ffit1("ffit1", "pol1", rtw1, rtw3);  ffit1.SetLineColor(kBlue);
@@ -1134,7 +1174,7 @@ void trd_mlp_cern(int RunNum) {
   sig->SetStats(0);
   bg->Draw();
   std::pair<double,double> rejLine90 = Reject(bg,sig,0.9);
-  std::pair<double,double> rejLine70 = Reject(bg, sig, 0.7);
+  std::pair<double,double> rejLine70 = Reject(bg,sig,0.7);
   TLine *line90 = new TLine(rejLine90.first,0,rejLine90.first,bg->GetMaximum()+1);
   TLine *line70 = new TLine(rejLine70.first,0,rejLine70.first,bg->GetMaximum()+1);
   line90->SetLineStyle(kDashed);   line70->SetLineStyle(kDashed);
@@ -1229,7 +1269,7 @@ void trd_mlp_cern(int RunNum) {
   //---------------------------------------------
   mlpa_canvas->cd(1);
   stringstream ss;
-  ss << "Nmod=" << 1 << ", e=70%, #pi=" << std::fixed << std::setprecision(2) << rej70.first*100. << "%, Rej=" << 1./rej70.first ;  string str = ss.str();
+  ss << "Nmod=" << 1 << ", e=70%, Eff #pi=" << std::fixed << std::setprecision(2) << rej70.first*100. << "%, Rej=" << 1./rej70.first ;  string str = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str.data());
   //--
   ss.str("");  ss.clear();
@@ -1265,7 +1305,6 @@ void trd_mlp_cern(int RunNum) {
   mlpa_canvas->cd(0);
   //mlpa_canvas->WaitPrimitive();
   
-  //HistList->Write("HistDQM", TObject::kSingleKey);
   outputFile->Write();
   delete inputFile;
   cout << "============== END RUN " << RunNum << "===============" <<endl;
@@ -1286,5 +1325,4 @@ void Count(const char *tit, double cut1, double cut2) {
   sprintf(clab,"%s_%.1f_%.1f",tit,cut1,cut2);
   hcount->Fill(clab,1);
 }
-
 //------------------------------------------------------------------

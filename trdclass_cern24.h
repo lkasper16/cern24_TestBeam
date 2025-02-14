@@ -9,12 +9,14 @@
 #define trdclass_cern24_h
 
 #include "TSystem.h"
-#include <TROOT.h>
+//#include <TROOT.h>
 #include <TChain.h>
-#include <TFile.h>
-#include <TH2.h>
+//#include <TFile.h>
+//#include <TH2.h>
 #include <sstream>
-
+#include <TStopwatch.h>
+#include <iostream>
+#include <fstream>
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -24,13 +26,15 @@
 #include <iostream>
 #include "TRandom3.h"
 #include "TCanvas.h"
+#include "TMarker.h"
+#include "TMultiGraph.h"
 #include "TMultiLayerPerceptron.h"
 #include "TMLPAnalyzer.h"
 #include "TLegend.h"
 #include "TGraph.h"
 #include "TString.h"
 #include "TLatex.h"
-#include "TStyle.h"
+//#include "TStyle.h"
 #include "TLine.h"
 #include "TLinearFitter.h"
 #include "TGraphErrors.h"
@@ -39,15 +43,15 @@
 #include "TCutG.h"
 #include "TProfile.h"
 #include "TBox.h"
-
 #include "stdio.h"
+
 #define ANALYZE_MERGED 1
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
-#include "vector"
-#include "vector"
-#include "vector"
+//#include "vector"
+//#include "vector"
+//#include "vector"
 
 class trdclass_cern24 {
 public :
@@ -284,19 +288,29 @@ public :
    int nTrees;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
-   //TH1F *h250_size;
    TH1D *hcount;
    TH1F *hgem_nhits, *hmmg1_nhits, *hgt1_nhits, *hgt2_nhits, *hgt3_nhits;
    //TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
-   //TH1F *hCal_occ;
+   TH1F *hCal_occ;
    TH1F *hCal_pulse, *hPresh_pulse, *hMult_pulse, *hCher_pulse;
    TH1F *hCal_sum,    *hPresh_sum,    *hMult_sum,    *hCher_sum;
    TH1F *hCal_sum_el, *hPresh_sum_el, *hMult_sum_el, *hCher_sum_el;
    TH1F *hCal_sum_pi, *hPresh_sum_pi, *hMult_sum_pi, *hCher_sum_pi;
    TH2F *hCal_Presh, *hCal_Cher;
-
+   TH1F *hchan_g_el, *hchan_g_pi, *hchan_m_el, *hchan_m_pi;
+   
+   TH2F *hgem_xy, *hmmg1_xy, *gem_mmg1_xcorr, *gem_mmg1_max_xcorr, *gem_mmg1_ycorr;
+   TH2F *gem_gt1_xcorr, *gem_gt2_xcorr, *gem_gt3_xcorr, *mmg1_gt1_xcorr, *mmg1_gt2_xcorr, *mmg1_gt3_xcorr;
+   TH1F *hgemClusterDiff_el, *hgemClusterDiff_pi, *hmmg1ClusterDiff_el, *hmmg1ClusterDiff_pi;
+   TH1F *hgemPulseDiff_el, *hgemPulseDiff_pi, *hmmg1PulseDiff_el, *hmmg1PulseDiff_pi;
+   TH1F *hClusterMaxdEdx_el, *hClusterTotaldEdx_el;
+   TH1F *hClusterMaxdEdx_pi, *hClusterTotaldEdx_pi;
+   TH1F *hmmg1ClusterMaxdEdx_el, *hmmg1ClusterTotaldEdx_el;
+   TH1F *hmmg1ClusterMaxdEdx_pi, *hmmg1ClusterTotaldEdx_pi;
+   
    TH1F *hgemtrkr_1_peak_x, *hgemtrkr_1_peak_y, *hgemtrkr_2_peak_x, *hgemtrkr_2_peak_y, *hgemtrkr_3_peak_x, *hgemtrkr_3_peak_y, *mmg1_peak_y, *gem_peak_y;
    TH1F *hgemtrkr_1_peak_x_height, *hgemtrkr_1_peak_y_height, *hgemtrkr_2_peak_x_height, *hgemtrkr_2_peak_y_height, *hgemtrkr_3_peak_x_height, *hgemtrkr_3_peak_y_height, *hmmg1_peak_y_height, *hgem_peak_y_height;
+   TH1F *hmmg1_peak_y_height_el, *hmmg1_peak_y_height_pi, *hgem_peak_y_height_el, *hgem_peak_y_height_pi;
    TH2F *hgemtrkr_1_peak_xy, *hgemtrkr_2_peak_xy, *hgemtrkr_3_peak_xy;
    TH2F *hgemtrkr_1_max_xy, *hgemtrkr_2_max_xy, *hgemtrkr_3_max_xy;
    TH2F *hgemtrkr_1_gem, *hgemtrkr_1_mmg1;
@@ -350,6 +364,7 @@ public :
    float clu_zpos_max;
    float clu_dedx_max;
    float clu_width_max;
+   float clu_dedx_tot;
    TH1F *gem_zHist;
    float gem_amp_max;
    float gem_time_max;
@@ -375,6 +390,7 @@ public :
    float mmg1_clu_zpos_max;
    float mmg1_clu_dedx_max;
    float mmg1_clu_width_max;
+   float mmg1_clu_dedx_tot;
    float mmg1_amp_max;
    float mmg1_time_max;
    std::vector <float> mmg1_chi2cc;
@@ -401,7 +417,7 @@ trdclass_cern24::trdclass_cern24(int RunNum_in, int nEntries_in=0, int nTrees_in
   MaxEvt=MaxEvt_in;
   FirstEvt=FirstEvt_in;
   
-  printf("====== trdclass constructor MERGED, last Run=%d ============\n",RunNum);
+  printf("====== trdclass_cern24 constructor MERGED, last Run=%d ============\n",RunNum);
   
   TChain* chain;
   TTree *tree=NULL;
@@ -415,11 +431,9 @@ trdclass_cern24::trdclass_cern24(int RunNum_in, int nEntries_in=0, int nTrees_in
     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
     if (!f || !f->IsOpen()) {
       f = new TFile(FileName);
-      printf("---> Open file = %s \n",FileName);
+      printf("---> Opening file = %s \n",FileName);
     } else {
-      sprintf(FileName,"ROOT_MERGED/eventsChain%0d_%0dEntries_%01dTrees.root",RunNum,nEntries,nTrees);
-      f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
-      printf("---> Open file = %s \n",FileName);
+      printf("---> File %s cannot be opened !\n",FileName);
     }
     f->GetObject("events",tree);
    }
@@ -758,10 +772,8 @@ std::pair<Double_t, Double_t> trdclass_cern24::TrkFit(TH2F *h2_evt, TF1 &fx, con
   Double_t Ndfx = fx.GetNDF();
   Double_t integral = profx->Integral(profx->GetXaxis()->FindBin(40.), profx->GetXaxis()->FindBin(150.));
   double chi2=chi2x/Ndfx; if (Ndfx<3) chi2=-chi2;
-  //return chi2;
   return std::make_pair(chi2, integral);
 }
-
 
 //==================================================================
 void trdclass_cern24::Count(const char *tit) {
