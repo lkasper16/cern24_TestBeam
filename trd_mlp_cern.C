@@ -39,12 +39,11 @@ void Count(const char *tit, double cut1);
 void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
 
-const int MaxNDEslices =10;
-const int NFixed = 8;
+const int NDEslices = 8; //10;
+const int NFixed = 12; //8;
 
 #if  NN_MODE == 3
-  const int NDEslices = 10;
-  const int MAXpar = NFixed+NDEslices;
+  const int MAXpar = NFixed+NDEslices+NDEslices;
 #elif  NN_MODE == 4
   const int NDEslices = 4;
   const int MAXpar = NFixed+NDEslices;
@@ -280,7 +279,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   #endif
   
   //==============================================================================
-  const int NDE=MaxNDEslices;
+  const int NDE=NDEslices;
   double dEdx[NDE];
   double dEdxc[NDE];
   int NPF=MAXpar; // number of parameters filled
@@ -345,17 +344,17 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       switch (RunNum) {
         
         #ifdef MMG_RUN
-        case 5264:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
-        case 5268:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
-        case 5278:   tw1=46; tw2=95;  tw3=193; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
-        case 5283:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
-        case 5284:   tw1=46; tw2=95;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5264:   tw1=46; tw2=112;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5268:   tw1=46; tw2=112;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5278:   tw1=46; tw2=112;  tw3=193; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
+        case 5283:   tw1=46; tw2=112;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
+        case 5284:   tw1=46; tw2=112;  tw3=193; e_chan1=102;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 23cm Fleece
         
         //-- For Second Xe Bottle !!
-        case 5301:   tw1=49; tw2=105; tw3=193; e_chan1=102; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
-        case 5303:   tw1=49; tw2=105; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5304:   tw1=49; tw2=105; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
-        case 5306:   tw1=55; tw2=105; tw3=193; e_chan1=102; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5301:   tw1=49; tw2=116; tw3=193; e_chan1=102; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- No Rad
+        case 5303:   tw1=49; tw2=116; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5304:   tw1=49; tw2=116; tw3=185; e_chan1=101; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
+        case 5306:   tw1=55; tw2=116; tw3=193; e_chan1=102; e_chan2=128;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- Foil
 
         #else
         case 5252:   tw1=65; tw2=115; tw3=135; e_chan1=104;   e_chan2=127;  pi_chan1=e_chan1; pi_chan2=e_chan2;   break; //-- 15cm Fleece
@@ -396,7 +395,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
         if (parID->size()>0) {
           if(parID->at(0)==1 && ecal_energy > 4000. && presh_energy > 1000. ) {
             type=1; ntrk_e++; Count("ntrk_e");
-          } else  if(parID->at(0)==0) {
+          } else if (parID->at(0)==0) {
             type=0; ntrk_pi++; Count("ntrk_pi");
           }
         }
@@ -431,10 +430,12 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     */
     #ifdef MMG_RUN
       int clu_nhits=mmg1_nclu;
+      int pulse_nhits=mmg1_nhit;
       hNhits->Fill(mmg1_nhit);
       hNclu->Fill(mmg1_nclu);
     #else
       int clu_nhits=gem_nclu;
+      int pulse_nhits=gem_nhit;
       hNhits->Fill(gem_nhit);
       hNclu->Fill(gem_nclu);
     #endif
@@ -519,8 +520,9 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     for (int i=0; i<mmg1_nclu; i++) {
       Count("mmg1_Clus");
       float ztimec=zposc->at(i);
-      ztimec = -1.*(ztimec/0.3)+100.5+100.; //DOUBLE CHECK MMG TIME OFFSET
-      if (tw1 > ztimec || ztimec > tw3) continue;
+      if (RunNum>5284) ztimec = -1.*(ztimec/0.1429)+110.5+100.; //Second Xe bottle
+      else ztimec = -1.*(ztimec/0.15)+110.5+100.;
+      //if (tw1 > ztimec || ztimec > tw3) continue;
       Count("mmg1_zClus");
       clu_xaver2+=((xposc->at(i)-clu_xaver)*(xposc->at(i)-clu_xaver));
       if (dedxc->at(i)>THR1) {
@@ -532,12 +534,12 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
           ctime_pi->Fill(ztimec,dedxc->at(i));
         }
       }
-      if(dedxc->at(i)>amax2_c && tw1<ztimec && ztimec<tw3) {
+      if(dedxc->at(i)>amax2_c /*&& tw1<ztimec && ztimec<tw3*/) {
         amax2_c=dedxc->at(i);
       }
       if (type>=0 ) {  //-- rad.pos. window OK
         //if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>THR1) { /////
-        if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>0.) {
+        if (/*tw1<ztimec && ztimec<tw3 &&*/ dedxc->at(i)>0.) {
           int ibinc=(ztimec-tw1)/dt; ////
           ibinc=min(max(0,ibinc),(NDE-1));
           dEdxc[ibinc]+=dedxc->at(i)/10;
@@ -550,8 +552,9 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     for (int i=0; i<gem_nclu; i++) {
       Count("Gem_Clus");
       float ztimec=zposc->at(i);
-      ztimec = -1.*(ztimec/0.3)+100.5+100.;
-      if (tw1 > ztimec || ztimec > tw3) continue;
+      if (RunNum>5284) ztimec = -1.*(ztimec/0.2308)+70.5+100.; //Second Xe bottle
+      else ztimec = -1.*(ztimec/0.3)+50.5+100.;
+      //if (tw1 > ztimec || ztimec > tw3) continue;
       Count("Gem_zClus");
       clu_xaver2+=((xposc->at(i)-clu_xaver)*(xposc->at(i)-clu_xaver));
       if (dedxc->at(i)>THR1) {
@@ -563,12 +566,12 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
           ctime_pi->Fill(ztimec,dedxc->at(i)); /////
         }
       }
-      if(dedxc->at(i)>amax2_c && tw1<ztimec && ztimec<tw3) { /////
+      if(dedxc->at(i)>amax2_c /*&& tw1<ztimec && ztimec<tw3*/) { /////
         amax2_c=dedxc->at(i);
       }
       if (type>=0 ) {  //-- rad.pos. window OK
         //if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>THR1) { /////
-        if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>0.) { /////
+        if (/*tw1<ztimec && ztimec<tw3 &&*/ dedxc->at(i)>0.) { /////
           int ibinc=(ztimec-tw1)/dt; ////
           ibinc=min(max(0,ibinc),(NDE-1));
           dEdxc[ibinc]+=dedxc->at(i)/10;
@@ -626,29 +629,29 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     
     if (NN_MODE==3) {  //-- dEdx(amp) + Par
       if (MAXpar<(NFixed+NDE)) { printf("ERROR :: MAXpar array too small =%d \n",MAXpar); exit(1); }
-      Par[0]=amax2/Ascale/5.;
-      Par[1]=clu_nhits*5;
-      Par[2]=xaver2*8;
-      Par[3]=atot/Escale/50.; //CHECK TO REMOVE
-      Par[4]=etrzon/Escale/50.; //CHECK TO REMOVE
-      Par[5]=NTR;
-      Par[6]=max_widthc*5.;
-      Par[7]=max_dedxc/Ascale/5.;
-      //Par[8]=gem_nhit*2; //CHANGE TO BE GEM OR MMG
-      //Par[9]=zposc_max*3; //zposc_max*5.;
-      //Par[10]=dedxc_tot/18.; //dedxc_tot/5.;
-      //Par[11]=etrzonc;
-      //Par[12]=clu_xaver2*14;
-      //Par[13]=amax2_c/8.;
+      Par[0]=amax2/Ascale/6.;
+      Par[1]=pulse_nhits;
+      Par[2]=xaver2*10;
+      //Par[3]=atot/Escale/50.; //CHECK TO REMOVE
+      //Par[4]=etrzon/Escale/50.; //CHECK TO REMOVE
+      Par[3]=NTR*2;
+      Par[4]=max_widthc*5.;
+      Par[5]=max_dedxc/Ascale/3.;
+      Par[6]=clu_nhits*5.;
+      Par[7]=zposc_max*3.5;
+      Par[8]=dedxc_tot/65.; //dedxc_tot/5.;
+      Par[9]=etrzonc/35.; //FIX TIME CUTS
+      Par[10]=clu_xaver2*18;
+      Par[11]=amax2_c/25.;
       int np=NDE;
       double coef=Ascale/2.;
       for (int ip=0; ip<np; ip++) { 
 	      Par[ip+NFixed]=dEdx[ip]/coef; 
       }
-/*      for (int ip=0; ip<np; ip++) {
-        Par[ip+NFixed+NDE]=dEdxc[NDE-1-ip];
+      for (int ip=0; ip<np; ip++) {
+        Par[ip+NFixed+NDE]=dEdxc[ip];
       }
-*/
+
     } else if (NN_MODE==4) {  //-- dEdx(amp) + Par
       Par[0]=amax2/Ascale/5.;
       Par[1]=khit;  // -- hits > THR1 = 100
@@ -1296,9 +1299,9 @@ void trd_mlp_cern(int RunNum) {
   #endif
   //---------------------------------------------
   #ifdef MMG_RUN
-    sprintf(text,"mlpOutput/%s_mmg_m%d.png",basename,nn_mode);
+    sprintf(text,"mlpOutput/%s_mmg_m%d.pdf",basename,nn_mode);
   #else
-    sprintf(text,"mlpOutput/%s_m%d.png",basename,nn_mode);
+    sprintf(text,"mlpOutput/%s_m%d.pdf",basename,nn_mode);
   #endif
   //mlpa_canvas->WaitPrimitive();
   mlpa_canvas->Print(text);

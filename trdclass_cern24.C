@@ -1434,7 +1434,7 @@ void trdclass_cern24::Loop() {
           #endif
           //-------------  Cluster Filter (GEMTRD) -----------------
           if ((clust_Size[k] >= MinClustSize && zStart < clust_Zpos[k] && clust_Zpos[k] < zEnd && clust_Width[k][2]>MinClustWidth) || clust_Length[k][2]<MaxClustLength) {
-            if (abs(mmg1_el_chan_max-(clust_Xpos[k]+3.2-1.35))<2.5 || abs(mmg1_pi_chan_max-(clust_Xpos[k]+3.2-1.35))<2.5) {
+            if (abs(mmg1_el_chan_max-(clust_Xpos[k]+3.2-1.35))<5. || abs(mmg1_pi_chan_max-(clust_Xpos[k]+3.2-1.35))<5.) {
               //FILL HIT DIFF HISTO
               if (electron_tag) hgemClusterDiff_el->Fill(mmg1_el_chan_max-(clust_Xpos[k]+3.2-1.35));
               else if (pion_tag) hgemClusterDiff_pi->Fill(mmg1_pi_chan_max-(clust_Xpos[k]+3.2-1.35));
@@ -1469,7 +1469,7 @@ void trdclass_cern24::Loop() {
         for (int k=0; k<mmg1_nclust; k++) {
           //-------------  Cluster Filter (MMG1TRD) -----------------
           if ((mmg1_clust_Size[k] >= MinClustSize && zStart < mmg1_clust_Zpos[k] && mmg1_clust_Zpos[k] < zEnd && mmg1_clust_Width[k][2]>MinClustWidth) || mmg1_clust_Length[k][2]<MaxClustLength) {
-            if (abs(gem_el_chan_max-(mmg1_clust_Xpos[k]+3.2)-1.35)<2.5 || abs(gem_pi_chan_max-(mmg1_clust_Xpos[k]+3.2)-1.35)<2.5) {
+            if (abs(gem_el_chan_max-(mmg1_clust_Xpos[k]+3.2)-1.35)<5. || abs(gem_pi_chan_max-(mmg1_clust_Xpos[k]+3.2)-1.35)<5.) {
               //FILL HIT DIFF HISTO
               if (electron_tag) hmmg1ClusterDiff_el->Fill(gem_el_chan_max-(mmg1_clust_Xpos[k]+3.2)-1.35);
               else if (pion_tag) hmmg1ClusterDiff_pi->Fill(gem_pi_chan_max-(mmg1_clust_Xpos[k]+3.2)-1.35);
@@ -1485,7 +1485,7 @@ void trdclass_cern24::Loop() {
           }
         }
         int mmg1_nhits=mmg1_ii;
-        clu_dedx_tot=totalClust_m_dEdx;
+        mmg1_clu_dedx_tot=totalClust_m_dEdx;
         // ----------------------- end hist dist clustering ---------------------------------
         
         //=================================== Draw HITS and CLUST  ============================================
