@@ -3,6 +3,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TBrowser.h"
+#include <TStopwatch.h>
 #include "TH2.h"
 #include "TRandom.h"
 #include <iostream>
@@ -31,16 +32,17 @@
 //#define VERBOSE
 #define ANALYZE_MERGED 1
 //#define MMG_RUN
-#define FERMI_NN
+//#define FERMI_NN
 //#define NO_RAD_COMPARE 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
 void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
+TStopwatch timer;
 
-const int NDEslices = 8; //10;
-const int NFixed = 12; //8;
+const int NDEslices = 10; //10;
+const int NFixed = 15; //8;
 
 #if  NN_MODE == 3
   const int MAXpar = NFixed+NDEslices+NDEslices;
@@ -169,6 +171,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
 #else
 int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
 #endif
+  timer.Start();
   // Set object pointer
   ecal_energy=0;
   presh_energy=0;
@@ -227,8 +230,8 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   TH2F *hits2d_e = new TH2F("hits2d_e","Electron dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
   TH2F *hits2d_pi = new TH2F("hits2d_pi","Pion dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
   
-  TH2F *clu2d_e = new TH2F("clu2d_e","Electron Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
-  TH2F *clu2d_pi = new TH2F("clu2d_pi","Pion Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
+  TH2F *clu2d_e = new TH2F("clu2d_e","Electron Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,256,-0.2,102.2);
+  TH2F *clu2d_pi = new TH2F("clu2d_pi","Pion Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,256,-0.2,102.2);
   
   TH2F *aver2d_e = new TH2F("aver2d_e","aver-rms electrons",120,0.,240.,100,0.,10.);
   TH2F *aver2d_pi = new TH2F("aver2d_pi","aver-rms pions",120,0.,240.,100,0.,10.);
@@ -243,8 +246,8 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   TH1F *helectron_dedxtotal = new TH1F("helectron_dedxtotal","Electron e_total",600,0.5,150000.5);
   TH1F *hpion_dedxtotal = new TH1F("hpion_dedxtotal","Pion e_total",600,0.5,150000.5);
   
-  TH1F *helectron_maxcamp = new TH1F("helectron_maxcamp","Electron max cluster amp",65,0.5,1500.5);
-  TH1F *hpion_maxcamp = new TH1F("hpion_maxcamp","Pion max cluster amp",65,0.5,1500.5);
+  TH1F *helectron_maxcamp = new TH1F("helectron_maxcamp","Electron max cluster amp",200,0.5,4000.5);
+  TH1F *hpion_maxcamp = new TH1F("hpion_maxcamp","Pion max cluster amp",200,0.5,4000.5);
   
   TH1F *time_e  = new TH1F("time_e","Electron Amplitude in Time;Time (*8ns)",250,0.5,250.5);
   TH1F *time_pi = new TH1F("time_pi","Pion Amplitude in Time;Time (*8ns)",250,0.5,250.5);
@@ -462,11 +465,15 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     int ncaver=0;
     #ifdef MMG_RUN
     for (int i=0; i<mmg1_nclu; i++) {
+      float ztimec=zposc->at(i);
+      if (RunNum>5284) ztimec = -1.*(ztimec/0.1429)+110.5+100.; //Second Xe bottle
+      else ztimec = -1.*(ztimec/0.15)+110.5+100.;
     #else
     for (int i=0; i<gem_nclu; i++) {
-    #endif
       float ztimec=zposc->at(i);
-      ztimec = -1.*(ztimec/0.3)+100.5+100.; //DOUBLE CHECK TIME OFFSET FOR MMG
+      if (RunNum>5284) ztimec = -1.*(ztimec/0.2308)+70.5+100.; //Second Xe bottle
+      else ztimec = -1.*(ztimec/0.3)+50.5+100.;
+    #endif
       if (tw1 > ztimec || ztimec > tw3) continue;
       clu_xaver+=xposc->at(i); ncaver++;
     }
@@ -631,18 +638,21 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       if (MAXpar<(NFixed+NDE)) { printf("ERROR :: MAXpar array too small =%d \n",MAXpar); exit(1); }
       Par[0]=amax2/Ascale/6.;
       Par[1]=pulse_nhits;
-      Par[2]=xaver2*10;
+      Par[2]=xaver2*10.;
       //Par[3]=atot/Escale/50.; //CHECK TO REMOVE
       //Par[4]=etrzon/Escale/50.; //CHECK TO REMOVE
-      Par[3]=NTR*2;
+      Par[3]=NTR*2.;
       Par[4]=max_widthc*5.;
-      Par[5]=max_dedxc/Ascale/3.;
-      Par[6]=clu_nhits*5.;
+      Par[5]=max_dedxc/Ascale/4.;
+      Par[6]=clu_nhits*4.;
       Par[7]=zposc_max*3.5;
-      Par[8]=dedxc_tot/65.; //dedxc_tot/5.;
-      Par[9]=etrzonc/35.; //FIX TIME CUTS
-      Par[10]=clu_xaver2*18;
-      Par[11]=amax2_c/25.;
+      Par[8]=dedxc_tot/75.; //dedxc_tot/5.;
+      Par[9]=etrzonc/40.; //FIX TIME CUTS
+      Par[10]=clu_xaver2*18.;
+      Par[11]=amax2_c/30.;
+      Par[12]=atot/Escale/75.; //CHECK TO REMOVE
+      Par[13]=etrzon/Escale/50.; //CHECK TO REMOVE
+      Par[14]=NTRc*5.;
       int np=NDE;
       double coef=Ascale/2.;
       for (int ip=0; ip<np; ip++) { 
@@ -733,6 +743,17 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   lin1p->SetLineColor(kCyan); lin2p->SetLineColor(kCyan); lin1p->Draw(); lin2p->Draw();
   gPad->Modified(); gPad->Update();
   
+  c1=NextPlot(nxd,nyd);   clu2d_e->Draw("colz"); 
+  TLine *lin1c = new TLine(0.,(e_chan1*0.4)+3.2,250.,(e_chan1*0.4)+3.2);    TLine *lin2c = new TLine(0.,(e_chan2*0.4)+3.2,250.,(e_chan2*0.4)+3.2);
+  lin1c->SetLineColor(kRed);   lin2c->SetLineColor(kRed);   lin1c->Draw();  lin2c->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  c1=NextPlot(nxd,nyd);   clu2d_pi->Draw("colz");
+  TLine *lin1pc = new TLine(0.,(pi_chan1*0.4)+3.2,250.,(pi_chan1*0.4)+3.2); TLine *lin2pc = new TLine(0.,(pi_chan2*0.4)+3.2,250.,(pi_chan2*0.4)+3.2);
+  lin1pc->SetLineColor(kCyan); lin2pc->SetLineColor(kCyan); lin1pc->Draw(); lin2pc->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  
   #ifdef VERBOSE
     printf(" Draw Lines :: %d %d %d %d \n",e_chan1,e_chan2, pi_chan1, pi_chan2);
   #endif
@@ -787,9 +808,11 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   gPad->Modified(); gPad->Update();
   
   c0->cd(5);  clu2d_e->Draw("colz");
+  lin1c->Draw();  lin2c->Draw(); 
   gPad->Modified(); gPad->Update();
   
   c0->cd(8);  clu2d_pi->Draw("colz");
+  lin1pc->Draw(); lin2pc->Draw();
   gPad->Modified(); gPad->Update();
   
   c0->cd(3);  hscale(helectron_maxcamp,hpion_maxcamp,0.,NORM,2); // --- scale clustering amp  hist here
@@ -1044,7 +1067,7 @@ void trd_mlp_cern(int RunNum) {
   char htit[120]; sprintf(htit,"NN output, Nmod=%d",Nmod);
   TH1F *bgm = new TH1F("bgm",htit, 120, -0.1, 1.1);
   TH1F *sigm = new TH1F("sigm",htit,120, -0.1, 1.1);
-  TH1F *hrejection_errors = new TH1F("hrejection_errors","Rej Factor Relative Error; Electron Purity %; Rejection Factor",6,62.5,92.5); hrejection_errors->SetStats(0);
+  TH1F *hrejection_errors = new TH1F("hrejection_errors","Sup. Factor Relative Error; Electron Efficiency [%]; Suppression Factor",7,62.5,97.5); hrejection_errors->SetStats(0);
   
   //---------------------------------------------------------------------
   //---------           test net                              -----------
@@ -1236,6 +1259,8 @@ void trd_mlp_cern(int RunNum) {
   //---------------------------------------------------------------------
   std::pair<double,double> rej70 = Reject(bg, sig, 0.7);
   cout << "---------------------------------------- \n" << endl;
+  std::pair<double,double> rej75 = Reject(bg, sig, 0.75);
+  cout << "---------------------------------------- \n" << endl; 
   std::pair<double,double> rej80 = Reject(bg, sig, 0.8);
   cout << "---------------------------------------- \n" << endl;
   std::pair<double,double> rej85 = Reject(bg, sig, 0.85);
@@ -1243,17 +1268,17 @@ void trd_mlp_cern(int RunNum) {
   std::pair<double,double> rej90 = Reject(bg, sig, 0.9);
   cout << "---------------------------------------- \n" << endl;
   
-  double rejectionValues[4] = {rej70.first, rej80.first, rej85.first, rej90.first};
-  double rejErrors[4] = {rej70.second, rej80.second, rej85.second, rej90.second};
-  for (int i=1; i<=6; i++) {
-    if (i==2) {
+  double rejectionValues[5] = {rej70.first, rej75.first, rej80.first, rej85.first, rej90.first};
+  double rejErrors[5] = {rej70.second, rej75.second, rej80.second, rej85.second, rej90.second};
+  for (int i=1; i<7; i++) {
+    if (i>1) {
       hrejection_errors->SetBinContent(i, 1./rejectionValues[i-2]);
       hrejection_errors->SetBinError(i, rejErrors[i-2]*hrejection_errors->GetBinContent(i));
     }
-    if (i>3) {
-      hrejection_errors->SetBinContent(i, 1./rejectionValues[i-3]);
-      hrejection_errors->SetBinError(i, rejErrors[i-3]*hrejection_errors->GetBinContent(i));
-    }
+    //if (i>3) {
+    //  hrejection_errors->SetBinContent(i, 1./rejectionValues[i-3]);
+    //  hrejection_errors->SetBinError(i, rejErrors[i-3]*hrejection_errors->GetBinContent(i));
+    //}
   }
   
   #ifdef VERBOSE
@@ -1276,16 +1301,20 @@ void trd_mlp_cern(int RunNum) {
   latex.DrawLatex(0.05,ypos-=ystep,str.data());
   //--
   ss.str("");  ss.clear();
-  ss << "Nmod=" << 1 << ", e=80%, Eff #pi=" << rej80.first*100. << "%, Rej=" << 1./rej80.first ;  string str0 = ss.str();
+  ss << "Nmod=" << 1 << ", e=75%, Eff #pi=" << rej75.first*100. << "%, Rej=" << 1./rej75.first ;  string str0 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str0.data());
   //--
   ss.str("");  ss.clear(); 
-  ss << "Nmod=" << 1 << ", e=85%, Eff #pi=" << rej85.first*100. << "%, Rej=" << 1./rej85.first ;  string str1 = ss.str();
+  ss << "Nmod=" << 1 << ", e=80%, Eff #pi=" << rej80.first*100. << "%, Rej=" << 1./rej80.first ;  string str1 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str1.data());
   //--
   ss.str("");  ss.clear(); 
-  ss << "Nmod=" << 1 << ", e=90%, Eff #pi=" << rej90.first*100. << "%, Rej=" << 1./rej90.first ;  string str2 = ss.str();
+  ss << "Nmod=" << 1 << ", e=85%, Eff #pi=" << rej85.first*100. << "%, Rej=" << 1./rej85.first ;  string str2 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str2.data());
+  //--
+  ss.str("");  ss.clear(); 
+  ss << "Nmod=" << 1 << ", e=90%, Eff #pi=" << rej90.first*100. << "%, Rej=" << 1./rej90.first ;  string str3 = ss.str();
+  latex.DrawLatex(0.05,ypos-=ystep,str3.data());
   latex.DrawLatex(0.05,ypos-=ystep,"--------------");
   //--
   #ifdef VERBOSE
@@ -1310,6 +1339,8 @@ void trd_mlp_cern(int RunNum) {
   
   outputFile->Write();
   delete inputFile;
+  timer.Stop();
+  cout<<"***>>> End MLP, Elapsed Time:"<<endl; timer.Print();
   cout << "============== END RUN " << RunNum << "===============" <<endl;
 }
 
