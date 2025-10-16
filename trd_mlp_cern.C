@@ -31,7 +31,7 @@
 #define NN_MODE 3
 //#define VERBOSE
 #define ANALYZE_MERGED 1
-//#define MMG_RUN
+#define MMG_RUN
 //#define FERMI_NN
 //#define NO_RAD_COMPARE 1
 

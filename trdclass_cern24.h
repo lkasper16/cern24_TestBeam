@@ -45,7 +45,7 @@
 #include "TBox.h"
 #include "stdio.h"
 
-//#define ANALYZE_MERGED 1
+#define ANALYZE_MERGED 1
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
@@ -335,7 +335,7 @@ public :
    TH2F *mmg1_f125_el_clu2d;
    TH2F *mmg1_f125_pi_clu2d;
    TH2F *mmg1_f125_fit;
-   
+   TH2F *f125_el_xVSamp_max, *f125_pi_xVSamp_max, *mmg1_el_f125_xVSamp_max, *mmg1_pi_f125_xVSamp_max;   
    //TH2F *gem_el_eff, *gem_pi_eff, *mmg1_el_eff, *mmg1_pi_eff;
    TH2F *gem_mmg1_doubleX, *gem_mmg1_doubleY;
    TH2F *mhevt, *mhevtc, *mhevti, *mhevtf, *hevt, *hevtc, *hevti, *hevtf, *hevtk, *hevtck;
