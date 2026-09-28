@@ -49,9 +49,6 @@
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
-//#include "vector"
-//#include "vector"
-//#include "vector"
 
 class trdclass_cern24 {
 public :
@@ -61,6 +58,7 @@ public :
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
+   /*
    ULong64_t       srs_raw_count;
    vector<unsigned int> *srs_raw_roc;
    vector<unsigned int> *srs_raw_slot;
@@ -71,6 +69,7 @@ public :
    vector<unsigned short> *srs_raw_samples_index;
    vector<unsigned short> *srs_raw_samples_count;
    vector<unsigned short> *srs_raw_samples;
+   */
    ULong64_t       f125_wraw_count;
    vector<unsigned int> *f125_wraw_roc;
    vector<unsigned int> *f125_wraw_slot;
@@ -144,6 +143,7 @@ public :
    vector<unsigned int> *f250_pulse_fine_time_emulated;
    vector<unsigned int> *f250_pulse_pulse_peak_emulated;
    vector<unsigned int> *f250_pulse_qf_emulated;
+   /*
    ULong64_t       gem_scluster_count;
    vector<double>  *gem_scluster_x;
    vector<double>  *gem_scluster_y;
@@ -152,6 +152,7 @@ public :
    ULong64_t       srs_prerecon_count;
    vector<double>  *srs_prerecon_y;
    vector<double>  *srs_prerecon_x;
+   */
    ULong64_t       gem_peak_count;
    vector<unsigned int> *gem_peak_plane_id;
    vector<string>  *gem_peak_plane_name;
@@ -163,6 +164,7 @@ public :
    vector<double>  *gem_peak_real_pos;
 
    // List of branches
+   /*
    TBranch        *b_srs_raw_count;   //!
    TBranch        *b_srs_raw_roc;   //!
    TBranch        *b_srs_raw_slot;   //!
@@ -173,6 +175,7 @@ public :
    TBranch        *b_srs_raw_samples_index;   //!
    TBranch        *b_srs_raw_samples_count;   //!
    TBranch        *b_srs_raw_samples;   //!
+   */
    TBranch        *b_f125_wraw_count;   //!
    TBranch        *b_f125_wraw_roc;   //!
    TBranch        *b_f125_wraw_slot;   //!
@@ -246,6 +249,7 @@ public :
    TBranch        *b_f250_pulse_fine_time_emulated;   //!
    TBranch        *b_f250_pulse_pulse_peak_emulated;   //!
    TBranch        *b_f250_pulse_qf_emulated;   //!
+   /*
    TBranch        *b_gem_scluster_count;   //!
    TBranch        *b_gem_scluster_x;   //!
    TBranch        *b_gem_scluster_y;   //!
@@ -254,6 +258,7 @@ public :
    TBranch        *b_srs_prerecon_count;   //!
    TBranch        *b_srs_prerecon_y;   //!
    TBranch        *b_srs_prerecon_x;   //!
+   */
    TBranch        *b_gem_peak_count;   //!
    TBranch        *b_gem_peak_plane_id;   //!
    TBranch        *b_gem_peak_plane_name;   //!
@@ -298,6 +303,12 @@ public :
    TH1F *hCal_sum_pi, *hPresh_sum_pi, *hMult_sum_pi, *hCher_sum_pi;
    TH2F *hCal_Presh, *hCal_Cher;
    TH1F *hchan_g_el, *hchan_g_pi, *hchan_m_el, *hchan_m_pi;
+    
+   TH1F *hmmg1GainSum, *hmmg1GainSpread, *hgemGainSum, *hgemGainSpread, *hgemGainMaxLate, *hmmg1GainMaxLate, *hgemGainSumLate, *hmmg1GainSumLate;
+   TH2F *hmmg12DGain, *hmmg1GainMultiplicity, *hmmg12DMaxGain, *hmmg12DMaxGainSingle, *hgem2DGain, *hgemGainMultiplicity, *hgem2DMaxGain, *hgem2DMaxGainSingle;
+   TH2F *hmmg12DGainLateTime, *hgem2DGainLateTime, *hmmg12DGainSumLateTime, *hgem2DGainSumLateTime;
+   TH2F *hgem_el_2DPulseMultiplicity, *hmmg1_el_2DPulseMultiplicity, *hgem_el_2DPulseVsChan, *hmmg1_el_2DPulseVsChan;
+  TH2F *hgem_pi_2DPulseMultiplicity, *hmmg1_pi_2DPulseMultiplicity, *hgem_pi_2DPulseVsChan, *hmmg1_pi_2DPulseVsChan;
    
    TH2F *hgem_xy, *hmmg1_xy, *gem_mmg1_xcorr, *gem_mmg1_max_xcorr, *gem_mmg1_ycorr;
    TH2F *gem_gt1_xcorr, *gem_gt2_xcorr, *gem_gt3_xcorr, *mmg1_gt1_xcorr, *mmg1_gt2_xcorr, *mmg1_gt3_xcorr;
@@ -336,6 +347,7 @@ public :
    TH2F *mmg1_f125_pi_clu2d;
    TH2F *mmg1_f125_fit;
    TH2F *f125_el_xVSamp_max, *f125_pi_xVSamp_max, *mmg1_el_f125_xVSamp_max, *mmg1_pi_f125_xVSamp_max;   
+   TH2F *f125_el_timeVSamp_max, *f125_pi_timeVSamp_max, *mmg1_el_f125_timeVSamp_max, *mmg1_pi_f125_timeVSamp_max;
    //TH2F *gem_el_eff, *gem_pi_eff, *mmg1_el_eff, *mmg1_pi_eff;
    TH2F *gem_mmg1_doubleX, *gem_mmg1_doubleY;
    TH2F *mhevt, *mhevtc, *mhevti, *mhevtf, *hevt, *hevtc, *hevti, *hevtf, *hevtk, *hevtck;
@@ -510,6 +522,7 @@ void trdclass_cern24::Init(TTree *tree)
    // (once per file to be processed).
 
    // Set object pointer
+   /*
    srs_raw_roc = 0;
    srs_raw_slot = 0;
    srs_raw_channel = 0;
@@ -519,6 +532,7 @@ void trdclass_cern24::Init(TTree *tree)
    srs_raw_samples_index = 0;
    srs_raw_samples_count = 0;
    srs_raw_samples = 0;
+   */
    f125_wraw_roc = 0;
    f125_wraw_slot = 0;
    f125_wraw_channel = 0;
@@ -588,12 +602,14 @@ void trdclass_cern24::Init(TTree *tree)
    f250_pulse_fine_time_emulated = 0;
    f250_pulse_pulse_peak_emulated = 0;
    f250_pulse_qf_emulated = 0;
+   /*
    gem_scluster_x = 0;
    gem_scluster_y = 0;
    gem_scluster_energy = 0;
    gem_scluster_adc = 0;
    srs_prerecon_y = 0;
    srs_prerecon_x = 0;
+   */
    gem_peak_plane_id = 0;
    gem_peak_plane_name = 0;
    gem_peak_index = 0;
@@ -608,6 +624,7 @@ void trdclass_cern24::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
+   /*
    fChain->SetBranchAddress("srs_raw_count", &srs_raw_count, &b_srs_raw_count);
    fChain->SetBranchAddress("srs_raw_roc", &srs_raw_roc, &b_srs_raw_roc);
    fChain->SetBranchAddress("srs_raw_slot", &srs_raw_slot, &b_srs_raw_slot);
@@ -618,6 +635,7 @@ void trdclass_cern24::Init(TTree *tree)
    fChain->SetBranchAddress("srs_raw_samples_index", &srs_raw_samples_index, &b_srs_raw_samples_index);
    fChain->SetBranchAddress("srs_raw_samples_count", &srs_raw_samples_count, &b_srs_raw_samples_count);
    fChain->SetBranchAddress("srs_raw_samples", &srs_raw_samples, &b_srs_raw_samples);
+   */
    fChain->SetBranchAddress("f125_wraw_count", &f125_wraw_count, &b_f125_wraw_count);
    fChain->SetBranchAddress("f125_wraw_roc", &f125_wraw_roc, &b_f125_wraw_roc);
    fChain->SetBranchAddress("f125_wraw_slot", &f125_wraw_slot, &b_f125_wraw_slot);
@@ -691,6 +709,7 @@ void trdclass_cern24::Init(TTree *tree)
    fChain->SetBranchAddress("f250_pulse_fine_time_emulated", &f250_pulse_fine_time_emulated, &b_f250_pulse_fine_time_emulated);
    fChain->SetBranchAddress("f250_pulse_pulse_peak_emulated", &f250_pulse_pulse_peak_emulated, &b_f250_pulse_pulse_peak_emulated);
    fChain->SetBranchAddress("f250_pulse_qf_emulated", &f250_pulse_qf_emulated, &b_f250_pulse_qf_emulated);
+   /*
    fChain->SetBranchAddress("gem_scluster_count", &gem_scluster_count, &b_gem_scluster_count);
    fChain->SetBranchAddress("gem_scluster_x", &gem_scluster_x, &b_gem_scluster_x);
    fChain->SetBranchAddress("gem_scluster_y", &gem_scluster_y, &b_gem_scluster_y);
@@ -699,6 +718,7 @@ void trdclass_cern24::Init(TTree *tree)
    fChain->SetBranchAddress("srs_prerecon_count", &srs_prerecon_count, &b_srs_prerecon_count);
    fChain->SetBranchAddress("srs_prerecon_y", &srs_prerecon_y, &b_srs_prerecon_y);
    fChain->SetBranchAddress("srs_prerecon_x", &srs_prerecon_x, &b_srs_prerecon_x);
+   */
    fChain->SetBranchAddress("gem_peak_count", &gem_peak_count, &b_gem_peak_count);
    fChain->SetBranchAddress("gem_peak_plane_id", &gem_peak_plane_id, &b_gem_peak_plane_id);
    fChain->SetBranchAddress("gem_peak_plane_name", &gem_peak_plane_name, &b_gem_peak_plane_name);
